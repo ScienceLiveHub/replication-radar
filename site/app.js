@@ -23,6 +23,7 @@ const surnames = (r) => (r.authors || []).map((a) => {
 }).filter(Boolean);
 const impact = (r) => (r.indicators && r.indicators.citationImpact) || {};
 const swh = (r) => (r.instances || []).some((i) => (i.urls || []).some((u) => (u || "").includes("softwareheritage.org")));
+const swhUrlOf = (r) => (r.instances || []).flatMap((i) => i.urls || []).find((u) => (u || "").includes("softwareheritage.org")) || null;
 const reuse = (r) => {
   let s = 0;
   if (r.codeRepositoryUrl) s += 2;
@@ -161,7 +162,7 @@ async function radar(topic) {
       cls: impact(p).citationClass, infl: impact(p).influenceClass,
       status: verified ? "VERIFIED" : "OPEN", readiness,
       verification: verified ? [...new Set(VERDICTS[doi].map((v) => v.verdict))].join(", ") : null,
-      tool: tools[0] ? { title: tools[0].mainTitle, swh: swh(tools[0]) } : null,
+      tool: tools[0] ? { title: tools[0].mainTitle, swh: swh(tools[0]), link: tools[0].codeRepositoryUrl || urlOf(tools[0]), swhUrl: swhUrlOf(tools[0]) } : null,
     };
   });
   targets.sort((a, b) => (a.status === "OPEN" ? 0 : 1) - (b.status === "OPEN" ? 0 : 1) || (b.readiness || 0) - (a.readiness || 0));
@@ -211,7 +212,7 @@ function renderTargets(targets) {
     const badge = t.status === "VERIFIED"
       ? `<span class="badge verified">VERIFIED</span><span class="badge cls">${t.verification}</span>`
       : `<span class="badge open">OPEN</span>${t.cls ? `<span class="badge cls" title="OpenAIRE BIP! impact class — C1 = top 0.01% most-cited globally, C5 = the rest">${t.cls}</span>` : ""}`;
-    const tool = t.tool ? `<div class="tool">independent tooling: ${esc(t.tool.title).slice(0, 54)}${t.tool.swh ? ' <span class="swh">· SWH-archived</span>' : ""}</div>` : "";
+    const tool = t.tool ? `<div class="tool">independent tooling: ${t.tool.link ? `<a href="${t.tool.link}" target="_blank" rel="noopener">${esc(t.tool.title).slice(0, 54)}</a>` : esc(t.tool.title).slice(0, 54)}${t.tool.swh ? ` · <a href="${t.tool.swhUrl || t.tool.link}" target="_blank" rel="noopener" class="swh">SWH-archived</a>` : ""}</div>` : "";
     const link = t.doi ? `<a href="https://doi.org/${t.doi}" target="_blank" rel="noopener">${t.doi}</a>` : "";
     return `<div class="target ${t.status === "VERIFIED" ? "verified" : ""}">
       ${score}
