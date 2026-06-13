@@ -205,6 +205,7 @@ async function radar(topic) {
       cls: impact(p).citationClass, infl: impact(p).influenceClass,
       status: verified ? "VERIFIED" : "OPEN", readiness,
       verification: verified ? [...new Set(VERDICTS[doi].map((v) => v.verdict))].join(", ") : null,
+      cito_np: verified ? ((VERDICTS[doi].find((v) => v.cito_np) || {}).cito_np || null) : null,
     };
   });
   targets.sort((a, b) => (a.status === "OPEN" ? 0 : 1) - (b.status === "OPEN" ? 0 : 1) || (b.readiness || 0) - (a.readiness || 0));
@@ -273,9 +274,11 @@ function renderTargets(targets) {
       ? `<span class="badge verified">VERIFIED</span><span class="badge cls">${t.verification}</span>`
       : `<span class="badge open">OPEN</span>${t.cls ? `<span class="badge cls" title="OpenAIRE BIP! impact class — C1 = top 0.01% most-cited globally, C5 = the rest">${t.cls}</span>` : ""}`;
     const link = t.doi ? `<a href="https://doi.org/${t.doi}" target="_blank" rel="noopener">${t.doi}</a>` : "";
+    const verdictLink = (t.status === "VERIFIED" && t.cito_np)
+      ? `<div class="tverdict">independently checked by Science Live · <a href="${t.cito_np}" target="_blank" rel="noopener">verdict chain →</a></div>` : "";
     return `<div class="target ${t.status === "VERIFIED" ? "verified" : ""}">
       ${score}
-      <div class="t-main">${badge}<br><b>${esc(t.title)}</b></div>
+      <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${verdictLink}</div>
       <div class="t-right">${t.citations.toLocaleString()} cites<br>${link}</div>
     </div>`;
   }).join("");
