@@ -176,7 +176,9 @@ function renderVerified(inField) {
     ].join("");
     const repl = v.repl
       ? `<div class="vrepl">↳ replication is an OpenAIRE node: <a href="${v.repl.url}" target="_blank" rel="noopener">${esc(v.repl.title).slice(0, 44) || v.repl.doi}</a> <span class="ochip type">${esc(v.repl.type)}</span></div>`
-      : (v.repo_doi ? `<div class="vrepl muted">↳ replication deposit ${esc(v.repo_doi)}</div>` : "");
+      : (v.repo_doi
+        ? `<div class="vrepl muted">↳ replication deposit: <a href="https://doi.org/${esc(v.repo_doi)}" target="_blank" rel="noopener">${esc(v.repo_doi)}</a> <span class="ochip wait">awaiting OpenAIRE harvest</span></div>`
+        : "");
     return `<li class="match">
       <span class="nodelabel">original paper · OpenAIRE</span>
       <span class="vt">${esc(v.title).slice(0, 82)}</span>

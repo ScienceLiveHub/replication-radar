@@ -70,6 +70,7 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .vrepl{font-size:12.5px;margin-top:8px;padding-top:8px;border-top:1px dashed #bfe3d2;color:var(--ink)}
 .vrepl.muted{color:var(--mut);border-top-color:var(--line)}
 .vrepl a{font-weight:600}
+.ochip.wait{background:#fde8cf;color:#8a5a1b}
 .vnone{color:#9c0356;background:var(--magenta-soft);padding:12px 14px;border-radius:8px;font-size:13.5px}
 .vmore{margin-top:12px}
 .vmore summary{cursor:pointer;color:var(--mut);font-size:12.5px;padding:7px 0;list-style-position:inside}
