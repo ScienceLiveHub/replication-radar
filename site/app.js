@@ -187,18 +187,10 @@ function renderVerified(inField) {
       ${repl}
     </li>`;
   };
-  const row = (v) => `<li>
-      <span class="vt">${esc(v.title).slice(0, 70)}</span>
-      <span class="vv ${partialOf(v) ? "partial" : ""}">${v.verdicts.join(", ")}</span> · ${v.citations.toLocaleString()} cites
-      ${v.cito_np ? `· <a href="${v.cito_np}" target="_blank" rel="noopener">→</a>` : ""}
-    </li>`;
   const fieldHtml = field.length
     ? `<ul class="vlist">${field.map(matchCard).join("")}</ul>`
     : `<p class="vnone">No Science Live verdict in this field yet — every paper on the left is an <b>open</b> replication opportunity.</p>`;
-  const moreHtml = others.length
-    ? `<details class="vmore"><summary>${others.length} more replications in the Science Live index (other fields)</summary>
-         <ul class="vlist">${others.map(row).join("")}</ul></details>`
-    : "";
+  const moreHtml = `<p class="vmore-stat">Science Live has independently verified <b>${VERIFIED.length}</b> claims across the network${others.length ? ` — the ${others.length} not shown here are in other fields` : ""}. <a href="https://github.com/ScienceLiveHub/replication-radar/blob/main/src/replication_radar/data/verdicts.json" target="_blank" rel="noopener">browse the full index →</a></p>`;
   el("verified").innerHTML = fieldHtml + moreHtml;
 }
 
