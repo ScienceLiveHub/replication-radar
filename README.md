@@ -1,0 +1,77 @@
+# Replication Radar
+
+An **MCP server that makes the OpenAIRE Graph more useful for replication.** Point it
+at a research field or a paper and it answers the question the Graph structurally
+cannot: *what high-impact work is worth replicating, is there **independent** reusable
+tooling to do it, and has it already been checked — with what verdict?*
+
+OpenAIRE's only value signal is citation-popularity (BIP! influence / popularity /
+impulse, classes C1–C5) — paper-bound, and orthogonal to whether a claim is *true*.
+The Radar joins three sources to add a **replication layer** on top:
+
+- **OpenAIRE Graph** — impact-ranks candidate papers (`api.openaire.eu/graph/v1`).
+- **Software Heritage + repo signals** — surfaces *reusable* method software.
+- **Science Live nanopub verdicts** — the "already checked → did it hold" overlay.
+
+> OpenAIRE AI Hackathon · Theme B (Build) · CC-BY. Built to be reused through the
+> [forrt-replication-template](https://github.com/ScienceLiveHub/forrt-replication-template):
+> discovery at the *start* of a replication, where the template's existing skills
+> handle the nanopub chain at the *end*.
+
+## Tools
+
+| Tool | What it answers |
+|---|---|
+| `radar(topic)` | Impact-ranked replication targets in a field — each **OPEN** (opportunity) or **VERIFIED** (done, with verdict) + independent tooling + funder context |
+| `find_independent_software(doi, topic)` | Reusable engines **not authored by the original team** (author-disjoint = *replication*, not *reproduction*), ranked by reuse signal not citations |
+| `replication_status(doi)` | Has this DOI been replicated, did it hold? Verdict(s) + CiTO nanopub links, or `open` |
+
+### The reproduction-vs-replication distinction, made computable
+A *reproduction* re-runs the original code; a *replication* tests the same claim by a
+**different** route. So the Radar filters tooling by **author-disjointness** from the
+original paper — e.g. for Phillips et al. 2009, the `dismo` package (co-authored by
+Phillips & Elith) is flagged *rooted* / non-independent, while `biomod2` and `jSDM`
+are *independent*. That filter is the difference between the two, and it's the thing
+that makes this replication-aware rather than just "find the code".
+
+## Run
+
+```bash
+pip install -e .                       # installs the `mcp` runtime
+python -m replication_radar.server     # stdio MCP server
+```
+
+Add to an MCP client (`.mcp.json`):
+
+```json
+{ "mcpServers": {
+  "replication-radar": { "command": "python", "args": ["-m", "replication_radar.server"] }
+} }
+```
+
+The **core** (OpenAIRE client + radar logic) is stdlib-only — try it without the MCP
+runtime:
+
+```bash
+PYTHONPATH=src python3 demo_sdm.py     # live vertical-slice demo on SDM
+```
+
+## Configuration
+
+| Env var | Default | Purpose |
+|---|---|---|
+| `RADAR_OPENAIRE_BASE` | `https://api.openaire.eu/graph/v1` | Swap to the Alien AI-Gateway or a mirror — the Radar is endpoint-agnostic |
+| `RADAR_HTTP_TIMEOUT` | `30` | Per-request timeout (s) |
+
+## Known limits (v1, honest)
+- **Keyword-bound discovery.** OpenAIRE free-text terms are AND-ed; long queries
+  return nothing. Use short topics. The VERIFIED overlay is *guaranteed* (resolved
+  from the verdict index directly), but OPEN-target recall depends on the query.
+- **No graph-relation traversal** on the public API (paper→its software/data/grant
+  edges aren't exposed): tooling/data are matched heuristically by topic + author
+  independence, not by a hard relation. Upgrades cleanly if a gateway exposes relations.
+- **Funder context is field-level, not per-paper** (per-paper funder attribution is
+  not reachable); budgets are frequently reported as 0 in records.
+- The verdict index ships 6 source works / 12 chains (Science Live). Extend
+  `data/verdicts.json` to grow coverage.
+```

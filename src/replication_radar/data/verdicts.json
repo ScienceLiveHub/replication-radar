@@ -1,0 +1,32 @@
+{
+  "_meta": {
+    "source": "Science Live FORRT replication chains (nanopub verdicts), built 2026-06-13",
+    "schema": "doi (lowercased) -> list of verifications {repo, verdict, cito[], outcome_np, cito_np}",
+    "note": "This is the 'already-checked' memory layer of the Replication Radar. Verdicts are carried in CiTO nanopubs; the OpenAIRE Graph cannot hold them. Extend by adding chains."
+  },
+  "verifications": {
+    "10.1126/science.aax8591": [
+      {"repo": "weatherxbiodiversity-projection", "verdict": "Validated", "cito": ["confirms"], "outcome_np": "https://w3id.org/sciencelive/np/RAPZMgcYbScSAXnrnSySQwZzgSA_rn-xodlMxNlwwQYY8", "cito_np": "https://w3id.org/sciencelive/np/RALbHA-r6wIFOFPFlfIpwYqJEpzCFqeJ082iChgdfvhNM"},
+      {"repo": "weatherxbiodiversity-projection-nside128", "verdict": "Validated", "cito": ["confirms"], "outcome_np": "https://w3id.org/sciencelive/np/RAa4QR41Hot9zxujcrCyTo82Ij7oaw_6z8zk8NxDqoJFM", "cito_np": "https://w3id.org/sciencelive/np/RAhw9m0BEj0-9hXrTtJ2NHG5rMr-ZBf_mdBQTQRk6u3n4"},
+      {"repo": "weatherxbiodiversity-substrate-sensitivity", "verdict": "Validated+PartiallySupported", "cito": ["confirms", "extends", "qualifies"], "outcome_np": null, "cito_np": null}
+    ],
+    "10.1890/07-2153.1": [
+      {"repo": "sdm-phillips-reproduction", "verdict": "Validated", "cito": ["confirms"], "outcome_np": "https://w3id.org/sciencelive/np/RA_uV84IchQAkkmCP_6amQir_flgCmvvt97DWIDmbu_V0", "cito_np": "https://w3id.org/sciencelive/np/RAWsmCzWMKYQQK_ovRvE1o2wqjYkoxjfZRncHEcWAvv2g"},
+      {"repo": "sdm-hotspot-spatial-effort", "verdict": "methodological-extension", "cito": ["extends", "usesMethodIn"], "outcome_np": "https://w3id.org/sciencelive/np/RA4q2J-h_UpFpeLTeL_DS8p7j7EOBCes4L1G1eOBfJiDo", "cito_np": "https://w3id.org/sciencelive/np/RA7151bPt5TSSTxi-sWGmZhUOHcqaSzevzhhD4QxmfURI"}
+    ],
+    "10.1890/11-1952.1": [
+      {"repo": "sdm-hotspot-effort-correction", "verdict": "Validated", "cito": ["extends", "usesMethodIn"], "outcome_np": "https://w3id.org/sciencelive/np/RAsPjEImfZaXsIri0ny4j_s_k_6wyOlC6tkocl6w2y7f4", "cito_np": "https://w3id.org/sciencelive/np/RACYbb_IxZNnBcxI7uPqc-df2oRaMr4bqHJTOJe-BNmkc"}
+    ],
+    "10.1073/pnas.0704469104": [
+      {"repo": "sdm-scale-replication", "verdict": "PartiallySupported", "cito": ["qualifies"], "outcome_np": "https://w3id.org/sciencelive/np/RAzeZKbUCEMXZXDc-WzgHZ4K5mOMwotYhS2uCKDDmdcHI", "cito_np": "https://w3id.org/sciencelive/np/RALjFcvPtncy74ZL8QgSiEyRZv_-mOiZj4wvWuq8JK-2s"}
+    ],
+    "10.1016/j.ocemod.2024.102387": [
+      {"repo": "coastal-rom-replication", "verdict": "Validated", "cito": ["confirms"], "outcome_np": "https://w3id.org/sciencelive/np/RAG8PjhjvPQFZo54BTaV_b7TryMonH--aDGzEXLhzvQ4w", "cito_np": "https://w3id.org/sciencelive/np/RAuvGPQk_nxEcBWzADcLnyfqgjJ9Hr2aSWxwof2sDAung"},
+      {"repo": "european-coastal-biodiversity-replication", "verdict": "Validated", "cito": ["extends", "qualifies"], "outcome_np": "https://w3id.org/sciencelive/np/RAwrIP5nKIk8Qh7WeMs8z6HHVGssLVAkHDeI8nSB4LUK8", "cito_np": "https://w3id.org/sciencelive/np/RAEXzZcCXiwsNf19NbXvilwwxnFU5IvkplzWTNiNmT70A"}
+    ],
+    "10.1038/s41597-022-01235-3": [
+      {"repo": "white-shark-geolocation-replication", "verdict": "PartiallySupported", "cito": ["qualifies"], "outcome_np": "https://w3id.org/sciencelive/np/RAv0cF0rwxb1CFmUAJlk5B7PLVc9pls5OvlfOHHHhtgm8", "cito_np": "https://w3id.org/sciencelive/np/RAnqtFUZHfmW7Dtmf3bcTQtjDAfrq5IGV4xQ8guW8L3vY"},
+      {"repo": "white-shark-geolocation-light", "verdict": "PartiallySupported", "cito": ["qualifies"], "outcome_np": "https://w3id.org/sciencelive/np/RAlwDA35wFcmV-ZYzOUB_E3SrqPMIlIxWftoiPFbzN-7I", "cito_np": "https://w3id.org/sciencelive/np/RA6JMK2CNN8MZITLdd3si08TwyR_-3fvbt6l6g3lf-YOg"}
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+name: Publish to PyPI
+
+# Publishes replication-radar to PyPI on each GitHub Release, using PyPI
+# Trusted Publishing (OIDC) — no API token stored in the repo.
+#
+# One-time setup on PyPI (pypi.org -> your account -> Publishing -> Add a pending
+# publisher), BEFORE the first release:
+#   PyPI project name : replication-radar
+#   Owner             : ScienceLiveHub
+#   Repository name   : replication-radar
+#   Workflow name     : publish-pypi.yml
+#   Environment name  : pypi
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build sdist + wheel
+        run: |
+          python -m pip install --upgrade build
+          python -m build
+      - name: Smoke-check the wheel imports + bundled data resolves
+        run: |
+          python -m pip install dist/*.whl
+          python -c "import replication_radar as r; assert r.replication_status('10.1126/science.aax8591')['replicated']; print('ok', r.__version__)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write   # required for trusted publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

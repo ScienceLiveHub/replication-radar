@@ -1,0 +1,41 @@
+[project]
+name = "replication-radar"
+version = "0.1.0"
+description = "MCP server that turns the OpenAIRE Graph into a ranked replication queue — impact-ranked targets, independent reusable tooling, and the Science Live verification overlay."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Anne Fouilloux" }]
+keywords = ["openaire", "mcp", "replication", "open-science", "nanopublication", "FORRT"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+dependencies = [
+    "mcp>=1.2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ScienceLiveHub/replication-radar"
+Repository = "https://github.com/ScienceLiveHub/replication-radar"
+"Science Live" = "https://sciencelive4all.org"
+
+[project.scripts]
+replication-radar = "replication_radar.server:main"
+
+[project.optional-dependencies]
+# the core (openaire client + radar logic) is stdlib-only and needs nothing extra;
+# `mcp` is only required to run the server wrapper.
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/replication_radar"]
+# data/verdicts.json ships automatically as package data under the package dir.
