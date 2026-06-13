@@ -199,7 +199,7 @@ async function radar(topic) {
     const doi = doiOf(p), auth = surnames(p);
     const verified = doi && VERDICTS[doi];
     const tools = sw.filter((s) => independent(auth, surnames(s)) && reuse(s) >= 2).sort((a, b) => reuse(b) - reuse(a));
-    const readiness = verified ? null : Math.round((0.5 * classScore(p) + 0.3 * (tools.length > 0) + 0.2 * hasData) * 100) / 100;
+    const readiness = Math.round((0.5 * classScore(p) + 0.3 * (tools.length > 0) + 0.2 * hasData) * 100) / 100;  // replicability potential, computed for ALL (incl. verified)
     return {
       title: p.mainTitle || "", doi, citations: impact(p).citationCount || 0,
       cls: impact(p).citationClass, infl: impact(p).influenceClass,
@@ -208,7 +208,7 @@ async function radar(topic) {
       outcome_np: verified ? ((VERDICTS[doi].find((v) => v.outcome_np) || {}).outcome_np || null) : null,
     };
   });
-  targets.sort((a, b) => (a.status === "OPEN" ? 0 : 1) - (b.status === "OPEN" ? 0 : 1) || (b.readiness || 0) - (a.readiness || 0));
+  targets.sort((a, b) => (b.readiness || 0) - (a.readiness || 0) || (b.citations || 0) - (a.citations || 0));  // by replicability, verified & open together
 
   // verified-in-field: keep only the BEST-matching tier, so a single generic word
   // (e.g. "climate") can't pull in unrelated papers. A paper is in-field only if it
@@ -269,8 +269,7 @@ const PER_PAGE = 10;
 let _targets = [], _tpage = 0;
 
 function targetRow(t) {
-  const score = t.readiness != null ? `<div class="score"><span>${t.readiness.toFixed(2)}</span><small>READY</small></div>`
-    : `<div class="score"><span>✓</span><small>DONE</small></div>`;
+  const score = `<div class="score"><span>${t.readiness != null ? t.readiness.toFixed(2) : "—"}</span><small>REPLIC.</small></div>`;
   const badge = t.status === "VERIFIED"
     ? `<span class="badge verified">VERIFIED</span><span class="badge cls">${t.verification}</span>`
     : `<span class="badge open">OPEN</span>${t.cls ? `<span class="badge cls" title="OpenAIRE BIP! impact class — C1 = top 0.01% most-cited globally, C5 = the rest">${t.cls}</span>` : ""}`;
