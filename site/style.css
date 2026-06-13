@@ -50,14 +50,20 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .tool .swh{color:var(--green);font-weight:600}
 .t-right{text-align:right;font-size:12px;color:var(--mut);white-space:nowrap}
 
-#verified{list-style:none;margin:0;padding:0}
-#verified li{padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
-#verified li:last-child{border:0}
-#verified .vt{color:var(--ink);font-weight:600;display:block}
-#verified .vv{color:var(--green);font-weight:700;font-size:12px}
-#verified .vv.partial{color:#b5820a}
+#verified{font-size:13.5px}
+.vlist{list-style:none;margin:0;padding:0}
+.vlist li{padding:9px 0;border-bottom:1px solid var(--line)}
+.vlist li:last-child{border:0}
+.vt{color:var(--ink);font-weight:600;display:block;margin-bottom:2px}
+.vv{color:var(--green);font-weight:700;font-size:12px}
+.vv.partial{color:#b5820a}
 #verified a{font-size:12px}
-#verified li.match{background:var(--green-soft);margin:0 -10px;padding:9px 10px;border-radius:8px}
+.vlist li.match{background:var(--green-soft);margin:0 -8px 8px;padding:11px 12px;border-radius:8px;border:0}
+.vnone{color:#9c0356;background:var(--magenta-soft);padding:12px 14px;border-radius:8px;font-size:13.5px}
+.vmore{margin-top:12px}
+.vmore summary{cursor:pointer;color:var(--mut);font-size:12.5px;padding:7px 0;list-style-position:inside}
+.vmore summary:hover{color:var(--navy)}
+.vmore .vlist{margin-top:6px}
 
 footer{border-top:1px solid var(--line);margin-top:30px;padding:20px 0;color:var(--mut);font-size:13px;background:#fff}
 footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
