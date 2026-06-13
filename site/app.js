@@ -251,7 +251,7 @@ function renderVerified(inField) {
   };
   const fieldHtml = field.length
     ? `<ul class="vlist">${field.map(matchCard).join("")}</ul>`
-    : `<p class="vnone">No Science Live verdict in this field yet — every paper on the left is an <b>open</b> replication opportunity.</p>`;
+    : `<p class="vnone">No Science Live verdict matching your search yet — every paper on the left is an <b>open</b> replication opportunity.</p>`;
   const moreHtml = `<p class="vmore-stat">Verdicts are drawn from the Science Live verification index bundled with this Radar. <a href="https://github.com/ScienceLiveHub/replication-radar/blob/main/src/replication_radar/data/verdicts.json" target="_blank" rel="noopener">browse the index →</a></p>`;
   el("verified").innerHTML = fieldHtml + moreHtml;
 }
@@ -300,8 +300,8 @@ async function run(topic) {
     renderVerified(r.inField);
     renderChart(r.chartItems);
     el("status").textContent = r.inField.size
-      ? `“${topic}”: ${r.targets.length} candidates · ${r.inField.size} already checked in this field (green) — the rest are open.`
-      : `“${topic}”: ${r.targets.length} candidates · none checked in this field yet — every one is an open replication opportunity.`;
+      ? `“${topic}”: ${r.targets.length} candidates · ${r.inField.size} already checked, matching your search (green) — the rest are open.`
+      : `“${topic}”: ${r.targets.length} candidates · none matching your search have been checked yet — every one is an open replication opportunity.`;
   } catch (e) {
     el("status").textContent = `Could not reach the OpenAIRE Graph (${e.message}). Try again or a shorter topic.`;
   } finally {
