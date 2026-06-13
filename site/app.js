@@ -195,7 +195,7 @@ async function radar(topic) {
   const sw = await search(topic, "software", 25);
   const hasData = (await search(topic, "dataset", 5)).length > 0;
 
-  const targets = pubs.slice(0, 10).map((p) => {
+  const targets = pubs.slice(0, 40).map((p) => {
     const doi = doiOf(p), auth = surnames(p);
     const verified = doi && VERDICTS[doi];
     const tools = sw.filter((s) => independent(auth, surnames(s)) && reuse(s) >= 2).sort((a, b) => reuse(b) - reuse(a));
@@ -265,24 +265,37 @@ async function radar(topic) {
 const el = (id) => document.getElementById(id);
 const esc = (s) => (s || "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 
-function renderTargets(targets) {
-  el("tcount").textContent = `${targets.filter((t) => t.status === "OPEN").length} open · ${targets.filter((t) => t.status === "VERIFIED").length} verified`;
-  el("targets").innerHTML = targets.map((t) => {
-    const score = t.readiness != null ? `<div class="score"><span>${t.readiness.toFixed(2)}</span><small>READY</small></div>`
-      : `<div class="score"><span>✓</span><small>DONE</small></div>`;
-    const badge = t.status === "VERIFIED"
-      ? `<span class="badge verified">VERIFIED</span><span class="badge cls">${t.verification}</span>`
-      : `<span class="badge open">OPEN</span>${t.cls ? `<span class="badge cls" title="OpenAIRE BIP! impact class — C1 = top 0.01% most-cited globally, C5 = the rest">${t.cls}</span>` : ""}`;
-    const link = t.doi ? `<a href="https://doi.org/${t.doi}" target="_blank" rel="noopener">${t.doi}</a>` : "";
-    const verdictLink = (t.status === "VERIFIED" && t.outcome_np)
-      ? `<div class="tverdict">independently checked by Science Live · <a href="${t.outcome_np}" target="_blank" rel="noopener">replication outcome →</a></div>` : "";
-    return `<div class="target ${t.status === "VERIFIED" ? "verified" : ""}">
-      ${score}
-      <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${verdictLink}</div>
-      <div class="t-right">${t.citations.toLocaleString()} cites<br>${link}</div>
-    </div>`;
-  }).join("");
+const PER_PAGE = 10;
+let _targets = [], _tpage = 0;
+
+function targetRow(t) {
+  const score = t.readiness != null ? `<div class="score"><span>${t.readiness.toFixed(2)}</span><small>READY</small></div>`
+    : `<div class="score"><span>✓</span><small>DONE</small></div>`;
+  const badge = t.status === "VERIFIED"
+    ? `<span class="badge verified">VERIFIED</span><span class="badge cls">${t.verification}</span>`
+    : `<span class="badge open">OPEN</span>${t.cls ? `<span class="badge cls" title="OpenAIRE BIP! impact class — C1 = top 0.01% most-cited globally, C5 = the rest">${t.cls}</span>` : ""}`;
+  const link = t.doi ? `<a href="https://doi.org/${t.doi}" target="_blank" rel="noopener">${t.doi}</a>` : "";
+  const verdictLink = (t.status === "VERIFIED" && t.outcome_np)
+    ? `<div class="tverdict">independently checked by Science Live · <a href="${t.outcome_np}" target="_blank" rel="noopener">replication outcome →</a></div>` : "";
+  return `<div class="target ${t.status === "VERIFIED" ? "verified" : ""}">
+    ${score}
+    <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${verdictLink}</div>
+    <div class="t-right">${t.citations.toLocaleString()} cites<br>${link}</div>
+  </div>`;
 }
+
+function paintTargets() {
+  const pages = Math.max(1, Math.ceil(_targets.length / PER_PAGE));
+  if (_tpage >= pages) _tpage = pages - 1;
+  el("tcount").textContent = `${_targets.filter((t) => t.status === "OPEN").length} open · ${_targets.filter((t) => t.status === "VERIFIED").length} verified`;
+  el("targets").innerHTML = _targets.slice(_tpage * PER_PAGE, _tpage * PER_PAGE + PER_PAGE).map(targetRow).join("");
+  el("tpager").innerHTML = pages > 1
+    ? `<button ${_tpage === 0 ? "disabled" : ""} onclick="pageTargets(-1)">← Prev</button><span>Page ${_tpage + 1} of ${pages}</span><button ${_tpage >= pages - 1 ? "disabled" : ""} onclick="pageTargets(1)">Next →</button>`
+    : "";
+}
+
+function renderTargets(targets) { _targets = targets; _tpage = 0; paintTargets(); }
+window.pageTargets = (d) => { _tpage += d; paintTargets(); el("targets").scrollIntoView({ behavior: "smooth", block: "start" }); };
 
 function renderTooling(tooling) {
   if (!tooling || !tooling.length) { el("fieldtools").innerHTML = ""; return; }
@@ -311,8 +324,8 @@ function renderVerified(inField) {
     if (v.repl) {
       const f = v.repl.fair;
       const fairBadge = f
-        ? `<div class="fairline"><span class="fairscore">FAIR-software ${f.score}/5</span><span class="fairbar"><i style="width:${f.pct}%"></i></span> · ⭐ ${f.stars} · ${f.forks} forks · ${f.swh ? `<span class="swhok">SWH-archived</span>` : `<span class="swhno">not yet in SWH</span>`}</div>
-        <div class="fairrecs" title="fair-software.eu recommendations">${Object.entries(f.recs).map(([k, ok]) => `<span class="${ok ? "rok" : "rno"}">${ok ? "✓" : "✗"} ${k}</span>`).join("")}</div>`
+        ? `<div class="fairrecs"><b>FAIR software (${f.score}/5):</b> ${Object.entries(f.recs).map(([k, ok]) => `<span class="${ok ? "rok" : "rno"}">${ok ? "✓" : "✗"} ${k}</span>`).join("")}</div>
+        <div class="fairline">⭐ ${f.stars} stars · ${f.forks} forks · ${f.swh ? `<span class="swhok">in Software Heritage</span>` : `<span class="swhno">not yet in Software Heritage</span>`}</div>`
         : "";
       const nodeHref = v.repl.code && v.repl.code.includes("github") ? v.repl.code : v.repl.url;
       repl = `<div class="vrepl">↳ replication is an OpenAIRE node: <a href="${nodeHref}" target="_blank" rel="noopener">${esc(v.repl.title).slice(0, 44) || v.repl.doi}</a> <span class="ochip type">${esc(v.repl.type)}</span></div>${fairBadge}`;
