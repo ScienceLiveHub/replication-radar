@@ -32,6 +32,7 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .hint{margin:.2rem 0 14px;font-size:13px;color:var(--mut)}
 .hint .open{color:var(--magenta)} .hint .verified{color:var(--green)}
 .pill{display:inline-block;background:var(--navy);color:#fff;font-size:12px;border-radius:20px;padding:1px 9px;vertical-align:middle}
+.chartbox{position:relative;height:340px;margin-top:8px}
 
 .targets{display:flex;flex-direction:column;gap:10px}
 .target{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:10px}

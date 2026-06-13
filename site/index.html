@@ -30,12 +30,12 @@
       <div class="grid">
         <div class="card chartcard">
           <h2>The replication-gap map</h2>
-          <p class="hint">Each point is a high-impact paper. <b class="open">Pink = open</b> (worth replicating), <b class="verified">green = already checked</b> by Science Live. Up-and-right = impactful <em>and</em> feasible.</p>
-          <canvas id="gap"></canvas>
+          <p class="hint">High-impact papers in this field, ranked by citations. <b class="verified">Green = already checked</b> by Science Live; <b class="open">pink = open</b> — a replication opportunity. A field of all-pink bars is an unchecked field.</p>
+          <div class="chartbox"><canvas id="gap"></canvas></div>
         </div>
         <aside class="card verifiedcard">
-          <h2>Already checked <span id="vcount" class="pill"></span></h2>
-          <p class="hint">The reliability signal the Graph can't hold — independent replications and how they held.</p>
+          <h2>Science Live verdicts <span id="vcount" class="pill"></span></h2>
+          <p class="hint">Every independent replication on the network — the reliability signal the Graph can't hold. <b class="verified">Highlighted</b> = matches your field.</p>
           <ul id="verified"></ul>
         </aside>
       </div>

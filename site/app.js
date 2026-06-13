@@ -93,8 +93,19 @@ async function radar(topic) {
 
   // verified-in-field: token overlap with the topic (mirrors the Python guarantee)
   const tset = new Set(terms.map((t) => t.toLowerCase()));
-  const inField = new Set(VERIFIED.filter((v) => v.title.toLowerCase().split(/\W+/).some((w) => tset.has(w))).map((v) => v.doi));
-  return { topic, targets, inField };
+  const fieldVerified = VERIFIED.filter((v) => v.title.toLowerCase().split(/\W+/).some((w) => tset.has(w)));
+  const inField = new Set(fieldVerified.map((v) => v.doi));
+
+  // chart = top targets + any field-relevant verified papers not already in the pool,
+  // ranked by citation impact, coloured by status. Green appears iff the field has
+  // checked work — so the chart and the sidebar can never contradict each other.
+  const poolItems = targets.map((t) => ({ title: t.title, citations: t.citations, status: t.status }));
+  const extra = fieldVerified
+    .filter((v) => !targets.some((t) => t.doi === v.doi))
+    .map((v) => ({ title: v.title, citations: v.citations, status: "VERIFIED" }));
+  const chartItems = [...poolItems, ...extra].sort((a, b) => (b.citations || 0) - (a.citations || 0)).slice(0, 12);
+
+  return { topic, targets, inField, chartItems };
 }
 
 // ---------- rendering ----------
@@ -133,26 +144,30 @@ function renderVerified(inField) {
   }).join("");
 }
 
-function renderChart(targets) {
-  const pts = (st, color) => ({
-    label: st === "OPEN" ? "Open — worth replicating" : "Already checked",
-    data: targets.filter((t) => t.status === st).map((t) => ({
-      x: Math.max(1, t.citations), y: t.readiness != null ? t.readiness : 1, title: t.title,
-    })),
-    backgroundColor: color, pointRadius: 7, pointHoverRadius: 9,
-  });
+function renderChart(items) {
+  const short = (s) => { s = s || ""; return s.length > 46 ? s.slice(0, 44) + "…" : s; };
   if (chart) chart.destroy();
+  if (!items.length) { el("gap").parentElement.querySelector(".empty")?.remove(); return; }
   chart = new Chart(el("gap"), {
-    type: "scatter",
-    data: { datasets: [pts("OPEN", "#e6007e"), pts("VERIFIED", "#11875a")] },
+    type: "bar",
+    data: {
+      labels: items.map((i) => short(i.title)),
+      datasets: [{
+        data: items.map((i) => Math.max(1, i.citations || 0)),
+        backgroundColor: items.map((i) => (i.status === "VERIFIED" ? "#11875a" : "#e6007e")),
+        borderRadius: 5, barThickness: 16,
+      }],
+    },
     options: {
+      indexAxis: "y",
+      maintainAspectRatio: false,
       scales: {
-        x: { type: "logarithmic", title: { display: true, text: "citation impact (count, log)" } },
-        y: { title: { display: true, text: "replication-readiness" }, min: 0, max: 1.05 },
+        x: { type: "logarithmic", title: { display: true, text: "citation impact (count, log)" }, grid: { color: "#eef2f9" } },
+        y: { ticks: { font: { size: 11 } }, grid: { display: false } },
       },
       plugins: {
-        legend: { position: "bottom" },
-        tooltip: { callbacks: { label: (c) => (c.raw.title || "").slice(0, 60) } },
+        legend: { display: false },
+        tooltip: { callbacks: { label: (c) => `${items[c.dataIndex].status === "VERIFIED" ? "✓ already checked" : "open — worth replicating"} · ${items[c.dataIndex].citations.toLocaleString()} cites` } },
       },
     },
   });
@@ -168,9 +183,10 @@ async function run(topic) {
     el("results").hidden = false;
     renderTargets(r.targets);
     renderVerified(r.inField);
-    renderChart(r.targets);
-    const v = r.targets.filter((t) => t.status === "VERIFIED").length;
-    el("status").textContent = `“${topic}”: ${r.targets.length} candidates · ${v} already checked · ${r.inField.size} verified replication(s) in this field.`;
+    renderChart(r.chartItems);
+    el("status").textContent = r.inField.size
+      ? `“${topic}”: ${r.targets.length} candidates · ${r.inField.size} already checked in this field (green) — the rest are open.`
+      : `“${topic}”: ${r.targets.length} candidates · none checked in this field yet — every one is an open replication opportunity.`;
   } catch (e) {
     el("status").textContent = `Could not reach the OpenAIRE Graph (${e.message}). Try again or a shorter topic.`;
   } finally {
