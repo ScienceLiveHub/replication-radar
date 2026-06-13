@@ -190,7 +190,7 @@ function renderVerified(inField) {
   const fieldHtml = field.length
     ? `<ul class="vlist">${field.map(matchCard).join("")}</ul>`
     : `<p class="vnone">No Science Live verdict in this field yet — every paper on the left is an <b>open</b> replication opportunity.</p>`;
-  const moreHtml = `<p class="vmore-stat">Verdicts come from the Science Live verification index bundled with this Radar — a <b>growing sample</b> (currently ${VERIFIED.length} paper-anchored claims; the network has more, including paperless ones a DOI search can't reach). <a href="https://github.com/ScienceLiveHub/replication-radar/blob/main/src/replication_radar/data/verdicts.json" target="_blank" rel="noopener">browse the index →</a></p>`;
+  const moreHtml = `<p class="vmore-stat">Verdicts are drawn from the Science Live verification index bundled with this Radar. <a href="https://github.com/ScienceLiveHub/replication-radar/blob/main/src/replication_radar/data/verdicts.json" target="_blank" rel="noopener">browse the index →</a></p>`;
   el("verified").innerHTML = fieldHtml + moreHtml;
 }
 
