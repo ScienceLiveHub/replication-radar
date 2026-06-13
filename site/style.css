@@ -87,7 +87,10 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .vrepl.muted{color:var(--mut);border-top-color:var(--line)}
 .vrepl a{font-weight:600}
 .fairline{display:flex;align-items:center;flex-wrap:wrap;gap:7px;font-size:12px;color:var(--mut);margin-top:6px}
-.fairscore{font-weight:700;color:var(--navy2);cursor:help;border-bottom:1px dotted var(--mut)}
+.fairscore{font-weight:700;color:var(--navy2)}
+.fairrecs{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:11px;margin-top:4px}
+.fairrecs .rok{color:var(--green)}
+.fairrecs .rno{color:#b5820a}
 .fairbar{display:inline-block;width:64px;height:7px;border-radius:4px;background:#e4e9f2;overflow:hidden}
 .fairbar i{display:block;height:100%;background:var(--green)}
 .swhok{color:var(--green);font-weight:600}

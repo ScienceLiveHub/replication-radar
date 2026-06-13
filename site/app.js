@@ -205,7 +205,7 @@ async function radar(topic) {
       cls: impact(p).citationClass, infl: impact(p).influenceClass,
       status: verified ? "VERIFIED" : "OPEN", readiness,
       verification: verified ? [...new Set(VERDICTS[doi].map((v) => v.verdict))].join(", ") : null,
-      cito_np: verified ? ((VERDICTS[doi].find((v) => v.cito_np) || {}).cito_np || null) : null,
+      outcome_np: verified ? ((VERDICTS[doi].find((v) => v.outcome_np) || {}).outcome_np || null) : null,
     };
   });
   targets.sort((a, b) => (a.status === "OPEN" ? 0 : 1) - (b.status === "OPEN" ? 0 : 1) || (b.readiness || 0) - (a.readiness || 0));
@@ -274,8 +274,8 @@ function renderTargets(targets) {
       ? `<span class="badge verified">VERIFIED</span><span class="badge cls">${t.verification}</span>`
       : `<span class="badge open">OPEN</span>${t.cls ? `<span class="badge cls" title="OpenAIRE BIP! impact class — C1 = top 0.01% most-cited globally, C5 = the rest">${t.cls}</span>` : ""}`;
     const link = t.doi ? `<a href="https://doi.org/${t.doi}" target="_blank" rel="noopener">${t.doi}</a>` : "";
-    const verdictLink = (t.status === "VERIFIED" && t.cito_np)
-      ? `<div class="tverdict">independently checked by Science Live · <a href="${t.cito_np}" target="_blank" rel="noopener">verdict chain →</a></div>` : "";
+    const verdictLink = (t.status === "VERIFIED" && t.outcome_np)
+      ? `<div class="tverdict">independently checked by Science Live · <a href="${t.outcome_np}" target="_blank" rel="noopener">replication outcome →</a></div>` : "";
     return `<div class="target ${t.status === "VERIFIED" ? "verified" : ""}">
       ${score}
       <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${verdictLink}</div>
@@ -311,7 +311,8 @@ function renderVerified(inField) {
     if (v.repl) {
       const f = v.repl.fair;
       const fairBadge = f
-        ? `<div class="fairline"><span class="fairscore" title="${`fair-software.eu recommendations\n` + Object.entries(f.recs).map(([k, ok]) => `${ok ? "✓" : "✗"}  ${RECLABEL[k] || k}`).join("\n")}">FAIR-software ${f.score}/5</span><span class="fairbar"><i style="width:${f.pct}%"></i></span> · ⭐ ${f.stars} · ${f.forks} forks · ${f.swh ? `<span class="swhok">SWH-archived</span>` : `<span class="swhno">not yet in SWH</span>`}</div>`
+        ? `<div class="fairline"><span class="fairscore">FAIR-software ${f.score}/5</span><span class="fairbar"><i style="width:${f.pct}%"></i></span> · ⭐ ${f.stars} · ${f.forks} forks · ${f.swh ? `<span class="swhok">SWH-archived</span>` : `<span class="swhno">not yet in SWH</span>`}</div>
+        <div class="fairrecs" title="fair-software.eu recommendations">${Object.entries(f.recs).map(([k, ok]) => `<span class="${ok ? "rok" : "rno"}">${ok ? "✓" : "✗"} ${k}</span>`).join("")}</div>`
         : "";
       const nodeHref = v.repl.code && v.repl.code.includes("github") ? v.repl.code : v.repl.url;
       repl = `<div class="vrepl">↳ replication is an OpenAIRE node: <a href="${nodeHref}" target="_blank" rel="noopener">${esc(v.repl.title).slice(0, 44) || v.repl.doi}</a> <span class="ochip type">${esc(v.repl.type)}</span></div>${fairBadge}`;
@@ -322,7 +323,7 @@ function renderVerified(inField) {
       <span class="nodelabel">original paper · OpenAIRE</span>
       <span class="vt">${esc(v.title).slice(0, 82)}</span>
       <div class="ochips">${chips}</div>
-      <div class="vline"><span class="vv ${partialOf(v) ? "partial" : ""}">${v.verdicts.join(", ")}</span> — independently checked by Science Live ${v.cito_np ? `· <a href="${v.cito_np}" target="_blank" rel="noopener">verdict chain →</a>` : ""}</div>
+      <div class="vline"><span class="vv ${partialOf(v) ? "partial" : ""}">${v.verdicts.join(", ")}</span> — independently checked by Science Live ${v.outcome_np ? `· <a href="${v.outcome_np}" target="_blank" rel="noopener">replication outcome →</a>` : (v.cito_np ? `· <a href="${v.cito_np}" target="_blank" rel="noopener">verdict chain →</a>` : "")}</div>
       ${repl}
     </li>`;
   };
