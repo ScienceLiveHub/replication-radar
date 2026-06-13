@@ -58,6 +58,35 @@ const cleanFos = (arr) => [...new Set(arr.map((v) => v.replace(/^\d+\s+/, "")).f
 const oaOf = (rec) => rec.openAccessColor || ((rec.bestAccessRight || {}).label || "").toLowerCase();
 const urlOf = (rec) => (rec.instances && rec.instances[0] && rec.instances[0].urls && rec.instances[0].urls[0]) || null;
 
+// ---------- software FAIR + usage assessment (grounded, live from GitHub + SWH) ----------
+// Computes the fair-software.eu 5 recommendations + usage from authoritative sources
+// (no third-party scorer needed — F-UJI/OSTrails have no usable API for this). Only
+// ever run on a software record we ACTUALLY have a repo URL for — never guessed.
+const parseGitHub = (url) => { const m = (url || "").match(/github\.com\/([^\/]+)\/([^\/#?]+)/i); return m ? { owner: m[1], repo: m[2].replace(/\.git$/, "") } : null; };
+
+async function assessSoftware(url) {
+  const g = parseGitHub(url);
+  if (!g) return null;
+  const base = `https://api.github.com/repos/${g.owner}/${g.repo}`;
+  let repo;
+  try { repo = await (await fetch(base)).json(); } catch (e) { return null; }
+  if (!repo || repo.message) return null;                 // not found / GitHub rate-limited
+  let files = [];
+  try { const c = await (await fetch(`${base}/contents`)).json(); if (Array.isArray(c)) files = c.map((f) => (f.name || "").toLowerCase()); } catch (e) { /* ignore */ }
+  const has = (n) => files.includes(n.toLowerCase());
+  let swh = false;
+  try { const s = await (await fetch(`https://archive.softwareheritage.org/api/1/origin/https://github.com/${g.owner}/${g.repo}/get/`)).json(); swh = !!s.origin_visits_url; } catch (e) { /* ignore */ }
+  const recs = {
+    repository: true,                                                       // public repo
+    license: !!(repo.license && repo.license.spdx_id && repo.license.spdx_id !== "NOASSERTION"),
+    registry: true,                                                         // it's in OpenAIRE/Zenodo (we reached it via the Graph)
+    citation: has("citation.cff") || has("codemeta.json"),                  // citable
+    quality: has("codemeta.json") || has("environment.yml") || has("dockerfile") || has("pixi.toml") || has(".github"), // reproducibility/quality artefacts
+  };
+  const score = Object.values(recs).filter(Boolean).length;
+  return { stars: repo.stargazers_count || 0, forks: repo.forks_count || 0, license: (repo.license || {}).spdx_id, swh, recs, score, pct: Math.round((score / 5) * 100) };
+}
+
 // ---------- author-agnostic verdict index, live from the nanopub network ----------
 // Every FORRT Replication Outcome + CiTO on the network (any signer), joined on the
 // trusty hash. No person filter — verification is author-agnostic.
@@ -183,7 +212,13 @@ async function radar(topic) {
   await Promise.all(fieldVerified.map(async (v) => {
     if (v.repo_doi && v.repl === undefined) {
       const rec = await fetchByDoi(v.repo_doi);
-      v.repl = rec ? { title: rec.mainTitle || "", type: rec.type || "output", oa: oaOf(rec), url: urlOf(rec) || `https://doi.org/${v.repo_doi}`, doi: v.repo_doi } : null;
+      if (rec) {
+        const code = rec.codeRepositoryUrl || urlOf(rec) || "";
+        v.repl = { title: rec.mainTitle || "", type: rec.type || "output", oa: oaOf(rec), url: urlOf(rec) || `https://doi.org/${v.repo_doi}`, doi: v.repo_doi, code };
+        v.repl.fair = await assessSoftware(code);   // FAIR + usage, only if it resolves to a GitHub repo
+      } else {
+        v.repl = null;
+      }
     }
   }));
 
@@ -254,11 +289,17 @@ function renderVerified(inField) {
       ...(v.sdg || []).map((s) => `<span class="ochip sdg">${esc(s).slice(0, 22)}</span>`),
       `<span class="ochip cites">${v.citations.toLocaleString()} cites</span>`,
     ].join("");
-    const repl = v.repl
-      ? `<div class="vrepl">↳ replication is an OpenAIRE node: <a href="${v.repl.url}" target="_blank" rel="noopener">${esc(v.repl.title).slice(0, 44) || v.repl.doi}</a> <span class="ochip type">${esc(v.repl.type)}</span></div>`
-      : (v.repo_doi
-        ? `<div class="vrepl muted">↳ replication deposit: <a href="${v.repo_doi.startsWith("http") ? esc(v.repo_doi) : "https://doi.org/" + esc(v.repo_doi)}" target="_blank" rel="noopener">${esc(v.repo_doi)}</a> <span class="ochip wait">awaiting OpenAIRE harvest</span></div>`
-        : "");
+    let repl = "";
+    if (v.repl) {
+      const f = v.repl.fair;
+      const fairBadge = f
+        ? `<div class="fairline"><span class="fairscore" title="fair-software.eu: ${Object.entries(f.recs).map(([k, ok]) => `${ok ? "✓" : "✗"} ${k}`).join("  ·  ")}">FAIR-software ${f.score}/5</span><span class="fairbar"><i style="width:${f.pct}%"></i></span> · ⭐ ${f.stars} · ${f.forks} forks · ${f.swh ? `<span class="swhok">SWH-archived</span>` : `<span class="swhno">not yet in SWH</span>`}</div>`
+        : "";
+      const nodeHref = v.repl.code && v.repl.code.includes("github") ? v.repl.code : v.repl.url;
+      repl = `<div class="vrepl">↳ replication is an OpenAIRE node: <a href="${nodeHref}" target="_blank" rel="noopener">${esc(v.repl.title).slice(0, 44) || v.repl.doi}</a> <span class="ochip type">${esc(v.repl.type)}</span></div>${fairBadge}`;
+    } else if (v.repo_doi) {
+      repl = `<div class="vrepl muted">↳ replication deposit: <a href="${v.repo_doi.startsWith("http") ? esc(v.repo_doi) : "https://doi.org/" + esc(v.repo_doi)}" target="_blank" rel="noopener">${esc(v.repo_doi)}</a> <span class="ochip wait">awaiting OpenAIRE harvest</span></div>`;
+    }
     return `<li class="match">
       <span class="nodelabel">original paper · OpenAIRE</span>
       <span class="vt">${esc(v.title).slice(0, 82)}</span>

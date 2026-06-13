@@ -85,6 +85,12 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .vrepl{font-size:12.5px;margin-top:8px;padding-top:8px;border-top:1px dashed #bfe3d2;color:var(--ink)}
 .vrepl.muted{color:var(--mut);border-top-color:var(--line)}
 .vrepl a{font-weight:600}
+.fairline{display:flex;align-items:center;flex-wrap:wrap;gap:7px;font-size:12px;color:var(--mut);margin-top:6px}
+.fairscore{font-weight:700;color:var(--navy2);cursor:help}
+.fairbar{display:inline-block;width:64px;height:7px;border-radius:4px;background:#e4e9f2;overflow:hidden}
+.fairbar i{display:block;height:100%;background:var(--green)}
+.swhok{color:var(--green);font-weight:600}
+.swhno{color:#b5820a}
 .ochip.wait{background:#fde8cf;color:#8a5a1b}
 .vnone{color:#9c0356;background:var(--magenta-soft);padding:12px 14px;border-radius:8px;font-size:13.5px}
 .vmore-stat{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:12.5px;color:var(--mut)}
