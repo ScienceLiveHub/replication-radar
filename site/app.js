@@ -176,9 +176,18 @@ async function loadVerdicts() {
 }
 
 // ---------- the radar ----------
+// OpenAIRE returns peer-review reports, comments, errata etc. as "publications" —
+// not replication targets. Drop them, and collapse versions/duplicates by title.
+const _normTitle = (s) => (s || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+const isNotAPaper = (r) => /^\s*(review (for|of)\b|peer[- ]?review\b|comment (on|to)\b|repl(y|ies) to\b|response to\b|correction\b|corrigend|errat|editorial\b|withdrawn\b|retraction\b)/i.test(r.mainTitle || "");
+
 function dedup(list) {
   const seen = new Set(), out = [];
-  for (const r of list) { const k = doiOf(r) || r.mainTitle; if (!seen.has(k)) { seen.add(k); out.push(r); } }
+  for (const r of list) {
+    if (isNotAPaper(r)) continue;
+    const k = _normTitle(r.mainTitle) || doiOf(r);
+    if (k && !seen.has(k)) { seen.add(k); out.push(r); }
+  }
   return out;
 }
 
