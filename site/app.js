@@ -162,7 +162,6 @@ async function radar(topic) {
       cls: impact(p).citationClass, infl: impact(p).influenceClass,
       status: verified ? "VERIFIED" : "OPEN", readiness,
       verification: verified ? [...new Set(VERDICTS[doi].map((v) => v.verdict))].join(", ") : null,
-      tool: tools[0] ? { title: tools[0].mainTitle, swh: swh(tools[0]), link: tools[0].codeRepositoryUrl || urlOf(tools[0]), swhUrl: swhUrlOf(tools[0]) } : null,
     };
   });
   targets.sort((a, b) => (a.status === "OPEN" ? 0 : 1) - (b.status === "OPEN" ? 0 : 1) || (b.readiness || 0) - (a.readiness || 0));
@@ -197,7 +196,18 @@ async function radar(topic) {
     .map((v) => ({ title: v.title, citations: v.citations, status: "VERIFIED" }));
   const chartItems = [...poolItems, ...extra].sort((a, b) => (b.citations || 0) - (a.citations || 0)).slice(0, 12);
 
-  return { topic, targets, inField, chartItems };
+  // FIELD-LEVEL independent tooling — shown ONCE, not per paper (it isn't paper-specific).
+  // Reuse-ranked, de-duplicated, and we drop repos merely named after the query.
+  const slug = topic.toLowerCase().replace(/\s+/g, "-");
+  const seenT = new Set();
+  const tooling = sw
+    .filter((s) => reuse(s) >= 2 && !(s.mainTitle || "").toLowerCase().includes(slug))
+    .sort((a, b) => reuse(b) - reuse(a))
+    .map((s) => ({ title: s.mainTitle || "", link: s.codeRepositoryUrl || urlOf(s), swh: swh(s), swhUrl: swhUrlOf(s) }))
+    .filter((t) => { const k = t.link || t.title; if (!t.title || seenT.has(k)) return false; seenT.add(k); return true; })
+    .slice(0, 5);
+
+  return { topic, targets, inField, chartItems, tooling };
 }
 
 // ---------- rendering ----------
@@ -212,14 +222,21 @@ function renderTargets(targets) {
     const badge = t.status === "VERIFIED"
       ? `<span class="badge verified">VERIFIED</span><span class="badge cls">${t.verification}</span>`
       : `<span class="badge open">OPEN</span>${t.cls ? `<span class="badge cls" title="OpenAIRE BIP! impact class — C1 = top 0.01% most-cited globally, C5 = the rest">${t.cls}</span>` : ""}`;
-    const tool = t.tool ? `<div class="tool">independent tooling: ${t.tool.link ? `<a href="${t.tool.link}" target="_blank" rel="noopener">${esc(t.tool.title).slice(0, 54)}</a>` : esc(t.tool.title).slice(0, 54)}${t.tool.swh ? ` · <a href="${t.tool.swhUrl || t.tool.link}" target="_blank" rel="noopener" class="swh">SWH-archived</a>` : ""}</div>` : "";
     const link = t.doi ? `<a href="https://doi.org/${t.doi}" target="_blank" rel="noopener">${t.doi}</a>` : "";
     return `<div class="target ${t.status === "VERIFIED" ? "verified" : ""}">
       ${score}
-      <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${tool}</div>
+      <div class="t-main">${badge}<br><b>${esc(t.title)}</b></div>
       <div class="t-right">${t.citations.toLocaleString()} cites<br>${link}</div>
     </div>`;
   }).join("");
+}
+
+function renderTooling(tooling) {
+  if (!tooling || !tooling.length) { el("fieldtools").innerHTML = ""; return; }
+  const items = tooling.map((t) =>
+    `${t.link ? `<a href="${t.link}" target="_blank" rel="noopener">${esc(t.title).slice(0, 40)}</a>` : esc(t.title).slice(0, 40)}${t.swh ? ` <a href="${t.swhUrl || t.link}" target="_blank" rel="noopener" class="swh" title="archived in Software Heritage">⬡</a>` : ""}`
+  ).join(" &nbsp;·&nbsp; ");
+  el("fieldtools").innerHTML = `<b>Independent reusable tooling in this area</b> — engines for replicating by a different route, not tied to any one paper below: ${items}`;
 }
 
 function renderVerified(inField) {
@@ -298,6 +315,7 @@ async function run(topic) {
     const r = await radar(topic);
     el("results").hidden = false;
     renderTargets(r.targets);
+    renderTooling(r.tooling);
     renderVerified(r.inField);
     renderChart(r.chartItems);
     el("status").textContent = r.inField.size

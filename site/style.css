@@ -45,6 +45,10 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .pill{display:inline-block;background:var(--navy);color:#fff;font-size:12px;border-radius:20px;padding:1px 9px;vertical-align:middle}
 .chartbox{position:relative;height:340px;margin-top:8px}
 
+.fieldtools{font-size:12.5px;color:var(--mut);background:#f3f6fb;border:1px solid var(--line);border-radius:9px;padding:10px 13px;margin:0 0 14px;line-height:1.7}
+.fieldtools:empty{display:none}
+.fieldtools b{color:var(--navy2)}
+.fieldtools .swh{color:var(--green);text-decoration:none;font-size:13px}
 .targets{display:flex;flex-direction:column;gap:10px}
 .target{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:10px}
 .target.verified{background:var(--green-soft);border-color:#bfe3d2}
