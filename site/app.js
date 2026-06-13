@@ -210,12 +210,12 @@ function renderTargets(targets) {
       : `<div class="score"><span>✓</span><small>DONE</small></div>`;
     const badge = t.status === "VERIFIED"
       ? `<span class="badge verified">VERIFIED</span><span class="badge cls">${t.verification}</span>`
-      : `<span class="badge open">OPEN</span>${t.cls ? `<span class="badge cls">${t.cls}</span>` : ""}`;
+      : `<span class="badge open">OPEN</span>${t.cls ? `<span class="badge cls" title="OpenAIRE BIP! impact class — C1 = top 0.01% most-cited globally, C5 = the rest">${t.cls}</span>` : ""}`;
     const tool = t.tool ? `<div class="tool">independent tooling: ${esc(t.tool.title).slice(0, 54)}${t.tool.swh ? ' <span class="swh">· SWH-archived</span>' : ""}</div>` : "";
     const link = t.doi ? `<a href="https://doi.org/${t.doi}" target="_blank" rel="noopener">${t.doi}</a>` : "";
     return `<div class="target ${t.status === "VERIFIED" ? "verified" : ""}">
       ${score}
-      <div class="t-main">${badge}<br><b>${esc(t.title).slice(0, 96)}</b>${tool}</div>
+      <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${tool}</div>
       <div class="t-right">${t.citations.toLocaleString()} cites<br>${link}</div>
     </div>`;
   }).join("");
@@ -279,7 +279,10 @@ function renderChart(items) {
       },
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { label: (c) => `${items[c.dataIndex].status === "VERIFIED" ? "✓ already checked" : "open — worth replicating"} · ${items[c.dataIndex].citations.toLocaleString()} cites` } },
+        tooltip: { callbacks: {
+          title: (ti) => items[ti[0].dataIndex].title,   // full (untruncated) paper title on hover
+          label: (c) => `${items[c.dataIndex].status === "VERIFIED" ? "✓ already checked" : "open — worth replicating"} · ${items[c.dataIndex].citations.toLocaleString()} cites`,
+        } },
       },
     },
   });
