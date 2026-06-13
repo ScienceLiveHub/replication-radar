@@ -57,9 +57,63 @@ const cleanFos = (arr) => [...new Set(arr.map((v) => v.replace(/^\d+\s+/, "")).f
 const oaOf = (rec) => rec.openAccessColor || ((rec.bestAccessRight || {}).label || "").toLowerCase();
 const urlOf = (rec) => (rec.instances && rec.instances[0] && rec.instances[0].urls && rec.instances[0].urls[0]) || null;
 
+// ---------- author-agnostic verdict index, live from the nanopub network ----------
+// Every FORRT Replication Outcome + CiTO on the network (any signer), joined on the
+// trusty hash. No person filter — verification is author-agnostic.
+const NP_SPARQL = "https://query.knowledgepixels.com/repo/full";
+const TPL_OUTCOME = "https://w3id.org/np/RA2zljn0Nw9SadppOyxZoh-_Rxosslrq-vYG-p9SttnJE";
+const TPL_CITO = "https://w3id.org/np/RA43F9EoOuzF0xoNUnCMNyFsfIqlsuWDdPHCnN0wCdCAw";
+const VERDICT_RELS = new Set(["confirms", "qualifies", "disputes", "critiques", "extends", "supports", "refutes"]);
+const npHash = (u) => (u || "").replace(/.*\/np\//, "");
+const doiPart = (u) => (u || "").replace(/.*doi\.org\//, "").toLowerCase();
+const cleanRepo = (r) => (!r ? null : r.includes("doi.org/") ? doiPart(r) : /^10\./.test(r) ? r.toLowerCase() : r);
+
+async function sparqlCsv(query) {
+  const r = await fetch(`${NP_SPARQL}?query=${encodeURIComponent(query)}`, { headers: { Accept: "text/csv" } });
+  if (!r.ok) throw new Error(`nanopub-query ${r.status}`);
+  const lines = (await r.text()).trim().split(/\r?\n/);
+  const head = lines.shift().split(",");
+  return lines.map((line) => {
+    const cells = (line.match(/("([^"]*)"|[^,]*)(,|$)/g) || []).map((c) => c.replace(/,$/, "").replace(/^"|"$/g, ""));
+    const o = {}; head.forEach((h, i) => (o[h] = cells[i])); return o;
+  });
+}
+
+async function buildIndexFromNetwork() {
+  const QA = `PREFIX np: <http://www.nanopub.org/nschema#> PREFIX ntpl: <https://w3id.org/np/o/ntemplate/> PREFIX slt: <https://w3id.org/sciencelive/o/terms/>
+SELECT DISTINCT ?outcome ?status ?repo WHERE { GRAPH ?g { ?outcome ntpl:wasCreatedFromTemplate <${TPL_OUTCOME}> . } ?outcome np:hasAssertion ?oa . GRAPH ?oa { ?oc slt:hasValidationStatus ?s . OPTIONAL { ?oc slt:hasOutcomeRepository ?repo . } } BIND(STRAFTER(STR(?s),"/terms/") AS ?status) }`;
+  const QB = `PREFIX np: <http://www.nanopub.org/nschema#> PREFIX ntpl: <https://w3id.org/np/o/ntemplate/> PREFIX cito: <http://purl.org/spar/cito/>
+SELECT DISTINCT ?cito ?subj ?rel ?orig WHERE { GRAPH ?g { ?cito ntpl:wasCreatedFromTemplate <${TPL_CITO}> . } ?cito np:hasAssertion ?ca . GRAPH ?ca { ?subj ?rel ?orig . } FILTER(STRSTARTS(STR(?rel),STR(cito:))) FILTER(CONTAINS(STR(?orig),"doi.org/10.")) } LIMIT 3000`;
+  const A = await sparqlCsv(QA);            // sequential: concurrent queries truncate the endpoint
+  const B = await sparqlCsv(QB);
+  const byHash = {};
+  for (const r of B) {
+    const h = npHash(r.subj);
+    (byHash[h] = byHash[h] || []).push({ rel: (r.rel || "").replace(/.*cito\//, ""), orig: doiPart(r.orig), cito: r.cito });
+  }
+  const V = {};
+  for (const o of A) {
+    const cs = byHash[npHash(o.outcome)] || [];
+    const verdictCitos = cs.filter((c) => VERDICT_RELS.has(c.rel) && !c.orig.startsWith("10.5281/"));
+    const targets = verdictCitos.length ? verdictCitos : cs.filter((c) => !c.orig.startsWith("10.5281/"));
+    for (const c of targets) {
+      (V[c.orig] = V[c.orig] || []).push({
+        verdict: o.status || "Published", cito: [c.rel], repo_doi: cleanRepo(o.repo),
+        outcome_np: o.outcome, cito_np: c.cito,
+      });
+    }
+  }
+  return V;
+}
+
 // ---------- load + enrich the verdict index ----------
 async function loadVerdicts() {
-  VERDICTS = (await (await fetch("verdicts.json")).json()).verifications || {};
+  try {
+    VERDICTS = await buildIndexFromNetwork();           // live, author-agnostic, network-wide
+    if (!Object.keys(VERDICTS).length) throw new Error("empty");
+  } catch (e) {
+    VERDICTS = (await (await fetch("verdicts.json")).json()).verifications || {};  // bundled fallback
+  }
   VERIFIED = await Promise.all(Object.entries(VERDICTS).map(async ([doi, vs]) => {
     const rec = await fetchByDoi(doi);   // the original paper, as an OpenAIRE node
     return {
@@ -177,7 +231,7 @@ function renderVerified(inField) {
     const repl = v.repl
       ? `<div class="vrepl">↳ replication is an OpenAIRE node: <a href="${v.repl.url}" target="_blank" rel="noopener">${esc(v.repl.title).slice(0, 44) || v.repl.doi}</a> <span class="ochip type">${esc(v.repl.type)}</span></div>`
       : (v.repo_doi
-        ? `<div class="vrepl muted">↳ replication deposit: <a href="https://doi.org/${esc(v.repo_doi)}" target="_blank" rel="noopener">${esc(v.repo_doi)}</a> <span class="ochip wait">awaiting OpenAIRE harvest</span></div>`
+        ? `<div class="vrepl muted">↳ replication deposit: <a href="${v.repo_doi.startsWith("http") ? esc(v.repo_doi) : "https://doi.org/" + esc(v.repo_doi)}" target="_blank" rel="noopener">${esc(v.repo_doi)}</a> <span class="ochip wait">awaiting OpenAIRE harvest</span></div>`
         : "");
     return `<li class="match">
       <span class="nodelabel">original paper · OpenAIRE</span>
@@ -250,5 +304,5 @@ el("chips").addEventListener("click", (e) => { if (e.target.classList.contains("
 el("go").addEventListener("click", () => run(el("topic").value));
 el("topic").addEventListener("keydown", (e) => { if (e.key === "Enter") run(el("topic").value); });
 
-el("status").textContent = "Loading the Science Live verdict overlay …";
+el("status").textContent = "Loading the Science Live verdict layer live from the nanopub network …";
 loadVerdicts().then(() => { el("status").textContent = "Type a research field and hit Scan — or try an example above."; });
