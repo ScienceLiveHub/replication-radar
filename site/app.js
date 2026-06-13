@@ -165,6 +165,8 @@ async function loadVerdicts() {
       verdicts: [...new Set(vs.map((v) => v.verdict))],
       title: rec ? (rec.mainTitle || doi) : doi,
       citations: rec ? (impact(rec).citationCount || 0) : 0,
+      cls: rec ? impact(rec).citationClass : null,
+      infl: rec ? impact(rec).influenceClass : null,
       oa: rec ? oaOf(rec) : "",
       fos: rec ? cleanFos(subjectsOf(rec, "FOS")).slice(0, 2) : [],
       sdg: rec ? subjectsOf(rec, "SDG").slice(0, 1) : [],
@@ -192,11 +194,11 @@ function dedup(list) {
 }
 
 async function radar(topic) {
-  let pubs = dedup(await search(topic, "publication", 30));
+  let pubs = dedup(await search(topic, "publication", 80));
   const terms = topic.toLowerCase().split(/\W+/).filter((t) => t.length > 3);
   if (pubs.length < 5 && terms.length > 1) {
     const longest = terms.sort((a, b) => b.length - a.length)[0];
-    pubs = dedup(pubs.concat(await search(longest, "publication", 30)));
+    pubs = dedup(pubs.concat(await search(longest, "publication", 80)));
   }
   const rank = (r) => [CLASS_SCORE[impact(r).influenceClass] || .2, CLASS_SCORE[impact(r).citationClass] || .2, (impact(r).citationCount || 0)];
   pubs.sort((a, b) => { const A = rank(a), B = rank(b); return (B[0] - A[0]) || (B[1] - A[1]) || (B[2] - A[2]); });
@@ -204,7 +206,7 @@ async function radar(topic) {
   const sw = await search(topic, "software", 25);
   const hasData = (await search(topic, "dataset", 5)).length > 0;
 
-  const targets = pubs.slice(0, 40).map((p) => {
+  const targets = pubs.slice(0, 50).map((p) => {
     const doi = doiOf(p), auth = surnames(p);
     const verified = doi && VERDICTS[doi];
     const tools = sw.filter((s) => independent(auth, surnames(s)) && reuse(s) >= 2).sort((a, b) => reuse(b) - reuse(a));
@@ -266,6 +268,22 @@ async function radar(topic) {
     .map((s) => ({ title: s.mainTitle || "", link: s.codeRepositoryUrl || urlOf(s), swh: swh(s), swhUrl: swhUrlOf(s) }))
     .filter((t) => { const k = t.link || t.title; if (!t.title || seenT.has(k)) return false; seenT.add(k); return true; })
     .slice(0, 5);
+
+  // Inject matched VERIFIED papers that OpenAIRE's keyword search didn't return, so
+  // the paper you replicated always appears in the table (at its replicability rank).
+  const have = new Set(targets.map((t) => t.doi));
+  for (const v of fieldVerified) {
+    if (!v.doi || have.has(v.doi)) continue;
+    const cs = Math.max(CLASS_SCORE[v.infl] || 0.2, CLASS_SCORE[v.cls] || 0.2);
+    targets.push({
+      title: v.title, doi: v.doi, citations: v.citations, cls: v.cls, infl: v.infl,
+      status: "VERIFIED",
+      readiness: Math.round((0.5 * cs + 0.3 * (tooling.length > 0) + 0.2 * hasData) * 100) / 100,
+      verification: [...new Set(v.verdicts)].join(", "),
+      outcome_np: v.outcome_np,
+    });
+  }
+  targets.sort((a, b) => (b.readiness || 0) - (a.readiness || 0) || (b.citations || 0) - (a.citations || 0));
 
   return { topic, targets, inField, chartItems, tooling };
 }
