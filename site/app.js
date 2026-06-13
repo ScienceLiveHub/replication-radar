@@ -308,7 +308,7 @@ function renderVerified(inField) {
     if (v.repl) {
       const f = v.repl.fair;
       const fairBadge = f
-        ? `<div class="fairline"><span class="fairscore" data-tip="${`fair-software.eu recommendations:\n` + Object.entries(f.recs).map(([k, ok]) => `${ok ? "✓" : "✗"}  ${RECLABEL[k] || k}`).join("\n")}">FAIR-software ${f.score}/5</span><span class="fairbar"><i style="width:${f.pct}%"></i></span> · ⭐ ${f.stars} · ${f.forks} forks · ${f.swh ? `<span class="swhok">SWH-archived</span>` : `<span class="swhno">not yet in SWH</span>`}</div>`
+        ? `<div class="fairline"><span class="fairscore" title="${`fair-software.eu recommendations\n` + Object.entries(f.recs).map(([k, ok]) => `${ok ? "✓" : "✗"}  ${RECLABEL[k] || k}`).join("\n")}">FAIR-software ${f.score}/5</span><span class="fairbar"><i style="width:${f.pct}%"></i></span> · ⭐ ${f.stars} · ${f.forks} forks · ${f.swh ? `<span class="swhok">SWH-archived</span>` : `<span class="swhno">not yet in SWH</span>`}</div>`
         : "";
       const nodeHref = v.repl.code && v.repl.code.includes("github") ? v.repl.code : v.repl.url;
       repl = `<div class="vrepl">↳ replication is an OpenAIRE node: <a href="${nodeHref}" target="_blank" rel="noopener">${esc(v.repl.title).slice(0, 44) || v.repl.doi}</a> <span class="ochip type">${esc(v.repl.type)}</span></div>${fairBadge}`;
