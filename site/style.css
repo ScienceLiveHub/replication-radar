@@ -25,6 +25,17 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .chip:hover{border-color:var(--magenta);color:var(--magenta)}
 
 .status{color:var(--mut);min-height:22px;margin:10px 0}
+
+.legend{background:#fff;border:1px solid var(--line);border-radius:12px;margin:16px 0 4px;padding:4px 18px}
+.legend>summary{cursor:pointer;font-weight:600;color:var(--navy);padding:11px 0;font-size:13.5px;list-style-position:inside}
+.legend>summary:hover{color:var(--magenta)}
+.legend-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 30px;padding:6px 0 16px;font-size:13px}
+@media(max-width:680px){.legend-grid{grid-template-columns:1fr}}
+.legend-item{display:flex;flex-direction:column;gap:5px}
+.legend-h{font-weight:700;color:var(--navy2);font-size:10.5px;text-transform:uppercase;letter-spacing:.5px}
+.legend-body{color:var(--mut);line-height:1.7}
+.legend-body em{color:#9aa7bd;font-size:12px}
+.vv.contra{color:#b3005f}
 .grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;margin-bottom:18px}
 @media(max-width:820px){.grid{grid-template-columns:1fr}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:18px}

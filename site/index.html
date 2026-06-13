@@ -24,6 +24,31 @@
       <div class="chips" id="chips"></div>
     </section>
 
+    <details class="legend" open>
+      <summary>Legend — what the labels mean</summary>
+      <div class="legend-grid">
+        <div class="legend-item">
+          <span class="legend-h">Impact class · OpenAIRE BIP!</span>
+          <span class="legend-body">
+            <span class="ochip">C1</span> top 0.01% &nbsp;<span class="ochip">C2</span> top 0.1% &nbsp;<span class="ochip">C3</span> top 1% &nbsp;<span class="ochip">C4</span> top 10% &nbsp;<span class="ochip">C5</span> the rest
+            <em>— global percentile of citations, across all of science</em>
+          </span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-h">Status</span>
+          <span class="legend-body"><span class="badge open">OPEN</span> a replication opportunity &nbsp; <span class="badge verified">VERIFIED</span> already independently checked</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-h">Verdict · Science Live</span>
+          <span class="legend-body"><span class="vv">Validated</span> held up &nbsp; <span class="vv partial">PartiallySupported</span> in part &nbsp; <span class="vv contra">Contradicted</span> did not hold</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-h">Readiness</span>
+          <span class="legend-body">a 0–1 score = impact × independent tooling × reference data — higher means more worth, and more feasible, to replicate</span>
+        </div>
+      </div>
+    </details>
+
     <p id="status" class="status"></p>
 
     <section id="results" hidden>
@@ -42,7 +67,7 @@
 
       <div class="card">
         <h2>Top replication targets <span class="pill" id="tcount"></span></h2>
-        <p class="hint">The 10 highest-impact candidates for this field, ranked by <b>readiness</b> = impact × independent tooling × reference data. OPEN = an opportunity; VERIFIED = already done (with the verdict). The <b>C1–C5</b> badge is OpenAIRE's BIP! impact class — <b>C1</b> = top 0.01% most-cited globally, down to <b>C5</b> = the rest.</p>
+        <p class="hint">The 10 highest-impact candidates for this field, ranked by <b>readiness</b>. OPEN = an opportunity; VERIFIED = already done. See the legend above for the badges.</p>
         <div id="targets" class="targets"></div>
       </div>
     </section>
