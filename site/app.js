@@ -63,6 +63,8 @@ const urlOf = (rec) => (rec.instances && rec.instances[0] && rec.instances[0].ur
 // (no third-party scorer needed — F-UJI/OSTrails have no usable API for this). Only
 // ever run on a software record we ACTUALLY have a repo URL for — never guessed.
 const parseGitHub = (url) => { const m = (url || "").match(/github\.com\/([^\/]+)\/([^\/#?]+)/i); return m ? { owner: m[1], repo: m[2].replace(/\.git$/, "") } : null; };
+// human labels for the fair-software.eu recommendations (shown on hover)
+const RECLABEL = { repository: "public repository", license: "open license", registry: "in a registry", citation: "citable (CITATION.cff / DOI)", quality: "quality artefacts (env / Docker / CI)" };
 
 // OpenAIRE often lacks the GitHub URL for a Zenodo deposit; Zenodo's own record
 // always carries the source repo (related_identifiers) for GitHub-published software.
@@ -306,7 +308,7 @@ function renderVerified(inField) {
     if (v.repl) {
       const f = v.repl.fair;
       const fairBadge = f
-        ? `<div class="fairline"><span class="fairscore" title="fair-software.eu: ${Object.entries(f.recs).map(([k, ok]) => `${ok ? "✓" : "✗"} ${k}`).join("  ·  ")}">FAIR-software ${f.score}/5</span><span class="fairbar"><i style="width:${f.pct}%"></i></span> · ⭐ ${f.stars} · ${f.forks} forks · ${f.swh ? `<span class="swhok">SWH-archived</span>` : `<span class="swhno">not yet in SWH</span>`}</div>`
+        ? `<div class="fairline"><span class="fairscore" data-tip="${`fair-software.eu recommendations:\n` + Object.entries(f.recs).map(([k, ok]) => `${ok ? "✓" : "✗"}  ${RECLABEL[k] || k}`).join("\n")}">FAIR-software ${f.score}/5</span><span class="fairbar"><i style="width:${f.pct}%"></i></span> · ⭐ ${f.stars} · ${f.forks} forks · ${f.swh ? `<span class="swhok">SWH-archived</span>` : `<span class="swhno">not yet in SWH</span>`}</div>`
         : "";
       const nodeHref = v.repl.code && v.repl.code.includes("github") ? v.repl.code : v.repl.url;
       repl = `<div class="vrepl">↳ replication is an OpenAIRE node: <a href="${nodeHref}" target="_blank" rel="noopener">${esc(v.repl.title).slice(0, 44) || v.repl.doi}</a> <span class="ochip type">${esc(v.repl.type)}</span></div>${fairBadge}`;
