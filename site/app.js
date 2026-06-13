@@ -41,18 +41,39 @@ async function search(topic, type, size) {
   return (await r.json()).results || [];
 }
 
+// resolve a single record by DOI (any type) — used for the original paper AND the
+// replication's own OpenAIRE node. OpenAIRE free-text matches the DOI string.
+async function fetchByDoi(doi) {
+  if (!doi) return null;
+  try {
+    const hits = (await (await fetch(`${API}/researchProducts?search=${encodeURIComponent(doi)}&pageSize=5`)).json()).results || [];
+    return hits.find((h) => doiOf(h) === doi.toLowerCase()) || hits[0] || null;
+  } catch (e) { return null; }
+}
+
+// OpenAIRE richness we already receive but were hiding
+const subjectsOf = (rec, scheme) => [...new Set((rec.subjects || []).filter((s) => s.subject && s.subject.scheme === scheme).map((s) => s.subject.value))];
+const cleanFos = (arr) => [...new Set(arr.map((v) => v.replace(/^\d+\s+/, "")).filter((v) => v && !/^\d+$/.test(v)))];
+const oaOf = (rec) => rec.openAccessColor || ((rec.bestAccessRight || {}).label || "").toLowerCase();
+const urlOf = (rec) => (rec.instances && rec.instances[0] && rec.instances[0].urls && rec.instances[0].urls[0]) || null;
+
 // ---------- load + enrich the verdict index ----------
 async function loadVerdicts() {
   VERDICTS = (await (await fetch("verdicts.json")).json()).verifications || {};
   VERIFIED = await Promise.all(Object.entries(VERDICTS).map(async ([doi, vs]) => {
-    let title = doi, citations = 0;
-    try {
-      const hits = await search(doi, "publication", 1);
-      const rec = (hits || []).find((h) => doiOf(h) === doi) || hits[0];
-      if (rec) { title = rec.mainTitle || doi; citations = impact(rec).citationCount || 0; }
-    } catch (e) { /* keep doi as title */ }
-    const verdicts = [...new Set(vs.map((v) => v.verdict))];
-    return { doi, title, citations, verdicts, cito_np: vs[0]?.cito_np };
+    const rec = await fetchByDoi(doi);   // the original paper, as an OpenAIRE node
+    return {
+      doi,
+      verdicts: [...new Set(vs.map((v) => v.verdict))],
+      title: rec ? (rec.mainTitle || doi) : doi,
+      citations: rec ? (impact(rec).citationCount || 0) : 0,
+      oa: rec ? oaOf(rec) : "",
+      fos: rec ? cleanFos(subjectsOf(rec, "FOS")).slice(0, 2) : [],
+      sdg: rec ? subjectsOf(rec, "SDG").slice(0, 1) : [],
+      repo: vs[0]?.repo, repo_doi: vs[0]?.repo_doi,
+      cito_np: vs[0]?.cito_np, outcome_np: vs[0]?.outcome_np,
+      repl: undefined,   // the replication's OpenAIRE node, resolved lazily for field matches
+    };
   }));
 }
 
@@ -96,6 +117,14 @@ async function radar(topic) {
   const fieldVerified = VERIFIED.filter((v) => v.title.toLowerCase().split(/\W+/).some((w) => tset.has(w)));
   const inField = new Set(fieldVerified.map((v) => v.doi));
 
+  // resolve each field-matched replication as its OWN OpenAIRE node (Zenodo/RO)
+  await Promise.all(fieldVerified.map(async (v) => {
+    if (v.repo_doi && v.repl === undefined) {
+      const rec = await fetchByDoi(v.repo_doi);
+      v.repl = rec ? { title: rec.mainTitle || "", type: rec.type || "output", oa: oaOf(rec), url: urlOf(rec) || `https://doi.org/${v.repo_doi}`, doi: v.repo_doi } : null;
+    }
+  }));
+
   // chart = top targets + any field-relevant verified papers not already in the pool,
   // ranked by citation impact, coloured by status. Green appears iff the field has
   // checked work — so the chart and the sidebar can never contradict each other.
@@ -135,20 +164,38 @@ function renderVerified(inField) {
   const others = VERIFIED.filter((v) => !inField.has(v.doi)).sort((a, b) => b.citations - a.citations);
   el("vcount").textContent = field.length;
 
-  const row = (v, cls) => {
-    const partial = v.verdicts.some((x) => /partial/i.test(x));
-    return `<li class="${cls}">
-      <span class="vt">${esc(v.title).slice(0, 74)}</span>
-      <span class="vv ${partial ? "partial" : ""}">${v.verdicts.join(", ")}</span> · ${v.citations.toLocaleString()} cites
-      ${v.cito_np ? `· <a href="${v.cito_np}" target="_blank" rel="noopener">verdict nanopub →</a>` : ""}
+  const partialOf = (v) => v.verdicts.some((x) => /partial/i.test(x));
+
+  // rich card: the trust edge shown as TWO OpenAIRE nodes (original + replication)
+  const matchCard = (v) => {
+    const chips = [
+      v.oa ? `<span class="ochip oa">${esc(v.oa)} OA</span>` : "",
+      ...(v.fos || []).map((f) => `<span class="ochip">${esc(f).slice(0, 24)}</span>`),
+      ...(v.sdg || []).map((s) => `<span class="ochip sdg">${esc(s).slice(0, 22)}</span>`),
+      `<span class="ochip cites">${v.citations.toLocaleString()} cites</span>`,
+    ].join("");
+    const repl = v.repl
+      ? `<div class="vrepl">↳ replication is an OpenAIRE node: <a href="${v.repl.url}" target="_blank" rel="noopener">${esc(v.repl.title).slice(0, 44) || v.repl.doi}</a> <span class="ochip type">${esc(v.repl.type)}</span></div>`
+      : (v.repo_doi ? `<div class="vrepl muted">↳ replication deposit ${esc(v.repo_doi)}</div>` : "");
+    return `<li class="match">
+      <span class="nodelabel">original paper · OpenAIRE</span>
+      <span class="vt">${esc(v.title).slice(0, 82)}</span>
+      <div class="ochips">${chips}</div>
+      <div class="vline"><span class="vv ${partialOf(v) ? "partial" : ""}">${v.verdicts.join(", ")}</span> — independently checked by Science Live ${v.cito_np ? `· <a href="${v.cito_np}" target="_blank" rel="noopener">verdict chain →</a>` : ""}</div>
+      ${repl}
     </li>`;
   };
+  const row = (v) => `<li>
+      <span class="vt">${esc(v.title).slice(0, 70)}</span>
+      <span class="vv ${partialOf(v) ? "partial" : ""}">${v.verdicts.join(", ")}</span> · ${v.citations.toLocaleString()} cites
+      ${v.cito_np ? `· <a href="${v.cito_np}" target="_blank" rel="noopener">→</a>` : ""}
+    </li>`;
   const fieldHtml = field.length
-    ? `<ul class="vlist">${field.map((v) => row(v, "match")).join("")}</ul>`
+    ? `<ul class="vlist">${field.map(matchCard).join("")}</ul>`
     : `<p class="vnone">No Science Live verdict in this field yet — every paper on the left is an <b>open</b> replication opportunity.</p>`;
   const moreHtml = others.length
     ? `<details class="vmore"><summary>${others.length} more replications in the Science Live index (other fields)</summary>
-         <ul class="vlist">${others.map((v) => row(v, "")).join("")}</ul></details>`
+         <ul class="vlist">${others.map(row).join("")}</ul></details>`
     : "";
   el("verified").innerHTML = fieldHtml + moreHtml;
 }

@@ -1,20 +1,136 @@
 {
   "_meta": {
-    "source": "Science Live FORRT replication chains (nanopub verdicts), built by scripts/build_verdicts.py",
+    "source": "Science Live FORRT replication chains — mined by scripts/build_verdicts.py (format-agnostic, from nanopub TriG bodies)",
     "schema": "doi (lowercased) -> list of verifications {repo, verdict, cito[], outcome_np, cito_np}",
-    "note": "The 'already-checked' overlay of the Replication Radar. Verdicts are carried in CiTO/Outcome nanopubs; the OpenAIRE Graph cannot hold them."
+    "note": "The 'already-checked' overlay of the Replication Radar. Verdicts live in CiTO/Outcome nanopubs; the OpenAIRE Graph cannot hold them."
   },
   "verifications": {
+    "10.1111/gcb.16633": [
+      {
+        "repo": "bio-oracle",
+        "verdict": "Validated",
+        "cito": [
+          "obtainsSupportFrom"
+        ],
+        "repo_doi": null,
+        "outcome_np": "https://w3id.org/sciencelive/np/RA7f-x8JBwYZCid2GYcvFzkrGQWyJkVyDXa1pvMH2FgwM",
+        "cito_np": "https://w3id.org/sciencelive/np/RAtKboaVur5jc4_i0iSi4sk70v6ocJLAgdmN6MDxcnJtU"
+      }
+    ],
     "10.1016/j.ocemod.2024.102387": [
       {
         "repo": "coastal-rom-replication",
         "verdict": "Validated",
         "cito": [
           "cites",
-          "confirms"
+          "hasQuotedText",
+          "quotes"
         ],
+        "repo_doi": "10.5281/zenodo.20348366",
         "outcome_np": "https://w3id.org/sciencelive/np/RAG8PjhjvPQFZo54BTaV_b7TryMonH--aDGzEXLhzvQ4w",
-        "cito_np": "https://w3id.org/sciencelive/np/RAuvGPQk_nxEcBWzADcLnyfqgjJ9Hr2aSWxwof2sDAung"
+        "cito_np": "https://w3id.org/sciencelive/np/RA_tuuJYawQ_zY1L6R0puEuiDVSo7JoHNfYQ9ULXPERZk"
+      },
+      {
+        "repo": "european-coastal-biodiversity-replication",
+        "verdict": "Validated",
+        "cito": [
+          "cites",
+          "extends",
+          "qualifies"
+        ],
+        "repo_doi": "10.5281/zenodo.20473380",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAwrIP5nKIk8Qh7WeMs8z6HHVGssLVAkHDeI8nSB4LUK8",
+        "cito_np": "https://w3id.org/sciencelive/np/RAEXzZcCXiwsNf19NbXvilwwxnFU5IvkplzWTNiNmT70A"
+      }
+    ],
+    "10.1007/978-3-030-58583-9_8": [
+      {
+        "repo": "few-shot-eurosat-cross-domain",
+        "verdict": "PartiallySupported",
+        "cito": [
+          "cites",
+          "hasQuotedText",
+          "quotes"
+        ],
+        "repo_doi": "10.5281/zenodo.19643138",
+        "outcome_np": "https://w3id.org/sciencelive/np/RA7OZmOmun07jDm8q6lq7Ris1W0MU3rptcp3bphOWUJj8",
+        "cito_np": "https://w3id.org/sciencelive/np/RA-bVr4LQBaoZPSWEyLFLWdoC7BTcObJ6ykgtBSml5cp4"
+      },
+      {
+        "repo": "few-shot-eurosat-within-domain",
+        "verdict": "Mixed",
+        "cito": [
+          "cites",
+          "hasQuotedText",
+          "quotes"
+        ],
+        "repo_doi": "10.5281/zenodo.19607662",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAUS6GbT3Bu-Np0Ue73q58G_c2HilLhh95Y2b8W18o--M",
+        "cito_np": "https://w3id.org/sciencelive/np/RA7g02DAdAV4zUy1_u7_lD7GnTDPkbnpyUIsfGDmv-yyE"
+      }
+    ],
+    "10.3389/fmars.2025.1699781": [
+      {
+        "repo": "fiesta-decrop-reproduction",
+        "verdict": "Validated",
+        "cito": [
+          "cites",
+          "hasQuotedText",
+          "quotes"
+        ],
+        "repo_doi": "10.5281/zenodo.19709129",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAn_DYEINS9hSmULEWNd8JmdPOykzptJPJCSqiatNLBrA",
+        "cito_np": "https://w3id.org/sciencelive/np/RAm0R_xdfpZCX8jGhrMU8LQonht0X6qvfApCekmUCwvgQ"
+      },
+      {
+        "repo": "fiesta-scattering-bio",
+        "verdict": "Validated",
+        "cito": [
+          "cites",
+          "citesAsDataSource",
+          "extends",
+          "usesMethodIn"
+        ],
+        "repo_doi": "10.5281/zenodo.19701108",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAIqyPwP8PzMKSKCMKb04vzR1CpttIsAYqIRy6RkaBPZk",
+        "cito_np": "https://w3id.org/sciencelive/np/RA8BSfq4Cbs3A4chU6fvafk0px-yDZwsYKFIO9cnzkyx4"
+      }
+    ],
+    "10.1051/0004-6361/202244566": [
+      {
+        "repo": "fiesta-scattering-astro",
+        "verdict": "Validated",
+        "cito": [
+          "cites",
+          "confirms",
+          "usesMethodIn"
+        ],
+        "repo_doi": "10.5281/zenodo.19707889",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAmEYMywIv9uDQPHuvPcPLEONpl7Et4M9hikmvDrRdVG0",
+        "cito_np": "https://w3id.org/sciencelive/np/RAAKbihIlG-DgS_LBhWCGPGc8-fKHWvIM-ee03u7t9kqs"
+      },
+      {
+        "repo": "fiesta-scattering-sst",
+        "verdict": "Validated",
+        "cito": [
+          "cites",
+          "confirms",
+          "credits",
+          "usesMethodIn"
+        ],
+        "repo_doi": "10.5281/zenodo.19707888",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAK2ynlqgA3L_YVbEo-cVoXZ7T63q4eCFZqf9CPWWNc40",
+        "cito_np": "https://w3id.org/sciencelive/np/RAA6_hyyQvv4h0l4bFNt-9tEn2KRRIL4mVE0pRzt4W31k"
+      },
+      {
+        "repo": "fiesta-scattering-sst-healpix-geo",
+        "verdict": "Validated",
+        "cito": [
+          "obtainsSupportFrom"
+        ],
+        "repo_doi": "10.5281/zenodo.19707890",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAs--Uf0wMFAWeTv54c4P37QYNp70c8nxUY9M6HgOfg4c",
+        "cito_np": "https://w3id.org/sciencelive/np/RA0P2dPFtPiyzW7uHgmAf_nBcwnUtAEYYpDV1Wkko8dC4"
       }
     ],
     "10.1890/11-1952.1": [
@@ -26,7 +142,8 @@
           "extends",
           "usesMethodIn"
         ],
-        "outcome_np": "https://w3id.org/sciencelive/np/RAsPjEImfZaXsIri0ny4j_s_k_6wyOlC6tkocl6w2y7f4",
+        "repo_doi": "10.5281/zenodo.20451519",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAONIKJjrrndTWX_f7emVpeKFOrdDtKuaXD6lJk4z6fKI",
         "cito_np": "https://w3id.org/sciencelive/np/RACYbb_IxZNnBcxI7uPqc-df2oRaMr4bqHJTOJe-BNmkc"
       }
     ],
@@ -40,7 +157,8 @@
           "extends",
           "usesMethodIn"
         ],
-        "outcome_np": "https://w3id.org/sciencelive/np/RA4q2J-h_UpFpeLTeL_DS8p7j7EOBCes4L1G1eOBfJiDo",
+        "repo_doi": "10.5281/zenodo.20473377",
+        "outcome_np": null,
         "cito_np": "https://w3id.org/sciencelive/np/RA7151bPt5TSSTxi-sWGmZhUOHcqaSzevzhhD4QxmfURI"
       },
       {
@@ -51,6 +169,7 @@
           "confirms",
           "discusses"
         ],
+        "repo_doi": "10.5281/zenodo.20473156",
         "outcome_np": "https://w3id.org/sciencelive/np/RA_uV84IchQAkkmCP_6amQir_flgCmvvt97DWIDmbu_V0",
         "cito_np": "https://w3id.org/sciencelive/np/RAWsmCzWMKYQQK_ovRvE1o2wqjYkoxjfZRncHEcWAvv2g"
       }
@@ -63,8 +182,33 @@
           "cites",
           "qualifies"
         ],
+        "repo_doi": "10.5281/zenodo.20363556",
         "outcome_np": "https://w3id.org/sciencelive/np/RAzeZKbUCEMXZXDc-WzgHZ4K5mOMwotYhS2uCKDDmdcHI",
         "cito_np": "https://w3id.org/sciencelive/np/RALjFcvPtncy74ZL8QgSiEyRZv_-mOiZj4wvWuq8JK-2s"
+      }
+    ],
+    "10.1016/j.pocean.2015.12.014": [
+      {
+        "repo": "spherical-ml-biodiversity",
+        "verdict": "Validated",
+        "cito": [
+          "supports"
+        ],
+        "repo_doi": "10.5281/zenodo.20082933",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAoW3q1q1Wyt5DXbFl2PI3woyhuYZuU8HYtJ3m0LyrP9M",
+        "cito_np": "https://w3id.org/sciencelive/np/RA0TakYbwjs9vdc2AXyKxaCj54u5vr8zIrNhebEEskWRc"
+      }
+    ],
+    "10.48546/workflowhub.workflow.1382.1": [
+      {
+        "repo": "warming-stripes",
+        "verdict": "Published",
+        "cito": [
+          "obtainsSupportFrom"
+        ],
+        "repo_doi": null,
+        "outcome_np": null,
+        "cito_np": "https://w3id.org/sciencelive/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE"
       }
     ],
     "10.1126/science.1184695": [
@@ -72,43 +216,45 @@
         "repo": "weatherxbiodiversity-lizards",
         "verdict": "PartiallySupported",
         "cito": [
-          "cites",
-          "extends"
+          "obtainsSupportFrom"
         ],
+        "repo_doi": "10.5281/zenodo.20266646",
         "outcome_np": "https://w3id.org/sciencelive/np/RAPw01nGqrY3V9ech7nd3gUOyoW52N6SspeKTa41neLBo",
-        "cito_np": "https://w3id.org/sciencelive/np/RAIdXhqT3oPF-7XlRYeN2oAAYJwXN9auLGR57iw8ipWl0"
+        "cito_np": "https://w3id.org/sciencelive/np/RA7jFaB3akXJH9XhcYkIKL-6svSehDYO-s0VhiNkeFKXQ"
       }
     ],
     "10.1126/science.aax8591": [
-      {
-        "repo": "weatherxbiodiversity-projection-nside128",
-        "verdict": "Validated",
-        "cito": [
-          "cites",
-          "confirms"
-        ],
-        "outcome_np": "https://w3id.org/sciencelive/np/RAa4QR41Hot9zxujcrCyTo82Ij7oaw_6z8zk8NxDqoJFM",
-        "cito_np": "https://w3id.org/sciencelive/np/RAhw9m0BEj0-9hXrTtJ2NHG5rMr-ZBf_mdBQTQRk6u3n4"
-      },
       {
         "repo": "weatherxbiodiversity-projection",
         "verdict": "Validated",
         "cito": [
           "cites",
-          "confirms"
+          "hasQuotedText",
+          "quotes"
         ],
+        "repo_doi": "10.5281/zenodo.20113778",
         "outcome_np": "https://w3id.org/sciencelive/np/RAPZMgcYbScSAXnrnSySQwZzgSA_rn-xodlMxNlwwQYY8",
-        "cito_np": "https://w3id.org/sciencelive/np/RALbHA-r6wIFOFPFlfIpwYqJEpzCFqeJ082iChgdfvhNM"
+        "cito_np": "https://w3id.org/sciencelive/np/RAErLL_QSe3e0pKBxHkUHH5v49F66fFVuS2OmYMJz02OY"
+      },
+      {
+        "repo": "weatherxbiodiversity-projection-nside128",
+        "verdict": "Validated",
+        "cito": [
+          "supports"
+        ],
+        "repo_doi": "10.5281/zenodo.20113781",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAa4QR41Hot9zxujcrCyTo82Ij7oaw_6z8zk8NxDqoJFM",
+        "cito_np": "https://w3id.org/sciencelive/np/RA-GY814xxcpEsUWozEJKHGG39bDV8gkbor7OhX8QpVPE"
       },
       {
         "repo": "weatherxbiodiversity-substrate-sensitivity",
-        "verdict": "Validated",
+        "verdict": "PartiallySupported",
         "cito": [
-          "cites",
-          "confirms"
+          "supports"
         ],
-        "outcome_np": "https://w3id.org/sciencelive/np/RAPZMgcYbScSAXnrnSySQwZzgSA_rn-xodlMxNlwwQYY8",
-        "cito_np": "https://w3id.org/sciencelive/np/RALbHA-r6wIFOFPFlfIpwYqJEpzCFqeJ082iChgdfvhNM"
+        "repo_doi": "10.5281/zenodo.20113787",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAD19jydIHgfVpRQiA8mqvVUefOd7FFwA4tLIfkXmOJmc",
+        "cito_np": "https://w3id.org/sciencelive/np/RA-GY814xxcpEsUWozEJKHGG39bDV8gkbor7OhX8QpVPE"
       }
     ],
     "10.1038/s41597-022-01235-3": [
@@ -117,36 +263,28 @@
         "verdict": "PartiallySupported",
         "cito": [
           "cites",
-          "qualifies"
+          "hasQuotedText",
+          "quotes"
         ],
+        "repo_doi": "10.5281/zenodo.20585042",
         "outcome_np": "https://w3id.org/sciencelive/np/RAlwDA35wFcmV-ZYzOUB_E3SrqPMIlIxWftoiPFbzN-7I",
-        "cito_np": "https://w3id.org/sciencelive/np/RA6JMK2CNN8MZITLdd3si08TwyR_-3fvbt6l6g3lf-YOg"
-      },
+        "cito_np": "https://w3id.org/sciencelive/np/RA2cJsrUTgyVf2aGH4OzB2STJnHOgMqiuqntHXiJ_ZXDM"
+      }
+    ],
+    "10.24431/rw1k6c3": [
       {
         "repo": "white-shark-geolocation-replication",
         "verdict": "PartiallySupported",
         "cito": [
-          "cites",
-          "qualifies"
+          "obtainsSupportFrom"
         ],
+        "repo_doi": "10.5281/zenodo.20569075",
         "outcome_np": "https://w3id.org/sciencelive/np/RAv0cF0rwxb1CFmUAJlk5B7PLVc9pls5OvlfOHHHhtgm8",
-        "cito_np": "https://w3id.org/sciencelive/np/RAnqtFUZHfmW7Dtmf3bcTQtjDAfrq5IGV4xQ8guW8L3vY"
+        "cito_np": "https://w3id.org/sciencelive/np/RAR5_Hyzw4BfWPOaqjX6pK3PKviPW92aTSq8uqNtZdXf8"
       }
     ]
   },
   "no_doi": [
-    {
-      "repo": "european-coastal-biodiversity-replication",
-      "verdict": "Validated",
-      "cito": [
-        "cites",
-        "extends",
-        "qualifies"
-      ],
-      "outcome_np": "https://w3id.org/sciencelive/np/RAwrIP5nKIk8Qh7WeMs8z6HHVGssLVAkHDeI8nSB4LUK8",
-      "cito_np": "https://w3id.org/sciencelive/np/RAEXzZcCXiwsNf19NbXvilwwxnFU5IvkplzWTNiNmT70A",
-      "note": "Mode-B / paperless or DOI not found in Quote"
-    },
     {
       "repo": "forrt-replication-zarr-consistency",
       "verdict": "Validated",
@@ -155,9 +293,54 @@
         "confirms",
         "usesMethodIn"
       ],
+      "repo_doi": null,
       "outcome_np": "https://w3id.org/sciencelive/np/RATn8QuiQng-s2Y4B8tYjLK1BDpRGzo3sXOZ2qXlgC1Sg",
       "cito_np": "https://w3id.org/sciencelive/np/RAd1DCWbDGeborhHyJqvpZ9cJQ8p2xAmR5LYbr-ArncmU",
-      "note": "Mode-B / paperless or DOI not found in Quote"
+      "note": "Mode-B / paperless or no literature anchor in chain"
+    },
+    {
+      "repo": "geo-nanopub",
+      "verdict": "Published",
+      "cito": [
+        "hasQuotedText",
+        "hasQuotedTextEnd",
+        "quotes"
+      ],
+      "repo_doi": null,
+      "outcome_np": null,
+      "cito_np": "https://w3id.org/sciencelive/np/RA22xv0H-LaNAF60g8oC-O22_a24gLfAgIqtkkfaXr9-I",
+      "note": "Mode-B / paperless or no literature anchor in chain"
+    },
+    {
+      "repo": "loom2nanopub",
+      "verdict": "Inconclusive",
+      "cito": [],
+      "repo_doi": null,
+      "outcome_np": "https://w3id.org/sciencelive/np/RAw3XdUhxQJfKBaU-cQhV6c7au4rLd5CSUdbMKTS_FB8g",
+      "cito_np": null,
+      "note": "Mode-B / paperless or no literature anchor in chain"
+    },
+    {
+      "repo": "templates4sciencelive",
+      "verdict": "Published",
+      "cito": [
+        "obtainsSupportFrom"
+      ],
+      "repo_doi": null,
+      "outcome_np": null,
+      "cito_np": "https://w3id.org/sciencelive/np/RA4fmfVFULMP50FqDFX8fEMn66uDF07vXKFXh_L9aoQKE",
+      "note": "Mode-B / paperless or no literature anchor in chain"
+    },
+    {
+      "repo": "zkp-environmental-compliance",
+      "verdict": "Validated",
+      "cito": [
+        "obtainsSupportFrom"
+      ],
+      "repo_doi": null,
+      "outcome_np": "https://w3id.org/sciencelive/np/RA2umDr4wFHRCk343H1FmxYsx2ijsZZ8tYtcfrWKdn7xI",
+      "cito_np": "https://w3id.org/sciencelive/np/RAaP8oA9UUXgvkk2NXIbFwacWPdtpUc1rxFE6fWFlZf7w",
+      "note": "Mode-B / paperless or no literature anchor in chain"
     }
   ]
 }

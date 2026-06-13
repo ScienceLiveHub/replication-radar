@@ -58,7 +58,18 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .vv{color:var(--green);font-weight:700;font-size:12px}
 .vv.partial{color:#b5820a}
 #verified a{font-size:12px}
-.vlist li.match{background:var(--green-soft);margin:0 -8px 8px;padding:11px 12px;border-radius:8px;border:0}
+.vlist li.match{background:var(--green-soft);margin:0 -8px 10px;padding:12px 13px;border-radius:8px;border:0}
+.nodelabel{display:block;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--green);margin-bottom:3px}
+.ochips{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0}
+.ochip{font-size:11px;background:#e7edf6;color:var(--navy2);border-radius:5px;padding:1px 7px;white-space:nowrap}
+.ochip.oa{background:#d3ecdf;color:var(--green);text-transform:capitalize}
+.ochip.sdg{background:#fff1d3;color:#8a6d1b}
+.ochip.type{background:var(--navy);color:#fff;text-transform:capitalize}
+.ochip.cites{background:transparent;color:var(--mut);padding-left:0}
+.vline{font-size:12.5px;color:var(--mut);margin-top:5px}
+.vrepl{font-size:12.5px;margin-top:8px;padding-top:8px;border-top:1px dashed #bfe3d2;color:var(--ink)}
+.vrepl.muted{color:var(--mut);border-top-color:var(--line)}
+.vrepl a{font-weight:600}
 .vnone{color:#9c0356;background:var(--magenta-soft);padding:12px 14px;border-radius:8px;font-size:13.5px}
 .vmore{margin-top:12px}
 .vmore summary{cursor:pointer;color:var(--mut);font-size:12.5px;padding:7px 0;list-style-position:inside}
