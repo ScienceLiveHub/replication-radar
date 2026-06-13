@@ -140,7 +140,7 @@ function dedup(list) {
 
 async function radar(topic) {
   let pubs = dedup(await search(topic, "publication", 30));
-  const terms = topic.split(/\s+/).filter((t) => t.length > 3);
+  const terms = topic.toLowerCase().split(/\W+/).filter((t) => t.length > 3);
   if (pubs.length < 5 && terms.length > 1) {
     const longest = terms.sort((a, b) => b.length - a.length)[0];
     pubs = dedup(pubs.concat(await search(longest, "publication", 30)));
@@ -166,9 +166,17 @@ async function radar(topic) {
   });
   targets.sort((a, b) => (a.status === "OPEN" ? 0 : 1) - (b.status === "OPEN" ? 0 : 1) || (b.readiness || 0) - (a.readiness || 0));
 
-  // verified-in-field: token overlap with the topic (mirrors the Python guarantee)
-  const tset = new Set(terms.map((t) => t.toLowerCase()));
-  const fieldVerified = VERIFIED.filter((v) => v.title.toLowerCase().split(/\W+/).some((w) => tset.has(w)));
+  // verified-in-field: keep only the BEST-matching tier, so a single generic word
+  // (e.g. "climate") can't pull in unrelated papers. A paper is in-field only if it
+  // matches as many query terms as the strongest match does.
+  const scored = VERIFIED
+    .map((v) => {
+      const tw = new Set(v.title.toLowerCase().split(/\W+/));
+      return { v, n: terms.filter((t) => tw.has(t)).length };
+    })
+    .filter((x) => x.n > 0);
+  const maxN = scored.reduce((m, x) => Math.max(m, x.n), 0);
+  const fieldVerified = scored.filter((x) => x.n === maxN).map((x) => x.v);
   const inField = new Set(fieldVerified.map((v) => v.doi));
 
   // resolve each field-matched replication as its OWN OpenAIRE node (Zenodo/RO)
