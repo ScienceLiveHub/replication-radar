@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Replication Radar — what to replicate next, from the OpenAIRE Graph</title>
+  <meta name="description" content="A live tool that turns the OpenAIRE Graph into a ranked replication queue: impact-ranked targets, independent reusable tooling, and whether a claim has already been checked." />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Replication&nbsp;Radar</h1>
+      <p class="tag">What's worth replicating next — read straight off the OpenAIRE&nbsp;Graph.</p>
+      <p class="sub">Science Live × OpenAIRE · impact-ranked targets · independent tooling · already-checked overlay</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="search">
+      <input id="topic" type="text" placeholder="a research field — e.g. species distribution" autocomplete="off" />
+      <button id="go">Scan</button>
+      <div class="chips" id="chips"></div>
+    </section>
+
+    <p id="status" class="status"></p>
+
+    <section id="results" hidden>
+      <div class="grid">
+        <div class="card chartcard">
+          <h2>The replication-gap map</h2>
+          <p class="hint">Each point is a high-impact paper. <b class="open">Pink = open</b> (worth replicating), <b class="verified">green = already checked</b> by Science Live. Up-and-right = impactful <em>and</em> feasible.</p>
+          <canvas id="gap"></canvas>
+        </div>
+        <aside class="card verifiedcard">
+          <h2>Already checked <span id="vcount" class="pill"></span></h2>
+          <p class="hint">The reliability signal the Graph can't hold — independent replications and how they held.</p>
+          <ul id="verified"></ul>
+        </aside>
+      </div>
+
+      <div class="card">
+        <h2>Replication targets <span class="pill" id="tcount"></span></h2>
+        <p class="hint">Ranked by <b>readiness</b> = impact × independent tooling × reference data. OPEN = an opportunity; VERIFIED = already done (with the verdict).</p>
+        <div id="targets" class="targets"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>Live against <a href="https://graph.openaire.eu/">OpenAIRE Graph</a> · verdicts from <a href="https://sciencelive4all.org">Science Live</a> nanopublications</span>
+      <span><a href="https://github.com/ScienceLiveHub/replication-radar">code (MIT)</a> · <a href="https://pypi.org/project/replication-radar/">PyPI</a> · <a href="https://github.com/ScienceLiveHub/replication-radar/blob/main/STORY.md">story (CC-BY)</a></span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

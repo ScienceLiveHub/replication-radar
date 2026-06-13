@@ -1,0 +1,11 @@
+# Netlify deploy config — the Replication Radar web app is pure static files
+# (no build step). It calls the OpenAIRE Graph API directly from the browser
+# (CORS-enabled) and ships the verdict index as a static asset.
+[build]
+  publish = "site"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
