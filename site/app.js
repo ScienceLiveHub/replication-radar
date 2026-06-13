@@ -64,6 +64,18 @@ const urlOf = (rec) => (rec.instances && rec.instances[0] && rec.instances[0].ur
 // ever run on a software record we ACTUALLY have a repo URL for — never guessed.
 const parseGitHub = (url) => { const m = (url || "").match(/github\.com\/([^\/]+)\/([^\/#?]+)/i); return m ? { owner: m[1], repo: m[2].replace(/\.git$/, "") } : null; };
 
+// OpenAIRE often lacks the GitHub URL for a Zenodo deposit; Zenodo's own record
+// always carries the source repo (related_identifiers) for GitHub-published software.
+async function githubFromZenodo(doi) {
+  const m = (doi || "").match(/zenodo\.(\d+)/i);
+  if (!m) return null;
+  try {
+    const d = await (await fetch(`https://zenodo.org/api/records/${m[1]}`)).json();
+    const rel = (d.metadata || {}).related_identifiers || [];
+    return rel.map((r) => r.identifier).find((u) => (u || "").includes("github.com")) || null;
+  } catch (e) { return null; }
+}
+
 async function assessSoftware(url) {
   const g = parseGitHub(url);
   if (!g) return null;
@@ -213,7 +225,8 @@ async function radar(topic) {
     if (v.repo_doi && v.repl === undefined) {
       const rec = await fetchByDoi(v.repo_doi);
       if (rec) {
-        const code = rec.codeRepositoryUrl || urlOf(rec) || "";
+        let code = rec.codeRepositoryUrl || urlOf(rec) || "";
+        if (!parseGitHub(code)) code = (await githubFromZenodo(v.repo_doi)) || code;  // Zenodo fallback for the repo URL
         v.repl = { title: rec.mainTitle || "", type: rec.type || "output", oa: oaOf(rec), url: urlOf(rec) || `https://doi.org/${v.repo_doi}`, doi: v.repo_doi, code };
         v.repl.fair = await assessSoftware(code);   // FAIR + usage, only if it resolves to a GitHub repo
       } else {
