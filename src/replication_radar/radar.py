@@ -13,6 +13,43 @@ from __future__ import annotations
 
 from . import openaire, verdicts
 
+# impact class -> 0..1 (C1 best). Used in the readiness score.
+_CLASS_SCORE = {"C1": 1.0, "C2": 0.8, "C3": 0.6, "C4": 0.4, "C5": 0.2, None: 0.2}
+
+
+def _impact_score(p) -> float:
+    return max(_CLASS_SCORE.get(p.influence_class, 0.2), _CLASS_SCORE.get(p.citation_class, 0.2))
+
+
+def _readiness(impact: float, has_independent_tool: bool, has_data: bool) -> float:
+    """Transparent 0..1 'replication-readiness' for an OPEN target:
+    how impactful (so worth checking) AND feasible (independent tooling + data exist).
+        0.5 * impact  +  0.3 * independent-tooling  +  0.2 * reference-data
+    """
+    return round(0.5 * impact + 0.3 * bool(has_independent_tool) + 0.2 * bool(has_data), 2)
+
+
+def _dedup_by_doi(products: list) -> list:
+    seen, out = set(), []
+    for p in products:
+        key = p.doi or p.title.lower()
+        if key not in seen:
+            seen.add(key)
+            out.append(p)
+    return out
+
+
+def _publication_pool(topic: str, size: int) -> list:
+    """Robust pool: OpenAIRE free-text terms are AND-ed, so a long topic can return
+    little. Query the full topic and (if thin) the most distinctive single term,
+    then union and de-duplicate by DOI."""
+    pool = openaire.search_products(topic, "publication", size=size)
+    terms = [t for t in topic.split() if len(t) > 3]
+    if len(pool) < 5 and len(terms) > 1:
+        longest = max(terms, key=len)
+        pool += openaire.search_products(longest, "publication", size=size)
+    return _dedup_by_doi(pool)
+
 
 def _independence(target_authors: list[str], cand_authors: list[str]) -> bool:
     """A candidate tool is INDEPENDENT of the target paper if no author surname is
@@ -79,11 +116,12 @@ def radar(topic: str, limit: int = 8, pool: int = 30) -> dict:
     Each target is flagged open vs already-verified (Science Live overlay) and, for
     open high-impact targets, whether independent tooling exists in the field.
     """
-    papers = openaire.search_products(topic, "publication", size=pool)
+    papers = _publication_pool(topic, size=pool)
     papers.sort(key=lambda p: p.impact_rank)
 
-    # one software pull for the field; independence is computed per target
+    # one software pull + one dataset pull for the field; reused across targets
     sw_pool = openaire.search_products(topic, "software", size=25)
+    has_data = len(openaire.search_products(topic, "dataset", size=5)) > 0
 
     targets = []
     for p in papers[:limit]:
@@ -92,6 +130,7 @@ def radar(topic: str, limit: int = 8, pool: int = 30) -> dict:
             s for s in sw_pool if _independence(p.authors, s.authors) and s.reuse_score >= 2
         ]
         indep_tools.sort(key=lambda s: -s.reuse_score)
+        open_target = not st["replicated"]
         targets.append(
             {
                 "title": p.title,
@@ -103,7 +142,9 @@ def radar(topic: str, limit: int = 8, pool: int = 30) -> dict:
                     "influenceClass": p.influence_class,
                     "popularityClass": p.popularity_class,
                 },
-                "status": "VERIFIED" if st["replicated"] else "OPEN",
+                "status": "OPEN" if open_target else "VERIFIED",
+                # replication-readiness only meaningful for OPEN targets (VERIFIED = already done)
+                "readiness": _readiness(_impact_score(p), bool(indep_tools), has_data) if open_target else None,
                 "verification": st["summary"],
                 "verifications": st["verifications"],
                 "independent_tooling": [
@@ -112,6 +153,8 @@ def radar(topic: str, limit: int = 8, pool: int = 30) -> dict:
                 ],
             }
         )
+    # rank OPEN targets by readiness (most replicable first); VERIFIED sink below
+    targets.sort(key=lambda t: (t["status"] != "OPEN", -(t["readiness"] or 0)))
 
     # Guarantee the verified-overlay shows: don't rely on keyword retrieval to
     # surface already-checked papers. Pull the verdict index directly and include
