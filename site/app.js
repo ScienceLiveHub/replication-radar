@@ -34,6 +34,33 @@ const reuse = (r) => {
 };
 const classScore = (r) => Math.max(CLASS_SCORE[impact(r).influenceClass] || 0.2, CLASS_SCORE[impact(r).citationClass] || 0.2);
 const independent = (target, cand) => cand.length === 0 || !cand.some((a) => target.includes(a));
+const yearOf = (r) => { const m = /^(\d{4})/.exec(r.publicationDate || ""); return m ? +m[1] : null; };
+const momentumScore = (r) => CLASS_SCORE[impact(r).impulseClass] || 0.2;   // BIP! impulse = early citation momentum
+// Per-paper MATERIALS signal — grounded, with an explicit "unknown" (null) state.
+// OpenAIRE's absence of a link is NOT real absence (the WiSDM rule): we only return
+// present (a real repo / RO-Crate ON THIS record) or null (unknown — needs resolving).
+const REPO_RE = /(github\.com|gitlab\.com|bitbucket\.org)/i;
+const codeUrlOf = (r) => {
+  if (r.codeRepositoryUrl && REPO_RE.test(r.codeRepositoryUrl)) return r.codeRepositoryUrl;
+  for (const i of r.instances || []) for (const u of i.urls || []) if (REPO_RE.test(u || "")) return u;
+  return null;
+};
+const isROCrate = (r) => /research object/i.test(r.type || "") || (r.instances || []).some((i) => /research object/i.test(i.type || ""));
+// -> {score: 0..1 | null, state: 'rocrate' | 'code' | 'unknown', code}
+const materialsOf = (r) => {
+  if (isROCrate(r)) return { score: 1.0, state: "rocrate", code: codeUrlOf(r) };
+  const code = codeUrlOf(r);
+  if (code) return { score: 0.6, state: "code", code };
+  return { score: null, state: "unknown", code: null };           // unknown != absent
+};
+// Transparent composite: materials is the largest term; when materials is UNKNOWN
+// (null) we DROP that term and renormalise the rest — never score a missing link as 0.
+const readinessFrom = (matScore, impactScore, momentum) => {
+  const r = matScore == null
+    ? (0.35 * impactScore + 0.20 * momentum) / 0.55
+    : (0.45 * matScore + 0.35 * impactScore + 0.20 * momentum);
+  return Math.round(r * 100) / 100;
+};
 
 async function search(topic, type, size) {
   const u = `${API}/researchProducts?search=${encodeURIComponent(topic)}&type=${type}&pageSize=${size}`;
@@ -167,6 +194,8 @@ async function loadVerdicts() {
       citations: rec ? (impact(rec).citationCount || 0) : 0,
       cls: rec ? impact(rec).citationClass : null,
       infl: rec ? impact(rec).influenceClass : null,
+      impl: rec ? impact(rec).impulseClass : null,
+      year: rec ? yearOf(rec) : null,
       oa: rec ? oaOf(rec) : "",
       fos: rec ? cleanFos(subjectsOf(rec, "FOS")).slice(0, 2) : [],
       sdg: rec ? subjectsOf(rec, "SDG").slice(0, 1) : [],
@@ -203,17 +232,19 @@ async function radar(topic) {
   const rank = (r) => [CLASS_SCORE[impact(r).influenceClass] || .2, CLASS_SCORE[impact(r).citationClass] || .2, (impact(r).citationCount || 0)];
   pubs.sort((a, b) => { const A = rank(a), B = rank(b); return (B[0] - A[0]) || (B[1] - A[1]) || (B[2] - A[2]); });
 
-  const sw = await search(topic, "software", 25);
-  const hasData = (await search(topic, "dataset", 5)).length > 0;
+  const sw = await search(topic, "software", 25);   // field-level reusable tooling (shown once, below)
 
   const targets = pubs.slice(0, 50).map((p) => {
-    const doi = doiOf(p), auth = surnames(p);
+    const doi = doiOf(p);
     const verified = doi && VERDICTS[doi];
-    const tools = sw.filter((s) => independent(auth, surnames(s)) && reuse(s) >= 2).sort((a, b) => reuse(b) - reuse(a));
-    const readiness = Math.round((0.5 * classScore(p) + 0.3 * (tools.length > 0) + 0.2 * hasData) * 100) / 100;  // replicability potential, computed for ALL (incl. verified)
+    const mat = materialsOf(p);                       // per-paper, grounded (unknown != absent)
+    const impactScore = classScore(p), momentum = momentumScore(p);
+    const readiness = readinessFrom(mat.score, impactScore, momentum);   // computed for ALL (incl. verified)
     return {
       title: p.mainTitle || "", doi, citations: impact(p).citationCount || 0,
       cls: impact(p).citationClass, infl: impact(p).influenceClass,
+      year: yearOf(p), impl: impact(p).impulseClass || null,
+      mat, parts: { mat: mat.score, impact: impactScore, momentum },
       status: verified ? "VERIFIED" : "OPEN", readiness,
       verification: verified ? [...new Set(VERDICTS[doi].map((v) => v.verdict))].join(", ") : null,
       outcome_np: verified ? ((VERDICTS[doi].find((v) => v.outcome_np) || {}).outcome_np || null) : null,
@@ -275,10 +306,15 @@ async function radar(topic) {
   for (const v of fieldVerified) {
     if (!v.doi || have.has(v.doi)) continue;
     const cs = Math.max(CLASS_SCORE[v.infl] || 0.2, CLASS_SCORE[v.cls] || 0.2);
+    const momentum = CLASS_SCORE[v.impl] || 0.2;
+    const matScore = (v.repl && v.repl.code) ? 1.0 : (v.repo_doi ? 0.8 : null);   // its replication deposit
     targets.push({
       title: v.title, doi: v.doi, citations: v.citations, cls: v.cls, infl: v.infl,
+      year: v.year || null, impl: v.impl || null,
+      mat: { score: matScore, state: matScore == null ? "unknown" : "code", code: (v.repl && v.repl.code) || null },
+      parts: { mat: matScore, impact: cs, momentum },
       status: "VERIFIED",
-      readiness: Math.round((0.5 * cs + 0.3 * (tooling.length > 0) + 0.2 * hasData) * 100) / 100,
+      readiness: readinessFrom(matScore, cs, momentum),
       verification: [...new Set(v.verdicts)].join(", "),
       outcome_np: v.outcome_np,
     });
@@ -296,16 +332,28 @@ const PER_PAGE = 10;
 let _targets = [], _tpage = 0;
 
 function targetRow(t) {
-  const score = `<div class="score"><span>${t.readiness != null ? t.readiness.toFixed(2) : "—"}</span><small>REPLIC.</small></div>`;
+  const p = t.parts || {};
+  const scoreTitle = `replicability = 0.45·materials + 0.35·impact + 0.20·momentum  —  `
+    + `materials ${p.mat == null ? "unverified" : p.mat.toFixed(2)} · impact ${(p.impact || 0).toFixed(2)} · momentum ${(p.momentum || 0).toFixed(2)}`;
+  const unv = t.mat && t.mat.score == null ? `<small class="unv">mat ?</small>` : "";
+  const score = `<div class="score" title="${esc(scoreTitle)}"><span>${t.readiness != null ? t.readiness.toFixed(2) : "—"}</span><small>REPLIC.</small>${unv}</div>`;
   const badge = t.status === "VERIFIED"
     ? `<span class="badge verified">VERIFIED</span><span class="badge cls">${t.verification}</span>`
     : `<span class="badge open">OPEN</span>${t.cls ? `<span class="badge cls" title="OpenAIRE BIP! impact class — C1 = top 0.01% most-cited globally, C5 = the rest">${t.cls}</span>` : ""}`;
+  const matMeta = !t.mat ? ""
+    : t.mat.state === "rocrate" ? `<span class="badge mok" title="RO-Crate research object — code + data + provenance bundled">RO-Crate ✓</span>`
+    : t.mat.state === "code" ? `<span class="badge mok" title="code repository linked to this paper">code ✓</span>`
+    : `<span class="badge munk" title="OpenAIRE holds no code/data link for this paper — unknown, NOT absent (needs checking)">materials ?</span>`;
+  const meta = `<div class="t-meta">`
+    + (t.year ? `<span class="badge yr">${t.year}</span>` : "")
+    + (t.impl ? `<span class="badge imp" title="OpenAIRE BIP! impulse class — early citation momentum (C1 highest)">impulse ${t.impl}</span>` : "")
+    + matMeta + `</div>`;
   const link = t.doi ? `<a href="https://doi.org/${t.doi}" target="_blank" rel="noopener">${t.doi}</a>` : "";
   const verdictLink = (t.status === "VERIFIED" && t.outcome_np)
     ? `<div class="tverdict">independently checked by Science Live · <a href="${t.outcome_np}" target="_blank" rel="noopener">replication outcome →</a></div>` : "";
   return `<div class="target ${t.status === "VERIFIED" ? "verified" : ""}">
     ${score}
-    <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${verdictLink}</div>
+    <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${meta}${verdictLink}</div>
     <div class="t-right">${t.citations.toLocaleString()} cites<br>${link}</div>
   </div>`;
 }
