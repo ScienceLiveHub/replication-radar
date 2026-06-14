@@ -79,6 +79,11 @@ readiness = 0.45 * materials      // per-paper (2a); null→excluded & flagged, 
 - **P1 · Status taxonomy (live):** compute & group by status; surface ⭐ Replication-ready.
 - **P2 · Curated demo enrichment (baked-to-static):** for the demo set resolve materials fully (repo
   from paper, FAIR, RO-Crate, citation-network "missing edge", transfer-headroom). See `app-ui.md` §8.
+  **▶ STARTED 2026-06-14** (`site/curated.json` + `app.js`): paper-resolved materials baked as just
+  the repo link (grounded, from the paper's Data/Code statement); app overrides materials, injects the
+  paper so it appears for its topic, and computes **FAIR live** via existing `assessSoftware()`.
+  **WiSDM lit**: `code ✓` + resolved-from-paper provenance + FAIR 3/5, readiness 0.4→0.49.
+  TODO: add Soroye/Bombus + a HEALPix-transfer entry; then the "missing edge" graph + transfer-headroom.
 - **P3 · Close the loop:** "Start a replication" → `forrt-replication-template` (scoped) → publish
   chain → re-search shows the paper flip to ✅ Validated.
 
