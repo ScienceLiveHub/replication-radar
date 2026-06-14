@@ -1,0 +1,12 @@
+{
+  "_comment": "Paper-resolved materials that OpenAIRE does NOT hold as links (verified: search records + relationship layer carry only paper->paper cites for these). Each repo URL is taken from the paper's own Data/Code Availability statement (grounded, not guessed). FAIR is computed LIVE by the app's assessSoftware() against the repo; we only store the resolved link here. This is the P2 'bake-to-static' bridge.",
+  "resolved": {
+    "10.3389/fevo.2024.1148895": {
+      "state": "code",
+      "code": "https://github.com/trias-project/risk-modelling-and-mapping",
+      "lang": "R",
+      "data": ["GBIF", "CHELSA", "EURO-CORDEX", "CORINE"],
+      "source": "the paper's Data & Code Availability statement"
+    }
+  }
+}

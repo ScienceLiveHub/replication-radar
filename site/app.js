@@ -8,6 +8,7 @@ const EXAMPLES = ["species distribution", "marine heatwave", "bumble bee climate
 
 let VERDICTS = {};      // doi -> [verifications]
 let VERIFIED = [];      // enriched: {doi, title, citations, verifications}
+let CURATED = {};       // doi -> paper-resolved materials (the links OpenAIRE lacks; from the paper)
 let chart = null;
 
 // ---------- OpenAIRE helpers (same shape as openaire.py) ----------
@@ -206,6 +207,23 @@ async function loadVerdicts() {
   }));
 }
 
+// ---------- curated paper-resolved materials (the links OpenAIRE doesn't hold) ----------
+// curated.json carries only the repo/RO-Crate link, taken from each paper's Data/Code
+// statement (grounded). FAIR is still computed LIVE by assessSoftware() against the repo.
+async function loadCurated() {
+  try { CURATED = (await (await fetch("curated.json")).json()).resolved || {}; }
+  catch (e) { CURATED = {}; return; }
+  // enrich each with its OpenAIRE node (title / impact / year) so it can be injected + ranked
+  await Promise.all(Object.entries(CURATED).map(async ([doi, c]) => {
+    const rec = await fetchByDoi(doi);
+    if (rec) {
+      c.title = rec.mainTitle || doi; c.citations = impact(rec).citationCount || 0;
+      c.cls = impact(rec).citationClass; c.infl = impact(rec).influenceClass;
+      c.impl = impact(rec).impulseClass; c.year = yearOf(rec);
+    } else { c.title = c.title || doi; }
+  }));
+}
+
 // ---------- the radar ----------
 // OpenAIRE returns peer-review reports, comments, errata etc. as "publications" —
 // not replication targets. Drop them, and collapse versions/duplicates by title.
@@ -237,7 +255,9 @@ async function radar(topic) {
   const targets = pubs.slice(0, 50).map((p) => {
     const doi = doiOf(p);
     const verified = doi && VERDICTS[doi];
-    const mat = materialsOf(p);                       // per-paper, grounded (unknown != absent)
+    let mat = materialsOf(p);                          // per-paper, grounded (unknown != absent)
+    const cur = doi && CURATED[doi];                   // paper-resolved materials override (P2)
+    if (cur) mat = { score: cur.state === "rocrate" ? 1.0 : 0.6, state: cur.state, code: cur.code || null, resolved: true, data: cur.data || [], source: cur.source || "the paper", lang: cur.lang };
     const impactScore = classScore(p), momentum = momentumScore(p);
     const readiness = readinessFrom(mat.score, impactScore, momentum);   // computed for ALL (incl. verified)
     return {
@@ -319,7 +339,32 @@ async function radar(topic) {
       outcome_np: v.outcome_np,
     });
   }
+  // Inject curated, paper-resolved candidates that match the field but OpenAIRE search missed,
+  // so the fully-resolved (materials-verified) papers always appear for their topic.
+  for (const [doi, c] of Object.entries(CURATED)) {
+    if (targets.some((t) => t.doi === doi)) continue;
+    const tw = new Set((c.title || "").toLowerCase().split(/\W+/));
+    if (!terms.some((t) => tw.has(t))) continue;       // only when it matches the search
+    const impactScore = Math.max(CLASS_SCORE[c.infl] || 0.2, CLASS_SCORE[c.cls] || 0.2);
+    const momentum = CLASS_SCORE[c.impl] || 0.2;
+    const matScore = c.state === "rocrate" ? 1.0 : 0.6;
+    targets.push({
+      title: c.title, doi, citations: c.citations || 0, cls: c.cls, infl: c.infl,
+      year: c.year || null, impl: c.impl || null,
+      mat: { score: matScore, state: c.state, code: c.code || null, resolved: true, data: c.data || [], source: c.source || "the paper", lang: c.lang },
+      parts: { mat: matScore, impact: impactScore, momentum },
+      status: VERDICTS[doi] ? "VERIFIED" : "OPEN",
+      readiness: readinessFrom(matScore, impactScore, momentum),
+      verification: VERDICTS[doi] ? [...new Set(VERDICTS[doi].map((v) => v.verdict))].join(", ") : null,
+      outcome_np: VERDICTS[doi] ? ((VERDICTS[doi].find((v) => v.outcome_np) || {}).outcome_np || null) : null,
+    });
+  }
   targets.sort((a, b) => (b.readiness || 0) - (a.readiness || 0) || (b.citations || 0) - (a.citations || 0));
+
+  // FAIR computed LIVE (same assessSoftware the verified path uses) for paper-resolved repos
+  await Promise.all(targets.map(async (t) => {
+    if (t.mat && t.mat.resolved && t.mat.code && parseGitHub(t.mat.code)) t.fair = await assessSoftware(t.mat.code);
+  }));
 
   return { topic, targets, inField, chartItems, tooling };
 }
@@ -352,9 +397,15 @@ function targetRow(t) {
   const link = t.doi ? `<a href="https://doi.org/${t.doi}" target="_blank" rel="noopener">${t.doi}</a>` : "";
   const verdictLink = (t.status === "VERIFIED" && t.outcome_np)
     ? `<div class="tverdict">independently checked by Science Live · <a href="${t.outcome_np}" target="_blank" rel="noopener">replication outcome →</a></div>` : "";
+  const resolvedNote = (t.mat && t.mat.resolved)
+    ? `<div class="tresolved">↳ materials resolved from ${esc(t.mat.source || "the paper")} (not in OpenAIRE): <a href="${esc(t.mat.code || "")}" target="_blank" rel="noopener">code repo</a>${(t.mat.data && t.mat.data.length) ? ` · data: ${t.mat.data.map(esc).join(", ")}` : ""}</div>`
+    : "";
+  const fairNote = t.fair
+    ? `<div class="tfair">FAIR software <b>${t.fair.score}/5</b> · ⭐ ${t.fair.stars}${t.fair.swh ? " · in Software Heritage" : ""}</div>`
+    : "";
   return `<div class="target ${t.status === "VERIFIED" ? "verified" : ""}">
     ${score}
-    <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${meta}${verdictLink}</div>
+    <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${meta}${verdictLink}${resolvedNote}${fairNote}</div>
     <div class="t-right">${t.citations.toLocaleString()} cites<br>${link}</div>
   </div>`;
 }
@@ -483,4 +534,4 @@ el("go").addEventListener("click", () => run(el("topic").value));
 el("topic").addEventListener("keydown", (e) => { if (e.key === "Enter") run(el("topic").value); });
 
 el("status").textContent = "Loading the Science Live verdict layer live from the nanopub network …";
-loadVerdicts().then(() => { el("status").textContent = "Type a research field and hit Scan — or try an example above."; });
+Promise.all([loadVerdicts(), loadCurated()]).then(() => { el("status").textContent = "Type a research field and hit Scan — or try an example above."; });
