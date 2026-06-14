@@ -62,6 +62,21 @@ const readinessFrom = (matScore, impactScore, momentum) => {
     : (0.45 * matScore + 0.35 * impactScore + 0.20 * momentum);
   return Math.round(r * 100) / 100;
 };
+// Status taxonomy — "not replicated" is DISAMBIGUATED, not penalised.
+const STATUS = {
+  ready:     { rank: 0, label: "⭐ Replication-ready", cls: "st-ready", tip: "no verdict yet, but materials (code/data) are available and it's recent/active — gap + means + momentum" },
+  validated: { rank: 1, label: "✅ Validated",         cls: "st-val",   tip: "independently replicated and it held up — a solid result to build on or extend" },
+  contested: { rank: 2, label: "⚠️ Contested",         cls: "st-con",   tip: "an independent replication contradicted or only partially supported this — worth re-checking" },
+  needs:     { rank: 3, label: "❔ Needs check",        cls: "st-needs", tip: "no verdict, and OpenAIRE holds no materials link — unknown (not absent); resolve from the paper" },
+  dormant:   { rank: 4, label: "💤 Dormant",           cls: "st-dorm",  tip: "no verdict, older, low momentum, no materials surfaced — likely dormant" },
+};
+const statusOf = (t) => {
+  if (t.status === "VERIFIED") return /contradict|partial|disput|refut|critiqu/i.test(t.verification || "") ? "contested" : "validated";
+  if (t.mat && t.mat.score != null) return "ready";                  // materials present (resolved or linked)
+  const old = t.year && (new Date().getFullYear() - t.year) >= 8;    // had time to be replicated
+  const hot = t.impl === "C1" || t.impl === "C2";                    // still gaining momentum
+  return (old && !hot) ? "dormant" : "needs";
+};
 
 async function search(topic, type, size) {
   const u = `${API}/researchProducts?search=${encodeURIComponent(topic)}&type=${type}&pageSize=${size}`;
@@ -136,6 +151,10 @@ const NP_SPARQL = "https://query.knowledgepixels.com/repo/full";
 const TPL_OUTCOME = "https://w3id.org/np/RA2zljn0Nw9SadppOyxZoh-_Rxosslrq-vYG-p9SttnJE";
 const TPL_CITO = "https://w3id.org/np/RA43F9EoOuzF0xoNUnCMNyFsfIqlsuWDdPHCnN0wCdCAw";
 const VERDICT_RELS = new Set(["confirms", "qualifies", "disputes", "critiques", "extends", "supports", "refutes"]);
+// CiTO relations that are METHOD/DATA/CREDIT provenance — they point to a SOURCE paper, not a
+// verdict on it. A verdict must never attach via these: a study that `usesMethodIn` Phillips 2009
+// and was Contradicted does NOT contradict Phillips 2009 (it reused its method). (lowercased compare)
+const NONVERDICT_RELS = new Set(["usesmethodin", "usesdatafrom", "citesasdatasource", "citesasevidence", "credits", "citesforinformation", "obtainsbackgroundfrom", "obtainssupportfrom", "citesasauthority", "citesasrelated", "citesassourcedocument", "includesquotationfrom", "sharesauthorinstitutionwith"]);
 const npHash = (u) => (u || "").replace(/.*\/np\//, "");
 const doiPart = (u) => (u || "").replace(/.*doi\.org\//, "").toLowerCase();
 const cleanRepo = (r) => (!r ? null : r.includes("doi.org/") ? doiPart(r) : /^10\./.test(r) ? r.toLowerCase() : r);
@@ -167,7 +186,8 @@ SELECT DISTINCT ?cito ?subj ?rel ?orig WHERE { GRAPH ?g { ?cito ntpl:wasCreatedF
   for (const o of A) {
     const cs = byHash[npHash(o.outcome)] || [];
     const verdictCitos = cs.filter((c) => VERDICT_RELS.has(c.rel) && !c.orig.startsWith("10.5281/"));
-    const targets = verdictCitos.length ? verdictCitos : cs.filter((c) => !c.orig.startsWith("10.5281/"));
+    const targets = verdictCitos.length ? verdictCitos
+      : cs.filter((c) => !NONVERDICT_RELS.has((c.rel || "").toLowerCase()) && !c.orig.startsWith("10.5281/"));
     for (const c of targets) {
       (V[c.orig] = V[c.orig] || []).push({
         verdict: o.status || "Published", cito: [c.rel], repo_doi: cleanRepo(o.repo),
@@ -359,7 +379,9 @@ async function radar(topic) {
       outcome_np: VERDICTS[doi] ? ((VERDICTS[doi].find((v) => v.outcome_np) || {}).outcome_np || null) : null,
     });
   }
-  targets.sort((a, b) => (b.readiness || 0) - (a.readiness || 0) || (b.citations || 0) - (a.citations || 0));
+  targets.forEach((t) => { t.statusKey = statusOf(t); });
+  // group by status (⭐ replication-ready first — the actionable candidates), then by readiness
+  targets.sort((a, b) => (STATUS[a.statusKey].rank - STATUS[b.statusKey].rank) || (b.readiness || 0) - (a.readiness || 0) || (b.citations || 0) - (a.citations || 0));
 
   // FAIR computed LIVE (same assessSoftware the verified path uses) for paper-resolved repos
   await Promise.all(targets.map(async (t) => {
@@ -381,9 +403,10 @@ function targetRow(t) {
   const scoreTitle = `replicability = 0.45·materials + 0.35·impact + 0.20·momentum  —  `
     + `materials ${p.mat == null ? "unverified" : p.mat.toFixed(2)} · impact ${(p.impact || 0).toFixed(2)} · momentum ${(p.momentum || 0).toFixed(2)}`;
   const score = `<div class="score" title="${esc(scoreTitle)}"><span>${t.readiness != null ? t.readiness.toFixed(2) : "—"}</span><small>REPLIC.</small></div>`;
-  const badge = t.status === "VERIFIED"
-    ? `<span class="badge verified">VERIFIED</span><span class="badge cls">${t.verification}</span>`
-    : `<span class="badge open">OPEN</span>${t.cls ? `<span class="badge cls" title="OpenAIRE BIP! impact class — C1 = top 0.01% most-cited globally, C5 = the rest">${t.cls}</span>` : ""}`;
+  const st = STATUS[t.statusKey] || STATUS.needs;
+  const badge = `<span class="badge ${st.cls}" title="${esc(st.tip)}">${st.label}</span>`
+    + (t.status === "VERIFIED" && t.verification ? `<span class="badge cls">${esc(t.verification)}</span>` : "")
+    + (t.cls ? `<span class="badge cls" title="OpenAIRE BIP! impact class — C1 = top 0.01% most-cited globally, C5 = the rest">${t.cls}</span>` : "");
   // Materials badge ONLY when positively known. OpenAIRE rarely links code/data to a
   // paper, so 'unknown' is the norm in live search and would be noise on every row —
   // it's carried in the score breakdown tooltip, and resolved in the baked demo set.
@@ -413,7 +436,8 @@ function targetRow(t) {
 function paintTargets() {
   const pages = Math.max(1, Math.ceil(_targets.length / PER_PAGE));
   if (_tpage >= pages) _tpage = pages - 1;
-  el("tcount").textContent = `${_targets.filter((t) => t.status === "OPEN").length} open · ${_targets.filter((t) => t.status === "VERIFIED").length} verified`;
+  const n = (k) => _targets.filter((t) => t.statusKey === k).length;
+  el("tcount").textContent = `${n("ready")} replication-ready · ${n("validated")} validated · ${_targets.length} candidates`;
   el("targets").innerHTML = _targets.slice(_tpage * PER_PAGE, _tpage * PER_PAGE + PER_PAGE).map(targetRow).join("");
   el("tpager").innerHTML = pages > 1
     ? `<button ${_tpage === 0 ? "disabled" : ""} onclick="pageTargets(-1)">← Prev</button><span>Page ${_tpage + 1} of ${pages}</span><button ${_tpage >= pages - 1 ? "disabled" : ""} onclick="pageTargets(1)">Next →</button>`
