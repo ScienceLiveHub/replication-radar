@@ -1,9 +1,15 @@
 # Replication Radar
 
-An **MCP server that makes the OpenAIRE Graph more useful for replication.** Point it
-at a research field or a paper and it answers the question the Graph structurally
-cannot: *what high-impact work is worth replicating, is there **independent** reusable
-tooling to do it, and has it already been checked — with what verdict?*
+### 🔗 Live demo → **https://openaire-hackathon.netlify.app**
+
+A tool that **makes the OpenAIRE Graph more useful for replication.** Search a research
+field and it answers the question the Graph structurally cannot: *what high-impact work
+is worth replicating, has it already been independently checked — with what verdict — and
+is the software reusable?*
+
+Ships as a **live web app** (the link above — pure static, queries OpenAIRE + the nanopub
+network + GitHub/Software Heritage from the browser) **and** an **MCP server** (this package)
+that exposes the same engine to any agent. Built for the OpenAIRE AI Hackathon (Theme B), CC-BY.
 
 OpenAIRE's only value signal is citation-popularity (BIP! influence / popularity /
 impulse, classes C1–C5) — paper-bound, and orthogonal to whether a claim is *true*.
