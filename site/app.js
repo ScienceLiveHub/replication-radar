@@ -335,15 +335,16 @@ function targetRow(t) {
   const p = t.parts || {};
   const scoreTitle = `replicability = 0.45·materials + 0.35·impact + 0.20·momentum  —  `
     + `materials ${p.mat == null ? "unverified" : p.mat.toFixed(2)} · impact ${(p.impact || 0).toFixed(2)} · momentum ${(p.momentum || 0).toFixed(2)}`;
-  const unv = t.mat && t.mat.score == null ? `<small class="unv">mat ?</small>` : "";
-  const score = `<div class="score" title="${esc(scoreTitle)}"><span>${t.readiness != null ? t.readiness.toFixed(2) : "—"}</span><small>REPLIC.</small>${unv}</div>`;
+  const score = `<div class="score" title="${esc(scoreTitle)}"><span>${t.readiness != null ? t.readiness.toFixed(2) : "—"}</span><small>REPLIC.</small></div>`;
   const badge = t.status === "VERIFIED"
     ? `<span class="badge verified">VERIFIED</span><span class="badge cls">${t.verification}</span>`
     : `<span class="badge open">OPEN</span>${t.cls ? `<span class="badge cls" title="OpenAIRE BIP! impact class — C1 = top 0.01% most-cited globally, C5 = the rest">${t.cls}</span>` : ""}`;
-  const matMeta = !t.mat ? ""
-    : t.mat.state === "rocrate" ? `<span class="badge mok" title="RO-Crate research object — code + data + provenance bundled">RO-Crate ✓</span>`
-    : t.mat.state === "code" ? `<span class="badge mok" title="code repository linked to this paper">code ✓</span>`
-    : `<span class="badge munk" title="OpenAIRE holds no code/data link for this paper — unknown, NOT absent (needs checking)">materials ?</span>`;
+  // Materials badge ONLY when positively known. OpenAIRE rarely links code/data to a
+  // paper, so 'unknown' is the norm in live search and would be noise on every row —
+  // it's carried in the score breakdown tooltip, and resolved in the baked demo set.
+  const matMeta = (t.mat && t.mat.state === "rocrate") ? `<span class="badge mok" title="RO-Crate research object — code + data + provenance bundled">RO-Crate ✓</span>`
+    : (t.mat && t.mat.state === "code") ? `<span class="badge mok" title="code repository linked to this paper">code ✓</span>`
+    : "";
   const meta = `<div class="t-meta">`
     + (t.year ? `<span class="badge yr">${t.year}</span>` : "")
     + (t.impl ? `<span class="badge imp" title="OpenAIRE BIP! impulse class — early citation momentum (C1 highest)">impulse ${t.impl}</span>` : "")
