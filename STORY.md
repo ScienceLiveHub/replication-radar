@@ -5,16 +5,27 @@
 
 ## The question
 
-The OpenAIRE Graph can tell you how *visible* a paper is — citation influence, popularity,
-impulse, the BIP! classes C1–C5. It cannot tell you two things that matter just as much:
-whether the claim is **reliable** (has anyone independently checked it, and did it hold), and
-whether the **software** behind it is actually reusable. Citation-popularity is a measure of
-attention, and attention is orthogonal to both. A heavily-cited paper looks identical, in the
-Graph, to one nobody ever reproduced; a widely-used research tool has the same "0 citations,
-class C5" as an abandoned script.
+The OpenAIRE Graph is a network of **structural links** between research entities — papers,
+authors, institutions, funding. It can tell you how *visible* a paper is (citation influence,
+popularity, the BIP! classes C1–C5), but not what it *means*: it links documents to one another
+without representing the **claims** inside them, their level of evidence, their **epistemic
+status** (confirmed, contested, retracted, superseded), or the **semantic relations between
+results** — replication, contradiction, refinement, not just "cites".
 
-So we asked a build question: **can we add those missing signals — reliability and
-reusability — *live*, on top of the Graph, without changing it?**
+That gap matters more than ever in the age of LLMs. A model fed the Graph swallows everything
+equally: a result replicated fifty times reads the same as a single study on twelve mice or an
+unreviewed preprint. The difference between *recognising text patterns* and *understanding* is
+exactly this missing layer — verified, status-aware, traceable knowledge. It's what would let a
+system say "three meta-analyses, 45 000 subjects, with a 2021 result that qualifies it for older
+populations" instead of a vague, unciteable "studies show X". OpenAIRE is the infrastructure best
+placed to start closing that gap at European scale.
+
+So we asked a concrete build question toward it: **can we add the two most actionable missing
+signals — is a claim *reliable* (independently checked, and did it hold) and is its *software*
+reusable — live, on top of the Graph, without changing it?** A heavily-cited paper looks
+identical, in the Graph today, to one nobody ever reproduced; a widely-used research tool has the
+same "0 citations, class C5" as an abandoned script. Both are signals the Graph structurally
+cannot hold.
 
 ## The journey
 
@@ -54,6 +65,13 @@ no keys — so the whole thing deploys as a static site anyone can open.
 - **Grounded-only is a discipline, not a nicety.** Every signal the Radar shows comes from a
   named, verifiable source. The one feature we built on a guess (keyword tooling) we deleted —
   and the project is stronger for it.
+- **Nanopublications are the substrate the Graph is missing.** The verdict layer isn't scraped
+  text — it's built from claim-level, cryptographically-signed assertions that already carry what
+  the Graph lacks: the claim, its epistemic relation (`cito:confirms` / `disagreesWith` /
+  `qualifies`), and its provenance. So the Graph gains, for a given paper, not "this document
+  exists" but "*this specific claim was independently checked → validated → here is the signed
+  verdict*" — traceable enough for a model to cite rather than paraphrase. That's the first brick
+  of a graph of **verified knowledge**.
 
 ## What others can reuse
 
@@ -71,9 +89,9 @@ no keys — so the whole thing deploys as a static site anyone can open.
   OSTrails assessment APIs; per-paper relations from the public Graph API; Knowledge Loom's
   unresolvable internal DOIs) — so the next builder doesn't re-discover it.
 
-*A complementary facet, using the OpenAIRE MCP's citation-graph tools, traces the relationships
-around a verified paper — and shows the citation graph contains everything **except** the
-verification edge, which is exactly the gap the Radar fills.*
+*A complementary facet by Jean Iaquinta, using the OpenAIRE MCP's citation-graph tools, traces
+the relationships around a verified paper — and shows the citation graph contains everything
+**except** the verification edge, which is exactly the gap the Radar fills.*
 
 ## Honest limits
 
@@ -82,7 +100,10 @@ network-wide but only covers claims that have a DOI a search can reach (paperles
 verifications exist but can't surface in a DOI search); FAIR-software runs only where a real
 repository resolves, and GitHub's unauthenticated rate limit caps how many it scores per hour;
 OpenAIRE's own subject classification is sometimes quirky and is shown faithfully, not corrected.
-None of this is hidden in the output.
+None of this is hidden in the output. And we add only two of the missing layers — reliability and
+reusability; the fuller graph of *verified knowledge* (claim-level extraction, temporal
+obsolescence, distinguishing hypothesis from result from interpretation) is the direction this
+points at, not something we built.
 
 ---
 
