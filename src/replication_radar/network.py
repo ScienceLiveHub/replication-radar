@@ -21,6 +21,12 @@ SPARQL = os.environ.get("RADAR_NANOPUB_SPARQL", "https://query.knowledgepixels.c
 TPL_OUTCOME = "https://w3id.org/np/RA2zljn0Nw9SadppOyxZoh-_Rxosslrq-vYG-p9SttnJE"
 TPL_CITO = "https://w3id.org/np/RA43F9EoOuzF0xoNUnCMNyFsfIqlsuWDdPHCnN0wCdCAw"
 VERDICT_RELS = {"confirms", "qualifies", "disputes", "critiques", "extends", "supports", "refutes"}
+# CiTO relations that are METHOD/DATA/CREDIT provenance — they point to a SOURCE paper, not a
+# verdict on it. A verdict must NEVER attach via these: a study that `usesMethodIn` Phillips 2009
+# and was Contradicted does not contradict Phillips 2009 (it reused its method). (lowercased compare)
+NONVERDICT_RELS = {"usesmethodin", "usesdatafrom", "citesasdatasource", "citesasevidence", "credits",
+                   "citesforinformation", "obtainsbackgroundfrom", "obtainssupportfrom", "citesasauthority",
+                   "citesasrelated", "citesassourcedocument", "includesquotationfrom", "sharesauthorinstitutionwith"}
 _CANON = {"validated": "Validated", "partiallysupported": "PartiallySupported", "contradicted": "Contradicted",
           "notsupported": "NotSupported", "mixed": "Mixed", "inconclusive": "Inconclusive"}
 _TIMEOUT = float(os.environ.get("RADAR_HTTP_TIMEOUT", "30"))
@@ -75,7 +81,7 @@ def build_index() -> dict:
     for o in outcomes:
         cs = by_hash.get(_hash(o.get("outcome")), [])
         verdict_citos = [c for c in cs if c["rel"] in VERDICT_RELS and not c["orig"].startswith("10.5281/")]
-        targets = verdict_citos or [c for c in cs if not c["orig"].startswith("10.5281/")]
+        targets = verdict_citos or [c for c in cs if c["rel"].lower() not in NONVERDICT_RELS and not c["orig"].startswith("10.5281/")]
         repo_doi = _clean_repo(o.get("repo") or "")
         for c in targets:
             index.setdefault(c["orig"], []).append({

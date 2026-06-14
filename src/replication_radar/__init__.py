@@ -7,4 +7,4 @@ OpenAIRE impact + Software Heritage reuse signals + Science Live nanopub verdict
 from .radar import radar, find_independent_software, replication_status, verified_claims
 
 __all__ = ["radar", "find_independent_software", "replication_status", "verified_claims"]
-__version__ = "0.3.0"
+__version__ = "0.3.1"
