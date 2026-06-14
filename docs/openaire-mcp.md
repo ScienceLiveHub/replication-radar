@@ -9,6 +9,15 @@
 > So MCP-backed features belong in the **`src/replication_radar` MCP server / agentic exploration**,
 > **not** in the browser app. The browser app stays on public CORS APIs (nanopub SPARQL + the
 > public OpenAIRE Graph REST API). Keep this split in mind when reading the "direction" column.
+>
+> **Confirmed (live `_debug.api_urls_called`, 2026-06-14):** the MCP queries the **same open
+> OpenAIRE Graph** as the app — `api.openaire.eu/graph/v2/researchProducts` (search) and
+> `api.openaire.eu/graph/v1/researchProducts/links` (relationships). There is **no private/fuller
+> dataset** behind the gateway; OAuth is access control, not a different graph. The app uses v1
+> search and does **not** call `/links` — that relationship endpoint (public, ~1.2M paper↔software
+> edges globally) is the one capability the app could adopt directly, no MCP needed. For
+> biodiversity/EO papers it returns only paper→paper `cites` (verified), so it does not close the
+> materials gap for this domain.
 
 Directions: **(i)** verified-knowledge graph (typed links between results) · **(ii)** CoARA
 (assess researchers/projects by output *diversity* + reproducibility + reuse, not citations) ·
