@@ -1,20 +1,37 @@
-"""The 'already-checked' memory layer: DOI -> Science Live replication verdicts.
+"""The 'already-checked' layer: DOI -> Science Live replication verdicts.
 
 This is the signal the OpenAIRE Graph structurally cannot hold (citation-popularity
-is orthogonal to whether a claim held). Verdicts live in CiTO nanopubs; this index
-is the bundled crosswalk. Extend data/verdicts.json as new chains are published.
+is orthogonal to whether a claim held). Verdicts live in FORRT Outcome/CiTO nanopubs.
+
+By default the index is built **live from the nanopub network** (author-agnostic,
+network-wide; see network.py). If that fails (offline), it falls back to the bundled
+data/verdicts.json. Set RADAR_VERDICTS_OFFLINE=1 to force the bundle.
 """
 from __future__ import annotations
 
 import json
+import os
 from functools import lru_cache
 from importlib import resources
 
 
 @lru_cache(maxsize=1)
-def _index() -> dict[str, list[dict]]:
+def _bundled() -> dict[str, list[dict]]:
     with resources.files(__package__).joinpath("data/verdicts.json").open() as fh:
         return (json.load(fh).get("verifications")) or {}
+
+
+@lru_cache(maxsize=1)
+def _index() -> dict[str, list[dict]]:
+    if os.environ.get("RADAR_VERDICTS_OFFLINE") != "1":
+        try:
+            from . import network
+            live = network.build_index()
+            if live:
+                return live
+        except Exception:  # noqa: BLE001 — any network/parse error → bundled fallback
+            pass
+    return _bundled()
 
 
 def status_for(doi: str | None) -> dict:

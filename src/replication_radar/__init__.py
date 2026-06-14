@@ -4,7 +4,7 @@ Adds a capability the Graph lacks: 'what high-impact work is worth replicating,
 with INDEPENDENT reusable tooling, and has it already been checked?' — joining
 OpenAIRE impact + Software Heritage reuse signals + Science Live nanopub verdicts.
 """
-from .radar import radar, find_independent_software, replication_status
+from .radar import radar, find_independent_software, replication_status, verified_claims
 
-__all__ = ["radar", "find_independent_software", "replication_status"]
-__version__ = "0.2.0"
+__all__ = ["radar", "find_independent_software", "replication_status", "verified_claims"]
+__version__ = "0.3.0"

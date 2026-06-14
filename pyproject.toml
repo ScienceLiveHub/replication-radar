@@ -1,6 +1,6 @@
 [project]
 name = "replication-radar"
-version = "0.2.0"
+version = "0.3.0"
 description = "MCP server that turns the OpenAIRE Graph into a ranked replication queue — impact-ranked targets, independent reusable tooling, and the Science Live verification overlay."
 readme = "README.md"
 requires-python = ">=3.10"

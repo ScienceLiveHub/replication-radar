@@ -65,6 +65,17 @@ def replication_status(doi: str) -> dict:
     return {"doi": doi.lower(), **st}
 
 
+def verified_claims() -> dict:
+    """Every claim the nanopub network has a Science Live verdict for (author-agnostic).
+    The verified-knowledge corpus the OpenAIRE Graph can't hold."""
+    idx = verdicts._index()
+    claims = [
+        {"doi": d, "verdicts": sorted({v["verdict"] for v in vs}), "replications": len(vs)}
+        for d, vs in sorted(idx.items(), key=lambda kv: -len(kv[1]))
+    ]
+    return {"count": len(claims), "claims": claims}
+
+
 def find_independent_software(
     doi: str | None = None,
     topic: str | None = None,

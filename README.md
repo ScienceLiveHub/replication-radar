@@ -30,7 +30,13 @@ The Radar joins three sources to add a **replication layer** on top:
 |---|---|
 | `radar(topic)` | Impact-ranked replication targets in a field — each **OPEN** (opportunity) or **VERIFIED** (done, with verdict) + independent tooling + funder context |
 | `find_independent_software(doi, topic)` | Reusable engines **not authored by the original team** (author-disjoint = *replication*, not *reproduction*), ranked by reuse signal not citations |
-| `replication_status(doi)` | Has this DOI been replicated, did it hold? Verdict(s) + CiTO nanopub links, or `open` |
+| `replication_status(doi)` | Has this DOI been replicated, did it hold? Verdict(s) — **live from the nanopub network, any signer** — with status, CiTO relation, repo, and signed Outcome/CiTO nanopub links; `open` if not |
+| `verified_claims()` | The whole **verified-knowledge corpus** — every claim the network holds a verdict for (author-agnostic) |
+
+The verdict tools pull **live** from the nanopub network (the FORRT Outcome/CiTO templates on
+`query.knowledgepixels.com`); the bundled `verdicts.json` is an offline fallback. So the MCP is the
+**verified-knowledge layer** — pair it with the OpenAIRE MCP and an agent has both the structural
+Graph *and* "has this been checked, and did it hold".
 
 ### The reproduction-vs-replication distinction, made computable
 A *reproduction* re-runs the original code; a *replication* tests the same claim by a
