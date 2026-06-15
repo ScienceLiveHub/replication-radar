@@ -85,12 +85,20 @@ const outcomesFor = (doi) => {
   });
   return out;
 };
-// One link when a single replication; numbered links (each tooltipped with its verdict) when many.
+// Colour an outcome chip by its verdict so the agreement pattern is legible at a glance.
+const verdictClass = (v) => /contradict|notsupport|refut/i.test(v) ? "v-con"
+  : /partial/i.test(v) ? "v-part"
+  : /validat|confirm|support/i.test(v) ? "v-ok" : "v-other";
+// One link when a single replication; colour-coded numbered chips (tooltipped with the verdict)
+// when many — green = confirmed, amber = partial, red = contradicted.
 const outcomeLinks = (outs) => {
   if (!outs.length) return "";
-  if (outs.length === 1) return ` · <a href="${outs[0].np}" target="_blank" rel="noopener">replication outcome →</a>`;
+  if (outs.length === 1) {
+    const o = outs[0];
+    return ` · <a class="onp ${verdictClass(o.verdict)}" href="${o.np}" target="_blank" rel="noopener" title="${esc(o.verdict)}">${esc(o.verdict)} →</a>`;
+  }
   return ` · ${outs.length} replication outcomes: ` + outs.map((o, i) =>
-    `<a class="onp" href="${o.np}" target="_blank" rel="noopener" title="${esc(o.verdict)}">${i + 1}</a>`).join(" ");
+    `<a class="onp ${verdictClass(o.verdict)}" href="${o.np}" target="_blank" rel="noopener" title="${esc(o.verdict)}">${i + 1}</a>`).join(" ");
 };
 // Agreement pattern across the independent replication verdicts — many-agree ≠ disagree.
 const agreementOf = (doi) => {
@@ -588,7 +596,7 @@ function renderVerified(inField) {
   const fieldHtml = field.length
     ? `<ul class="vlist">${field.map(matchCard).join("")}</ul>`
     : `<p class="vnone">No Science Live verdict matching your search yet — every paper on the left is an <b>open</b> replication opportunity.</p>`;
-  const moreHtml = `<p class="vmore-stat">Verdicts are drawn from the Science Live verification index bundled with this Radar. <a href="https://github.com/ScienceLiveHub/replication-radar/blob/main/src/replication_radar/data/verdicts.json" target="_blank" rel="noopener">browse the index →</a></p>`;
+  const moreHtml = `<p class="vmore-stat">Verdicts are pulled <b>live</b> from the nanopub network (any signer), filtered for retracted/superseded versions. <a href="https://github.com/ScienceLiveHub/replication-radar/blob/main/src/replication_radar/data/verdicts.json" target="_blank" rel="noopener">offline fallback index →</a></p>`;
   el("verified").innerHTML = fieldHtml + moreHtml;
 }
 

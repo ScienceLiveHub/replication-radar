@@ -26,18 +26,16 @@
     <p id="status" class="status"></p>
 
     <section id="results" hidden>
-      <div class="grid">
-        <div class="card chartcard">
-          <h2>The replication-gap map</h2>
-          <p class="hint">How much of the high-impact work matching your search has actually been <b class="verified">independently checked</b> — the field at a glance. Everything <b class="open">not yet checked</b> is the replication gap.</p>
-          <div class="chartbox" id="gap"></div>
-        </div>
-        <aside class="card verifiedcard">
-          <h2>Verified, matching your search <span id="vcount" class="pill"></span></h2>
-          <p class="hint">Science Live replications matching your search — these are the <b class="verified">green bars</b>. The verdict is the reliability signal the Graph can't hold; click through to the signed nanopub.</p>
-          <div id="verified"></div>
-        </aside>
+      <div class="card chartcard">
+        <h2>The replication-gap map</h2>
+        <p class="hint">How much of the high-impact work matching your search has actually been <b class="verified">independently checked</b> — the field at a glance. Everything <b class="open">not yet checked</b> is the replication gap.</p>
+        <div class="chartbox" id="gap"></div>
       </div>
+      <aside class="card verifiedcard">
+        <h2>Verified, matching your search <span id="vcount" class="pill"></span></h2>
+        <p class="hint">The <b class="verified">checked</b> papers matching your search, with the claim that was tested and the verdict — the reliability signal the Graph can't hold. Click any outcome to open its signed nanopub.</p>
+        <div id="verified"></div>
+      </aside>
 
       <details class="legend">
         <summary>Legend — what the labels mean (click to expand)</summary>
