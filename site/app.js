@@ -428,7 +428,7 @@ const el = (id) => document.getElementById(id);
 const esc = (s) => (s || "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 
 const PER_PAGE = 10;
-let _targets = [], _tpage = 0;
+let _targets = [], _tpage = 0, _tfilter = new Set();
 
 function targetRow(t) {
   const p = t.parts || {};
@@ -466,19 +466,43 @@ function targetRow(t) {
   </div>`;
 }
 
+const FILTER_ORDER = ["reproducible", "robust", "validated", "contested", "refuted", "needs", "dormant"];
+const visibleTargets = () => (_tfilter.size ? _targets.filter((t) => _tfilter.has(t.statusKey)) : _targets);
+
+function paintFilters() {
+  const counts = {};
+  for (const t of _targets) counts[t.statusKey] = (counts[t.statusKey] || 0) + 1;
+  const present = FILTER_ORDER.filter((k) => counts[k]);
+  if (present.length < 2) { el("tfilters").innerHTML = ""; return; }   // nothing to filter
+  const chip = (on, key, label, count) =>
+    `<button class="tfilter${on ? " on" : ""}" onclick="filterTargets(${key ? `'${key}'` : "null"})"${key ? ` title="${esc(STATUS[key].tip)}"` : ""}>${label} <span>${count}</span></button>`;
+  el("tfilters").innerHTML = chip(_tfilter.size === 0, null, "All", _targets.length)
+    + present.map((k) => chip(_tfilter.has(k), k, STATUS[k].label, counts[k])).join("");
+}
+
 function paintTargets() {
-  const pages = Math.max(1, Math.ceil(_targets.length / PER_PAGE));
+  paintFilters();
+  const list = visibleTargets();
+  const pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
   if (_tpage >= pages) _tpage = pages - 1;
-  const n = (k) => _targets.filter((t) => t.statusKey === k).length;
-  el("tcount").textContent = `${n("reproducible")} reproducible · ${n("robust") + n("validated")} validated · ${n("contested") + n("refuted")} contested · ${_targets.length} candidates`;
-  el("targets").innerHTML = _targets.slice(_tpage * PER_PAGE, _tpage * PER_PAGE + PER_PAGE).map(targetRow).join("");
+  if (_tpage < 0) _tpage = 0;
+  el("tcount").textContent = `${_targets.length} candidate${_targets.length === 1 ? "" : "s"}`;
+  el("targets").innerHTML = list.length
+    ? list.slice(_tpage * PER_PAGE, _tpage * PER_PAGE + PER_PAGE).map(targetRow).join("")
+    : `<p class="hint" style="padding:10px 2px">No candidates in this category — <a href="#" onclick="filterTargets(null);return false">show all</a>.</p>`;
   el("tpager").innerHTML = pages > 1
     ? `<button ${_tpage === 0 ? "disabled" : ""} onclick="pageTargets(-1)">← Prev</button><span>Page ${_tpage + 1} of ${pages}</span><button ${_tpage >= pages - 1 ? "disabled" : ""} onclick="pageTargets(1)">Next →</button>`
     : "";
 }
 
-function renderTargets(targets) { _targets = targets; _tpage = 0; paintTargets(); }
+function renderTargets(targets) { _targets = targets; _tpage = 0; _tfilter.clear(); paintTargets(); }
 window.pageTargets = (d) => { _tpage += d; paintTargets(); el("targets").scrollIntoView({ behavior: "smooth", block: "start" }); };
+window.filterTargets = (k) => {
+  if (k === null) _tfilter.clear();
+  else if (_tfilter.has(k)) _tfilter.delete(k);
+  else _tfilter.add(k);
+  _tpage = 0; paintTargets();
+};
 
 function renderTooling(tooling) {
   if (!tooling || !tooling.length) { el("fieldtools").innerHTML = ""; return; }

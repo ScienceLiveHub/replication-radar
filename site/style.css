@@ -49,6 +49,13 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .fieldtools:empty{display:none}
 .fieldtools b{color:var(--navy2)}
 .fieldtools .swh{color:var(--green);text-decoration:none;font-size:13px}
+.tfilters{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 14px}
+.tfilters:empty{display:none}
+.tfilter{border:1px solid var(--line);background:#fff;border-radius:20px;padding:5px 12px;font-size:12.5px;font-weight:600;color:var(--mut);cursor:pointer;display:inline-flex;align-items:center;gap:6px;line-height:1.4}
+.tfilter span{background:#eef2f9;color:var(--navy2);border-radius:10px;padding:0 7px;font-size:11px;font-weight:700}
+.tfilter:hover{border-color:var(--magenta);color:var(--navy2)}
+.tfilter.on{border-color:var(--navy2);background:var(--navy);color:#fff}
+.tfilter.on span{background:rgba(255,255,255,.22);color:#fff}
 .targets{display:flex;flex-direction:column;gap:10px}
 .tpager{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:16px;font-size:13px;color:var(--mut)}
 .tpager:empty{display:none}
