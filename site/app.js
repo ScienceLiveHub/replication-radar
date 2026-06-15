@@ -64,18 +64,43 @@ const readinessFrom = (matScore, impactScore, momentum) => {
 };
 // Status taxonomy — "not replicated" is DISAMBIGUATED, not penalised.
 const STATUS = {
-  ready:     { rank: 0, label: "⭐ Replication-ready", cls: "st-ready", tip: "no verdict yet, but materials (code/data) are available and it's recent/active — gap + means + momentum" },
-  validated: { rank: 1, label: "✅ Validated",         cls: "st-val",   tip: "independently replicated and it held up — a solid result to build on or extend" },
-  contested: { rank: 2, label: "⚠️ Contested",         cls: "st-con",   tip: "an independent replication contradicted or only partially supported this — worth re-checking" },
-  needs:     { rank: 3, label: "❔ Needs check",        cls: "st-needs", tip: "no verdict, and OpenAIRE holds no materials link — unknown (not absent); resolve from the paper" },
-  dormant:   { rank: 4, label: "💤 Dormant",           cls: "st-dorm",  tip: "no verdict, older, low momentum, no materials surfaced — likely dormant" },
+  robust:       { label: "✅ Robustly validated", cls: "st-val",   tip: "multiple independent replications, all confirmed — a settled, reliable result" },
+  validated:    { label: "✅ Validated",          cls: "st-val",   tip: "independently replicated and it held up" },
+  contested:    { label: "⚠️ Contested",          cls: "st-con",   tip: "independent replications DISAGREE (some confirm, some contradict/partial) — worth re-checking" },
+  refuted:      { label: "❌ Refuted",            cls: "st-con",   tip: "independent replication(s) contradicted it, none confirmed" },
+  reproducible: { label: "🔁 Reproducible",       cls: "st-ready", tip: "original code/data are available, so it can be RE-RUN (reproduced). Note: replication ≠ reproduction — replication tests the same claim with DIFFERENT data/methods (FORRT)." },
+  needs:        { label: "❔ Needs check",         cls: "st-needs", tip: "not yet replicated and OpenAIRE links no materials — unknown (not absent); resolve from the paper" },
+  dormant:      { label: "💤 Dormant",            cls: "st-dorm",  tip: "no verdict, older, low momentum, no materials surfaced — likely dormant" },
+};
+// Agreement pattern across the independent replication verdicts — many-agree ≠ disagree.
+const agreementOf = (doi) => {
+  const vs = (VERDICTS[doi] || []).map((v) => v.verdict || "");
+  const contra  = vs.filter((v) => /contradict|notsupport|refut/i.test(v)).length;
+  const partial = vs.filter((v) => /partial/i.test(v)).length;
+  const confirm = vs.filter((v) => /validat|confirm|support/i.test(v) && !/partial|contradict|notsupport|refut/i.test(v)).length;
+  const n = vs.length;
+  if (contra && (confirm || partial)) return { key: "contested", why: `${n} replications disagree — ${confirm} confirm · ${partial} partial · ${contra} contradict` };
+  if (contra)                         return { key: "refuted",   why: `contradicted by ${contra} replication${contra > 1 ? "s" : ""}` };
+  if (confirm >= 2 && !partial)       return { key: "robust",    why: `${confirm} independent replications, all confirmed` };
+  if (confirm)                        return { key: "validated", why: partial ? `confirmed (${n} replications, ${partial} partial)` : (n > 1 ? `confirmed (${n} replications)` : "confirmed once") };
+  if (partial)                        return { key: "validated", why: `partially supported (${partial} of ${n})` };
+  return { key: "validated", why: "independently checked" };
 };
 const statusOf = (t) => {
-  if (t.status === "VERIFIED") return /contradict|partial|disput|refut|critiqu/i.test(t.verification || "") ? "contested" : "validated";
-  if (t.mat && t.mat.score != null) return "ready";                  // materials present (resolved or linked)
-  const old = t.year && (new Date().getFullYear() - t.year) >= 8;    // had time to be replicated
-  const hot = t.impl === "C1" || t.impl === "C2";                    // still gaining momentum
+  if (t.status === "VERIFIED") return agreementOf(t.doi).key;        // robust / validated / contested / refuted
+  if (t.mat && t.mat.score != null) return "reproducible";          // original materials present → can re-run
+  const old = t.year && (new Date().getFullYear() - t.year) >= 8;   // had time to be replicated
+  const hot = t.impl === "C1" || t.impl === "C2";                   // still gaining momentum
   return (old && !hot) ? "dormant" : "needs";
+};
+// Replication PRIORITY (0..1) — how much this would benefit from (further) replication, so the
+// number and the order agree. OPEN = worth × feasible (the readiness already computed). VERIFIED =
+// impact modulated by the agreement: contested/unsettled rises, robustly-validated sinks (it's done).
+const VERDICT_WEIGHT = { robust: 0.2, validated: 0.4, contested: 0.95, refuted: 0.55 };
+const priorityOf = (t) => {
+  if (t.status !== "VERIFIED") return t.readiness;
+  const imp = Math.max(CLASS_SCORE[t.infl] || 0.2, CLASS_SCORE[t.cls] || 0.2);
+  return Math.round(imp * (VERDICT_WEIGHT[t.statusKey] ?? 0.4) * 100) / 100;
 };
 
 async function search(topic, type, size) {
@@ -347,14 +372,15 @@ async function radar(topic) {
     if (!v.doi || have.has(v.doi)) continue;
     const cs = Math.max(CLASS_SCORE[v.infl] || 0.2, CLASS_SCORE[v.cls] || 0.2);
     const momentum = CLASS_SCORE[v.impl] || 0.2;
-    const matScore = (v.repl && v.repl.code) ? 1.0 : (v.repo_doi ? 0.8 : null);   // its replication deposit
+    // verified: the materials score is about reproducing the ORIGINAL (unknown here) — NOT the
+    // replication's own repo. Keep that repo only so the FAIR badge can assess it.
     targets.push({
       title: v.title, doi: v.doi, citations: v.citations, cls: v.cls, infl: v.infl,
       year: v.year || null, impl: v.impl || null,
-      mat: { score: matScore, state: matScore == null ? "unknown" : "code", code: (v.repl && v.repl.code) || null },
-      parts: { mat: matScore, impact: cs, momentum },
+      mat: { score: null, state: "unknown", code: (v.repl && v.repl.code) || null },
+      parts: { mat: null, impact: cs, momentum },
       status: "VERIFIED",
-      readiness: readinessFrom(matScore, cs, momentum),
+      readiness: readinessFrom(null, cs, momentum),
       verification: [...new Set(v.verdicts)].join(", "),
       outcome_np: v.outcome_np,
     });
@@ -379,9 +405,10 @@ async function radar(topic) {
       outcome_np: VERDICTS[doi] ? ((VERDICTS[doi].find((v) => v.outcome_np) || {}).outcome_np || null) : null,
     });
   }
-  targets.forEach((t) => { t.statusKey = statusOf(t); });
-  // group by status (⭐ replication-ready first — the actionable candidates), then by readiness
-  targets.sort((a, b) => (STATUS[a.statusKey].rank - STATUS[b.statusKey].rank) || (b.readiness || 0) - (a.readiness || 0) || (b.citations || 0) - (a.citations || 0));
+  targets.forEach((t) => { t.statusKey = statusOf(t); t.priority = priorityOf(t); });
+  // sort by replication PRIORITY — so the number and the order agree (contested/unchecked rise,
+  // robustly-validated sinks). No status-rank override.
+  targets.sort((a, b) => (b.priority || 0) - (a.priority || 0) || (b.citations || 0) - (a.citations || 0));
 
   // FAIR computed LIVE (same assessSoftware the verified path uses) for paper-resolved repos
   await Promise.all(targets.map(async (t) => {
@@ -400,9 +427,10 @@ let _targets = [], _tpage = 0;
 
 function targetRow(t) {
   const p = t.parts || {};
-  const scoreTitle = `replicability = 0.45·materials + 0.35·impact + 0.20·momentum  —  `
-    + `materials ${p.mat == null ? "unverified" : p.mat.toFixed(2)} · impact ${(p.impact || 0).toFixed(2)} · momentum ${(p.momentum || 0).toFixed(2)}`;
-  const score = `<div class="score" title="${esc(scoreTitle)}"><span>${t.readiness != null ? t.readiness.toFixed(2) : "—"}</span><small>REPLIC.</small></div>`;
+  const scoreTitle = t.status === "VERIFIED"
+    ? `replication priority — already checked: impact modulated by agreement (${t.statusKey}). A robustly-validated result sinks (it's settled); a contested one rises (worth re-checking).`
+    : `replication priority = 0.45·materials + 0.35·impact + 0.20·momentum  —  materials ${p.mat == null ? "unverified" : p.mat.toFixed(2)} · impact ${(p.impact || 0).toFixed(2)} · momentum ${(p.momentum || 0).toFixed(2)}`;
+  const score = `<div class="score" title="${esc(scoreTitle)}"><span>${t.priority != null ? t.priority.toFixed(2) : "—"}</span><small>PRIORITY</small></div>`;
   const st = STATUS[t.statusKey] || STATUS.needs;
   const badge = `<span class="badge ${st.cls}" title="${esc(st.tip)}">${st.label}</span>`
     + (t.status === "VERIFIED" && t.verification ? `<span class="badge cls">${esc(t.verification)}</span>` : "")
@@ -418,8 +446,8 @@ function targetRow(t) {
     + (t.impl ? `<span class="badge imp" title="OpenAIRE BIP! impulse class — early citation momentum (C1 highest)">impulse ${t.impl}</span>` : "")
     + matMeta + `</div>`;
   const link = t.doi ? `<a href="https://doi.org/${t.doi}" target="_blank" rel="noopener">${t.doi}</a>` : "";
-  const verdictLink = (t.status === "VERIFIED" && t.outcome_np)
-    ? `<div class="tverdict">independently checked by Science Live · <a href="${t.outcome_np}" target="_blank" rel="noopener">replication outcome →</a></div>` : "";
+  const verdictLink = (t.status === "VERIFIED")
+    ? `<div class="tverdict">independently checked by Science Live — <b>${esc(agreementOf(t.doi).why)}</b>${t.outcome_np ? ` · <a href="${t.outcome_np}" target="_blank" rel="noopener">replication outcome →</a>` : ""}</div>` : "";
   const resolvedNote = (t.mat && t.mat.resolved)
     ? `<div class="tresolved">↳ materials resolved from ${esc(t.mat.source || "the paper")} (not in OpenAIRE): <a href="${esc(t.mat.code || "")}" target="_blank" rel="noopener">code repo</a>${(t.mat.data && t.mat.data.length) ? ` · data: ${t.mat.data.map(esc).join(", ")}` : ""}</div>`
     : "";
@@ -437,7 +465,7 @@ function paintTargets() {
   const pages = Math.max(1, Math.ceil(_targets.length / PER_PAGE));
   if (_tpage >= pages) _tpage = pages - 1;
   const n = (k) => _targets.filter((t) => t.statusKey === k).length;
-  el("tcount").textContent = `${n("ready")} replication-ready · ${n("validated")} validated · ${_targets.length} candidates`;
+  el("tcount").textContent = `${n("reproducible")} reproducible · ${n("robust") + n("validated")} validated · ${n("contested") + n("refuted")} contested · ${_targets.length} candidates`;
   el("targets").innerHTML = _targets.slice(_tpage * PER_PAGE, _tpage * PER_PAGE + PER_PAGE).map(targetRow).join("");
   el("tpager").innerHTML = pages > 1
     ? `<button ${_tpage === 0 ? "disabled" : ""} onclick="pageTargets(-1)">← Prev</button><span>Page ${_tpage + 1} of ${pages}</span><button ${_tpage >= pages - 1 ? "disabled" : ""} onclick="pageTargets(1)">Next →</button>`
