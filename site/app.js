@@ -57,9 +57,10 @@ const materialsOf = (r) => {
 // Transparent composite: materials is the largest term; when materials is UNKNOWN
 // (null) we DROP that term and renormalise the rest — never score a missing link as 0.
 const readinessFrom = (matScore, impactScore, momentum) => {
-  const r = matScore == null
-    ? (0.35 * impactScore + 0.20 * momentum) / 0.55
-    : (0.45 * matScore + 0.35 * impactScore + 0.20 * momentum);
+  // No renormalisation when materials are unknown: you can't even reproduce a paper whose
+  // code/data aren't surfaced, so the materials term simply contributes 0 (worth caps at 0.55).
+  // A paper WITH materials therefore always out-ranks an equally-cited one without.
+  const r = 0.45 * (matScore || 0) + 0.35 * impactScore + 0.20 * momentum;
   return Math.round(r * 100) / 100;
 };
 // Status taxonomy — "not replicated" is DISAMBIGUATED, not penalised.
@@ -98,7 +99,11 @@ const statusOf = (t) => {
 // impact modulated by the agreement: contested/unsettled rises, robustly-validated sinks (it's done).
 const VERDICT_WEIGHT = { robust: 0.2, validated: 0.4, contested: 0.95, refuted: 0.55 };
 const priorityOf = (t) => {
-  if (t.status !== "VERIFIED") return t.readiness;
+  if (t.status !== "VERIFIED") {
+    // dormant = old, cold, no materials → low ACTIONABILITY, so it sinks below live targets
+    // however high its historic citation count, matching what the "💤 Dormant" badge signals.
+    return t.statusKey === "dormant" ? Math.round(t.readiness * 0.5 * 100) / 100 : t.readiness;
+  }
   const imp = Math.max(CLASS_SCORE[t.infl] || 0.2, CLASS_SCORE[t.cls] || 0.2);
   return Math.round(imp * (VERDICT_WEIGHT[t.statusKey] ?? 0.4) * 100) / 100;
 };
