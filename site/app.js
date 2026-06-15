@@ -605,7 +605,9 @@ function renderVerified(inField) {
 // The replication-gap map: a status-composition bar over the ranked list (not a per-paper
 // citation chart — the insight is how MUCH of the field has been checked, not who's most cited).
 const GAP_ORDER = ["reproducible", "robust", "validated", "contested", "refuted", "needs", "dormant"];
-const GAP_COLOR = { reproducible: "#e6007e", robust: "#11875a", validated: "#3fae82", contested: "#e0922f", refuted: "#c0392b", needs: "#aebbd0", dormant: "#dde2ea" };
+// Distinguishable by hue AND lightness — the two "unchecked" states (needs/dormant) were
+// previously near-identical light blue-greys; now a clear medium slate vs a light warm grey.
+const GAP_COLOR = { reproducible: "#e6007e", robust: "#0f7a4f", validated: "#4caf86", contested: "#e0922f", refuted: "#c0392b", needs: "#64748b", dormant: "#d8d4cc" };
 const CHECKED = new Set(["robust", "validated", "contested", "refuted"]);
 function renderChart() {
   const counts = {};
