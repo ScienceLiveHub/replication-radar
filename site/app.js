@@ -607,7 +607,9 @@ function renderVerified(inField) {
 const GAP_ORDER = ["reproducible", "robust", "validated", "contested", "refuted", "needs", "dormant"];
 // Distinguishable by hue AND lightness — the two "unchecked" states (needs/dormant) were
 // previously near-identical light blue-greys; now a clear medium slate vs a light warm grey.
-const GAP_COLOR = { reproducible: "#e6007e", robust: "#0f7a4f", validated: "#4caf86", contested: "#e0922f", refuted: "#c0392b", needs: "#64748b", dormant: "#d8d4cc" };
+// Platform chart colormap: chart-1 pink, chart-3 green, chart-4 orange, destructive red,
+// chart-5 slate + a light grey for the two "unchecked" states (which should recede).
+const GAP_COLOR = { reproducible: "#be2e78", robust: "#8eb032", validated: "#aac95e", contested: "#f59e09", refuted: "#ff6b6b", needs: "#64748b", dormant: "#d1d3d8" };
 const CHECKED = new Set(["robust", "validated", "contested", "refuted"]);
 function renderChart() {
   const counts = {};
