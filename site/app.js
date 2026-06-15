@@ -9,7 +9,6 @@ const EXAMPLES = ["species distribution", "marine heatwave", "bumble bee climate
 let VERDICTS = {};      // doi -> [verifications]
 let VERIFIED = [];      // enriched: {doi, title, citations, verifications}
 let CURATED = {};       // doi -> paper-resolved materials (the links OpenAIRE lacks; from the paper)
-let chart = null;
 
 // ---------- OpenAIRE helpers (same shape as openaire.py) ----------
 const doiOf = (r) => {
@@ -459,9 +458,13 @@ function targetRow(t) {
   const fairNote = t.fair
     ? `<div class="tfair">FAIR software <b>${t.fair.score}/5</b> · ⭐ ${t.fair.stars}${t.fair.swh ? " · in Software Heritage" : ""}</div>`
     : "";
+  // OPEN targets get a next step: discovery here → the FORRT template handles the nanopub chain.
+  const replicateCTA = (t.status !== "VERIFIED")
+    ? `<div class="treplicate"><a href="https://github.com/ScienceLiveHub/forrt-replication-template" target="_blank" rel="noopener" title="Start a replication from the FORRT template — it scaffolds the repo and the signed nanopub chain (Claim · Study · Outcome)">▷ Replicate this with the template →</a></div>`
+    : "";
   return `<div class="target ${t.status === "VERIFIED" ? "verified" : ""}">
     ${score}
-    <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${meta}${verdictLink}${resolvedNote}${fairNote}</div>
+    <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${meta}${verdictLink}${resolvedNote}${fairNote}${replicateCTA}</div>
     <div class="t-right">${t.citations.toLocaleString()} cites<br>${link}</div>
   </div>`;
 }
@@ -554,36 +557,26 @@ function renderVerified(inField) {
   el("verified").innerHTML = fieldHtml + moreHtml;
 }
 
-function renderChart(items) {
-  const short = (s) => { s = s || ""; return s.length > 46 ? s.slice(0, 44) + "…" : s; };
-  if (chart) chart.destroy();
-  if (!items.length) { el("gap").parentElement.querySelector(".empty")?.remove(); return; }
-  chart = new Chart(el("gap"), {
-    type: "bar",
-    data: {
-      labels: items.map((i) => short(i.title)),
-      datasets: [{
-        data: items.map((i) => Math.max(1, i.citations || 0)),
-        backgroundColor: items.map((i) => (i.status === "VERIFIED" ? "#11875a" : "#e6007e")),
-        borderRadius: 5, barThickness: 16,
-      }],
-    },
-    options: {
-      indexAxis: "y",
-      maintainAspectRatio: false,
-      scales: {
-        x: { type: "logarithmic", title: { display: true, text: "citation impact (count, log)" }, grid: { color: "#eef2f9" } },
-        y: { ticks: { font: { size: 11 } }, grid: { display: false } },
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: {
-          title: (ti) => items[ti[0].dataIndex].title,   // full (untruncated) paper title on hover
-          label: (c) => `${items[c.dataIndex].status === "VERIFIED" ? "✓ already checked" : "open — worth replicating"} · ${items[c.dataIndex].citations.toLocaleString()} cites`,
-        } },
-      },
-    },
-  });
+// The replication-gap map: a status-composition bar over the ranked list (not a per-paper
+// citation chart — the insight is how MUCH of the field has been checked, not who's most cited).
+const GAP_ORDER = ["reproducible", "robust", "validated", "contested", "refuted", "needs", "dormant"];
+const GAP_COLOR = { reproducible: "#e6007e", robust: "#11875a", validated: "#3fae82", contested: "#e0922f", refuted: "#c0392b", needs: "#aebbd0", dormant: "#dde2ea" };
+const CHECKED = new Set(["robust", "validated", "contested", "refuted"]);
+function renderChart() {
+  const counts = {};
+  for (const t of _targets) counts[t.statusKey] = (counts[t.statusKey] || 0) + 1;
+  const total = _targets.length;
+  if (!total) { el("gap").innerHTML = ""; return; }
+  const present = GAP_ORDER.filter((k) => counts[k]);
+  const checked = present.filter((k) => CHECKED.has(k)).reduce((s, k) => s + counts[k], 0);
+  const seg = present.map((k) =>
+    `<span class="gapseg" style="width:${(counts[k] / total * 100).toFixed(1)}%;background:${GAP_COLOR[k]}" title="${esc(STATUS[k].label)} — ${counts[k]}"></span>`).join("");
+  const key = present.map((k) =>
+    `<button class="gapkeyi" onclick="filterTargets('${k}')" title="filter the list to ${esc(STATUS[k].label)}"><i style="background:${GAP_COLOR[k]}"></i>${STATUS[k].label} <b>${counts[k]}</b></button>`).join("");
+  const head = checked === 0
+    ? `<b>0</b> of <b>${total}</b> independently checked — <span class="gapnone">the whole field is an open replication gap</span>`
+    : `<b>${checked}</b> of <b>${total}</b> independently checked — <span class="gapsub">the other ${total - checked} are the replication gap</span>`;
+  el("gap").innerHTML = `<div class="gaphead">${head}</div><div class="gapbar">${seg}</div><div class="gapkey">${key}</div>`;
 }
 
 async function run(topic) {
@@ -597,7 +590,7 @@ async function run(topic) {
     renderTargets(r.targets);
     renderTooling(r.tooling);
     renderVerified(r.inField);
-    renderChart(r.chartItems);
+    renderChart();
     el("status").textContent = r.inField.size
       ? `“${topic}”: ${r.targets.length} candidates · ${r.inField.size} already checked, matching your search (green) — the rest are open.`
       : `“${topic}”: ${r.targets.length} candidates · none matching your search have been checked yet — every one is an open replication opportunity.`;

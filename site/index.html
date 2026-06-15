@@ -6,7 +6,6 @@
   <title>Replication Radar — what to replicate next, from the OpenAIRE Graph</title>
   <meta name="description" content="A live tool that turns the OpenAIRE Graph into a ranked replication queue: impact-ranked targets, independent reusable tooling, and whether a claim has already been checked." />
   <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <header>
@@ -30,8 +29,8 @@
       <div class="grid">
         <div class="card chartcard">
           <h2>The replication-gap map</h2>
-          <p class="hint">High-impact papers matching your search, ranked by citations. <b class="verified">Green = already checked</b> by Science Live; <b class="open">pink = open</b> — a replication opportunity. All-pink means nothing here has been independently checked yet.</p>
-          <div class="chartbox"><canvas id="gap"></canvas></div>
+          <p class="hint">How much of the high-impact work matching your search has actually been <b class="verified">independently checked</b> — the field at a glance. Everything <b class="open">not yet checked</b> is the replication gap.</p>
+          <div class="chartbox" id="gap"></div>
         </div>
         <aside class="card verifiedcard">
           <h2>Verified, matching your search <span id="vcount" class="pill"></span></h2>
