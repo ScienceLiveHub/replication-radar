@@ -89,16 +89,18 @@ const outcomesFor = (doi) => {
 const verdictClass = (v) => /contradict|notsupport|refut/i.test(v) ? "v-con"
   : /partial/i.test(v) ? "v-part"
   : /validat|confirm|support/i.test(v) ? "v-ok" : "v-other";
-// One link when a single replication; colour-coded numbered chips (tooltipped with the verdict)
-// when many — green = confirmed, amber = partial, red = contradicted.
+// Short, human verdict label for a chip (no arbitrary numbers — the verdict is the meaning).
+const verdictLabel = (v) => /contradict/i.test(v) ? "Contradicted"
+  : /notsupport/i.test(v) ? "Not supported"
+  : /partial/i.test(v) ? "Partial"
+  : /validat|confirm|support/i.test(v) ? "Validated" : (v || "outcome");
+// Each replication outcome is a verdict-labelled, colour-coded chip linking to its signed nanopub
+// — green = confirmed, amber = partial, red = contradicted. No cryptic index numbers.
 const outcomeLinks = (outs) => {
   if (!outs.length) return "";
-  if (outs.length === 1) {
-    const o = outs[0];
-    return ` · <a class="onp ${verdictClass(o.verdict)}" href="${o.np}" target="_blank" rel="noopener" title="${esc(o.verdict)}">${esc(o.verdict)} →</a>`;
-  }
-  return ` · ${outs.length} replication outcomes: ` + outs.map((o, i) =>
-    `<a class="onp ${verdictClass(o.verdict)}" href="${o.np}" target="_blank" rel="noopener" title="${esc(o.verdict)}">${i + 1}</a>`).join(" ");
+  const lead = outs.length === 1 ? "replication outcome:" : `${outs.length} replication outcomes:`;
+  return ` · ${lead} ` + outs.map((o) =>
+    `<a class="onp ${verdictClass(o.verdict)}" href="${o.np}" target="_blank" rel="noopener" title="${esc(o.verdict)} — open the signed nanopub">${verdictLabel(o.verdict)}</a>`).join(" ");
 };
 // Agreement pattern across the independent replication verdicts — many-agree ≠ disagree.
 const agreementOf = (doi) => {
