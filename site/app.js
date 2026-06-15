@@ -579,7 +579,7 @@ function renderChart() {
   el("gap").innerHTML = `<div class="gaphead">${head}</div><div class="gapbar">${seg}</div><div class="gapkey">${key}</div>`;
 }
 
-async function run(topic) {
+async function run(topic, isExample) {
   topic = (topic || "").trim();
   if (!topic) return;
   el("go").disabled = true;
@@ -591,9 +591,10 @@ async function run(topic) {
     renderTooling(r.tooling);
     renderVerified(r.inField);
     renderChart();
-    el("status").textContent = r.inField.size
+    const note = isExample ? ` <i>— showing an example; search your own field above.</i>` : "";
+    el("status").innerHTML = (r.inField.size
       ? `“${topic}”: ${r.targets.length} candidates · ${r.inField.size} already checked, matching your search (green) — the rest are open.`
-      : `“${topic}”: ${r.targets.length} candidates · none matching your search have been checked yet — every one is an open replication opportunity.`;
+      : `“${topic}”: ${r.targets.length} candidates · none matching your search have been checked yet — every one is an open replication opportunity.`) + note;
   } catch (e) {
     el("status").textContent = `Could not reach the OpenAIRE Graph (${e.message}). Try again or a shorter topic.`;
   } finally {
@@ -608,4 +609,12 @@ el("go").addEventListener("click", () => run(el("topic").value));
 el("topic").addEventListener("keydown", (e) => { if (e.key === "Enter") run(el("topic").value); });
 
 el("status").textContent = "Loading the Science Live verdict layer live from the nanopub network …";
-Promise.all([loadVerdicts(), loadCurated()]).then(() => { el("status").textContent = "Type a research field and hit Scan — or try an example above."; });
+Promise.all([loadVerdicts(), loadCurated()]).then(() => {
+  // Default landing state: populate the radar with a sample field so first-time visitors see the
+  // value immediately, not a blank page — but never clobber a user who has already started.
+  if (!el("topic").value.trim() && el("results").hidden) {
+    run("species distribution", true);
+  } else {
+    el("status").textContent = "Type a research field and hit Scan — or try an example above.";
+  }
+});
