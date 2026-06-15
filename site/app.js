@@ -7,6 +7,7 @@ const CLASS_SCORE = { C1: 1, C2: 0.8, C3: 0.6, C4: 0.4, C5: 0.2 };
 const EXAMPLES = ["species distribution", "marine heatwave", "bumble bee climate", "presence-only", "range maps scale"];
 
 let VERDICTS = {};      // doi -> [verifications]
+let CLAIMS = {};        // outcome-hash -> { label, aida, type } (what exactly was replicated)
 let VERIFIED = [];      // enriched: {doi, title, citations, verifications}
 let CURATED = {};       // doi -> paper-resolved materials (the links OpenAIRE lacks; from the paper)
 
@@ -187,6 +188,11 @@ const NONVERDICT_RELS = new Set(["usesmethodin", "usesdatafrom", "citesasdatasou
 const npHash = (u) => (u || "").replace(/.*\/np\//, "");
 const doiPart = (u) => (u || "").replace(/.*doi\.org\//, "").toLowerCase();
 const cleanRepo = (r) => (!r ? null : r.includes("doi.org/") ? doiPart(r) : /^10\./.test(r) ? r.toLowerCase() : r);
+// AIDA statement URI → the atomic claim sentence (mixed +/%20 encoding in the wild).
+const aidaText = (u) => { if (!u) return ""; try { return decodeURIComponent(u.replace(/.*\/aida\//, "").replace(/\+/g, " ")); } catch (e) { return ""; } };
+// e.g. ".../terms/model_performance-FORRT-Claim" → "model performance"
+const claimType = (u) => (!u ? "" : u.replace(/.*\/terms\//, "").replace(/-FORRT-Claim$/, "").replace(/_/g, " "));
+const claimFor = (outcome_np) => CLAIMS[npHash(outcome_np)] || null;
 
 async function sparqlCsv(query) {
   const r = await fetch(`${NP_SPARQL}?query=${encodeURIComponent(query)}`, { headers: { Accept: "text/csv" } });
@@ -204,8 +210,19 @@ async function buildIndexFromNetwork() {
 SELECT DISTINCT ?outcome ?status ?repo WHERE { GRAPH ?g { ?outcome ntpl:wasCreatedFromTemplate <${TPL_OUTCOME}> . } ?outcome np:hasAssertion ?oa . GRAPH ?oa { ?oc slt:hasValidationStatus ?s . OPTIONAL { ?oc slt:hasOutcomeRepository ?repo . } } BIND(STRAFTER(STR(?s),"/terms/") AS ?status) }`;
   const QB = `PREFIX np: <http://www.nanopub.org/nschema#> PREFIX ntpl: <https://w3id.org/np/o/ntemplate/> PREFIX cito: <http://purl.org/spar/cito/>
 SELECT DISTINCT ?cito ?subj ?rel ?orig WHERE { GRAPH ?g { ?cito ntpl:wasCreatedFromTemplate <${TPL_CITO}> . } ?cito np:hasAssertion ?ca . GRAPH ?ca { ?subj ?rel ?orig . } FILTER(STRSTARTS(STR(?rel),STR(cito:))) FILTER(CONTAINS(STR(?orig),"doi.org/10.")) } LIMIT 3000`;
+  // QC: what exactly was replicated — traverse Outcome →isOutcomeOf→ Study →targetsClaim→ Claim,
+  // pulling the claim label, its AIDA statement (the atomic claim sentence), and its FORRT type.
+  const QC = `PREFIX np: <http://www.nanopub.org/nschema#> PREFIX ntpl: <https://w3id.org/np/o/ntemplate/> PREFIX slt: <https://w3id.org/sciencelive/o/terms/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?outcome ?claimLabel ?aida ?ctype WHERE { GRAPH ?og { ?outcome ntpl:wasCreatedFromTemplate <${TPL_OUTCOME}> . } ?outcome np:hasAssertion ?oa . GRAPH ?oa { ?oc slt:isOutcomeOf ?study . } GRAPH ?sg { ?study slt:targetsClaim ?claim . } GRAPH ?cg { ?claim rdfs:label ?claimLabel . } OPTIONAL { GRAPH ?cg { ?claim slt:asAidaStatement ?aida . } } OPTIONAL { GRAPH ?cg { ?claim a ?ctype . FILTER(CONTAINS(STR(?ctype),"-FORRT-Claim")) } } } LIMIT 500`;
   const A = await sparqlCsv(QA);            // sequential: concurrent queries truncate the endpoint
   const B = await sparqlCsv(QB);
+  CLAIMS = {};
+  try {                                     // claim enrichment is best-effort — never break verdicts
+    for (const r of await sparqlCsv(QC)) {
+      const h = npHash(r.outcome);
+      if (!CLAIMS[h]) CLAIMS[h] = { label: r.claimLabel || "", aida: aidaText(r.aida), type: claimType(r.ctype) };
+    }
+  } catch (e) { /* claims stay empty; cards still show verdict + why */ }
   const byHash = {};
   for (const r of B) {
     const h = npHash(r.subj);
@@ -450,6 +467,10 @@ function targetRow(t) {
     + (t.impl ? `<span class="badge imp" title="OpenAIRE BIP! impulse class — early citation momentum (C1 highest)">impulse ${t.impl}</span>` : "")
     + matMeta + `</div>`;
   const link = t.doi ? `<a href="https://doi.org/${t.doi}" target="_blank" rel="noopener">${t.doi}</a>` : "";
+  // what EXACTLY was replicated — the claim's AIDA statement (atomic sentence) + its FORRT type
+  const cl = t.status === "VERIFIED" ? claimFor(t.outcome_np) : null;
+  const claimLine = (cl && (cl.aida || cl.label))
+    ? `<div class="tclaim"><span class="claimlbl">claim:</span> <span class="claimq">“${esc(cl.aida || cl.label)}”</span>${cl.type ? ` <span class="badge ctype" title="FORRT claim type">${esc(cl.type)}</span>` : ""}</div>` : "";
   const verdictLink = (t.status === "VERIFIED")
     ? `<div class="tverdict">independently checked by Science Live — <b>${esc(agreementOf(t.doi).why)}</b>${t.outcome_np ? ` · <a href="${t.outcome_np}" target="_blank" rel="noopener">replication outcome →</a>` : ""}</div>` : "";
   const resolvedNote = (t.mat && t.mat.resolved)
@@ -464,7 +485,7 @@ function targetRow(t) {
     : "";
   return `<div class="target ${t.status === "VERIFIED" ? "verified" : ""}">
     ${score}
-    <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${meta}${verdictLink}${resolvedNote}${fairNote}${replicateCTA}</div>
+    <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${meta}${claimLine}${verdictLink}${resolvedNote}${fairNote}${replicateCTA}</div>
     <div class="t-right">${t.citations.toLocaleString()} cites<br>${link}</div>
   </div>`;
 }
@@ -542,10 +563,14 @@ function renderVerified(inField) {
     } else if (v.repo_doi) {
       repl = `<div class="vrepl muted">↳ replication deposit: <a href="${v.repo_doi.startsWith("http") ? esc(v.repo_doi) : "https://doi.org/" + esc(v.repo_doi)}" target="_blank" rel="noopener">${esc(v.repo_doi)}</a> <span class="ochip wait">awaiting OpenAIRE harvest</span></div>`;
     }
+    const vcl = claimFor(v.outcome_np);
+    const vClaimLine = (vcl && (vcl.aida || vcl.label))
+      ? `<div class="vclaim"><span class="claimlbl">claim replicated</span> <span class="claimq">“${esc(vcl.aida || vcl.label)}”</span>${vcl.type ? ` <span class="badge ctype" title="FORRT claim type">${esc(vcl.type)}</span>` : ""}</div>` : "";
     return `<li class="match">
       <span class="nodelabel">original paper · OpenAIRE</span>
       <span class="vt">${esc(v.title).slice(0, 82)}</span>
       <div class="ochips">${chips}</div>
+      ${vClaimLine}
       <div class="vline"><span class="vv ${partialOf(v) ? "partial" : ""}">${v.verdicts.join(", ")}</span> — independently checked by Science Live ${v.outcome_np ? `· <a href="${v.outcome_np}" target="_blank" rel="noopener">replication outcome →</a>` : (v.cito_np ? `· <a href="${v.cito_np}" target="_blank" rel="noopener">verdict chain →</a>` : "")}</div>
       ${repl}
     </li>`;
