@@ -37,6 +37,18 @@ SELECT DISTINCT ?outcome ?status ?repo WHERE {{ GRAPH ?g {{ ?outcome ntpl:wasCre
 _QB = f"""PREFIX np: <http://www.nanopub.org/nschema#> PREFIX ntpl: <https://w3id.org/np/o/ntemplate/> PREFIX cito: <http://purl.org/spar/cito/>
 SELECT DISTINCT ?cito ?subj ?rel ?orig WHERE {{ GRAPH ?g {{ ?cito ntpl:wasCreatedFromTemplate <{TPL_CITO}> . }} ?cito np:hasAssertion ?ca . GRAPH ?ca {{ ?subj ?rel ?orig . }} FILTER(STRSTARTS(STR(?rel),STR(cito:))) FILTER(CONTAINS(STR(?orig),"doi.org/10.")) }} LIMIT 3000"""
 
+# Validity guard, run as its OWN lightweight query (anchored on the Outcome template, so it stays
+# fast — anchoring on two templates, or an inline FILTER NOT EXISTS on the full repo, times the
+# endpoint out at 504). Returns OUR Outcomes that have been retracted / invalidated / superseded by
+# a nanopub from the SAME creator. Same-creator is essential: only the original author can retract
+# their own work — a third party publishing `retracts` must not be able to suppress someone else's.
+# Disapproval (`disapprovesOf`) is deliberately NOT here: that is a third party disagreeing, not a
+# retraction, so it must never hide a verdict. (Only Outcomes are affected in the current network;
+# extend VALUES ?tpl to the CiTO template if a superseded CiTO ever appears — but keep it one
+# query per template to stay under the endpoint timeout.)
+_QV = f"""PREFIX ntpl: <https://w3id.org/np/o/ntemplate/> PREFIX npx: <http://purl.org/nanopub/x/> PREFIX dct: <http://purl.org/dc/terms/>
+SELECT DISTINCT ?np WHERE {{ GRAPH ?g {{ ?np ntpl:wasCreatedFromTemplate <{TPL_OUTCOME}> . }} GRAPH ?supg {{ ?sup ?act ?np . }} VALUES ?act {{ npx:retracts npx:invalidates npx:supersedes }} GRAPH ?cg1 {{ ?sup dct:creator ?cc . }} GRAPH ?cg2 {{ ?np dct:creator ?cc . }} }}"""
+
 
 def _sparql(query: str) -> list[dict]:
     url = f"{SPARQL}?{urllib.parse.urlencode({'query': query})}"
@@ -70,6 +82,10 @@ def build_index() -> dict:
     """
     outcomes = _sparql(_QA)        # sequential: concurrent queries truncate the endpoint
     citos = _sparql(_QB)
+    try:                                                   # best-effort: a guard timeout must not
+        invalid = {_hash(r.get("np")) for r in _sparql(_QV)}   # take down live verdicts
+    except Exception:
+        invalid = set()
     by_hash: dict[str, list] = {}
     for r in citos:
         by_hash.setdefault(_hash(r.get("subj")), []).append({
@@ -79,6 +95,8 @@ def build_index() -> dict:
         })
     index: dict[str, list] = {}
     for o in outcomes:
+        if _hash(o.get("outcome")) in invalid:             # drop a superseded/retracted Outcome
+            continue
         cs = by_hash.get(_hash(o.get("outcome")), [])
         verdict_citos = [c for c in cs if c["rel"] in VERDICT_RELS and not c["orig"].startswith("10.5281/")]
         targets = verdict_citos or [c for c in cs if c["rel"].lower() not in NONVERDICT_RELS and not c["orig"].startswith("10.5281/")]

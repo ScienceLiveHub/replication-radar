@@ -233,8 +233,17 @@ SELECT DISTINCT ?cito ?subj ?rel ?orig WHERE { GRAPH ?g { ?cito ntpl:wasCreatedF
   // pulling the claim label, its AIDA statement (the atomic claim sentence), and its FORRT type.
   const QC = `PREFIX np: <http://www.nanopub.org/nschema#> PREFIX ntpl: <https://w3id.org/np/o/ntemplate/> PREFIX slt: <https://w3id.org/sciencelive/o/terms/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT DISTINCT ?outcome ?claimLabel ?aida ?ctype WHERE { GRAPH ?og { ?outcome ntpl:wasCreatedFromTemplate <${TPL_OUTCOME}> . } ?outcome np:hasAssertion ?oa . GRAPH ?oa { ?oc slt:isOutcomeOf ?study . } GRAPH ?sg { ?study slt:targetsClaim ?claim . } GRAPH ?cg { ?claim rdfs:label ?claimLabel . } OPTIONAL { GRAPH ?cg { ?claim slt:asAidaStatement ?aida . } } OPTIONAL { GRAPH ?cg { ?claim a ?ctype . FILTER(CONTAINS(STR(?ctype),"-FORRT-Claim")) } } } LIMIT 500`;
+  // QV: validity guard — OUR Outcomes retracted / invalidated / superseded by a nanopub from the
+  // SAME creator (only the original author can retract their own work; a third-party `retracts`
+  // must not suppress someone else's). Disapproval is deliberately excluded — that's disagreement,
+  // not retraction. Anchored on the Outcome template alone to stay under the endpoint timeout.
+  const QV = `PREFIX ntpl: <https://w3id.org/np/o/ntemplate/> PREFIX npx: <http://purl.org/nanopub/x/> PREFIX dct: <http://purl.org/dc/terms/>
+SELECT DISTINCT ?np WHERE { GRAPH ?g { ?np ntpl:wasCreatedFromTemplate <${TPL_OUTCOME}> . } GRAPH ?supg { ?sup ?act ?np . } VALUES ?act { npx:retracts npx:invalidates npx:supersedes } GRAPH ?cg1 { ?sup dct:creator ?cc . } GRAPH ?cg2 { ?np dct:creator ?cc . } }`;
   const A = await sparqlCsv(QA);            // sequential: concurrent queries truncate the endpoint
   const B = await sparqlCsv(QB);
+  let invalid = new Set();
+  try { invalid = new Set((await sparqlCsv(QV)).map((r) => npHash(r.np))); }  // best-effort: never break verdicts
+  catch (e) { /* no guard this load */ }
   CLAIMS = {};
   try {                                     // claim enrichment is best-effort — never break verdicts
     for (const r of await sparqlCsv(QC)) {
@@ -249,6 +258,7 @@ SELECT DISTINCT ?outcome ?claimLabel ?aida ?ctype WHERE { GRAPH ?og { ?outcome n
   }
   const V = {};
   for (const o of A) {
+    if (invalid.has(npHash(o.outcome))) continue;   // drop a superseded/retracted Outcome
     const cs = byHash[npHash(o.outcome)] || [];
     const verdictCitos = cs.filter((c) => VERDICT_RELS.has(c.rel) && !c.orig.startsWith("10.5281/"));
     const targets = verdictCitos.length ? verdictCitos
