@@ -36,47 +36,9 @@
         <p class="hint">The <b class="verified">checked</b> papers matching your search, with the claim that was tested and the verdict — the reliability signal the Graph can't hold. Click any outcome to open its signed nanopub.</p>
         <div id="verified"></div>
       </aside>
-
-      <details class="legend">
-        <summary>Legend — what the labels mean (click to expand)</summary>
-        <div class="legend-grid">
-          <div class="legend-item">
-            <span class="legend-h">Impact class · OpenAIRE BIP!</span>
-            <span class="legend-body">
-              <span class="ochip">C1</span> top 0.01% &nbsp;<span class="ochip">C2</span> top 0.1% &nbsp;<span class="ochip">C3</span> top 1% &nbsp;<span class="ochip">C4</span> top 10% &nbsp;<span class="ochip">C5</span> the rest
-              <em>— global percentile of citations, across all of science</em>
-            </span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-h">Status (FORRT-aware)</span>
-            <span class="legend-body"><span class="badge st-ready">🔁 Reproducible</span> original code/data are available, so it can be re-run — <em>reproduction ≠ replication</em> (replication re-tests the claim with different data/methods) &nbsp; <span class="badge st-needs">❔ Needs check</span> not yet replicated, materials unknown &nbsp; <span class="badge st-dorm">💤 Dormant</span> older, low momentum</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-h">Verdict · Science Live (agreement pattern)</span>
-            <span class="legend-body"><span class="badge st-val">✅ Robustly validated</span> several independent replications, all confirmed &nbsp; <span class="badge st-val">✅ Validated</span> confirmed &nbsp; <span class="badge st-con">⚠️ Contested</span> replications disagree &nbsp; <span class="badge st-con">❌ Refuted</span> contradicted, none confirmed</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-h">Replication PRIORITY (the score)</span>
-            <span class="legend-body">a 0–1 number the table is sorted by. OPEN papers: impact × materials-available × momentum — higher = more worth, and more feasible, to replicate. VERIFIED papers: impact modulated by the agreement, so a <b>contested</b> result rises (worth re-checking) and a <b>robustly-validated</b> one sinks (it's settled).</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-h">Open access · OpenAIRE</span>
-            <span class="legend-body">All mean the paper is <b>free to read</b>; they differ in <b>who paid to publish</b>: <b>gold</b> OA journal (author/funder fee) · <b>hybrid</b> OA in a subscription journal (author fee) · <b>green</b> free self-archived copy · <b>bronze</b> free on the publisher site, no open licence · <b>diamond</b> no fee for authors or readers</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-h">Subject tags · OpenAIRE</span>
-            <span class="legend-body">auto-classified by OpenAIRE: research field (e.g. <em>biological sciences</em>) and UN Sustainable Development Goal (e.g. <em>13. Climate action</em>)</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-h">FAIR-software · fair-software.eu</span>
-            <span class="legend-body">a replication's code scored N/5 on the <b>fair-software.eu</b> recommendations — public repository · open license · in a registry · citable (CITATION.cff/DOI) · quality artefacts — computed live from GitHub + Software Heritage. Hover the score for the breakdown.</span>
-          </div>
-        </div>
-      </details>
-
       <div class="card">
         <h2>Top replication targets <span class="pill" id="tcount"></span></h2>
-        <p class="hint">Candidates matching your search, ranked by <b>replication priority</b> (the PRIORITY score — the number and the order agree). OPEN = an opportunity; VERIFIED = already checked, with its agreement pattern. Paged, 10 at a time. See the legend above for the badges.</p>
+        <p class="hint">Candidates matching your search, ranked by <b>replication priority</b> (the PRIORITY score — the number and the order agree). OPEN = an opportunity; VERIFIED = already checked, with its agreement pattern. Paged, 10 at a time. Hover any badge or the score for what it means.</p>
         <div id="tfilters" class="tfilters"></div>
         <div id="targets" class="targets"></div>
         <div id="tpager" class="tpager"></div>

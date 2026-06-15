@@ -565,7 +565,7 @@ function renderVerified(inField) {
   // rich card: the trust edge shown as TWO OpenAIRE nodes (original + replication)
   const matchCard = (v) => {
     const chips = [
-      v.oa ? `<span class="ochip oa">${esc(v.oa)} OA</span>` : "",
+      v.oa ? `<span class="ochip oa" title="Open-access route (OpenAIRE) — how the paper is free to read: gold/diamond = OA journal, hybrid = OA in a subscription journal, green = self-archived copy, bronze = free on the publisher site with no open licence">${esc(v.oa)} OA</span>` : "",
       ...(v.fos || []).map((f) => `<span class="ochip">${esc(f).slice(0, 24)}</span>`),
       ...(v.sdg || []).map((s) => `<span class="ochip sdg">${esc(s).slice(0, 22)}</span>`),
       `<span class="ochip cites">${v.citations.toLocaleString()} cites</span>`,
