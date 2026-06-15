@@ -460,7 +460,6 @@ function targetRow(t) {
   const score = `<div class="score" title="${esc(scoreTitle)}"><span>${t.priority != null ? t.priority.toFixed(2) : "—"}</span><small>PRIORITY</small></div>`;
   const st = STATUS[t.statusKey] || STATUS.needs;
   const badge = `<span class="badge ${st.cls}" title="${esc(st.tip)}">${st.label}</span>`
-    + (t.status === "VERIFIED" && t.verification ? `<span class="badge cls">${esc(t.verification)}</span>` : "")
     + (t.cls ? `<span class="badge cls" title="OpenAIRE BIP! impact class — C1 = top 0.01% most-cited globally, C5 = the rest">${t.cls}</span>` : "");
   // Materials badge ONLY when positively known. OpenAIRE rarely links code/data to a
   // paper, so 'unknown' is the norm in live search and would be noise on every row —
