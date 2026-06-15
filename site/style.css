@@ -94,13 +94,14 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .tverdict{font-size:12px;color:var(--mut);margin-top:4px}
 .onp{display:inline-block;min-width:18px;text-align:center;border:1px solid var(--line);border-radius:4px;padding:0 6px;margin:0 2px;font-weight:700;font-size:11px;line-height:1.6}
 .onp:hover{text-decoration:none}
-.onp.v-ok{border-color:#cbd9f0;color:var(--green);background:var(--green-soft)}
+/* white body so the chip is visible on tinted (verified) cards; verdict lives in border+text+hover */
+.onp.v-ok{border-color:#9db6df;color:var(--green);background:#fff}
 .onp.v-ok:hover{background:var(--green);color:#fff;border-color:var(--green)}
-.onp.v-part{border-color:#f7d9a0;color:#9a6206;background:#fdecc8}
+.onp.v-part{border-color:#f0c06a;color:#9a6206;background:#fff}
 .onp.v-part:hover{background:#f59e09;color:#fff;border-color:#f59e09}
-.onp.v-con{border-color:#f3c4c0;color:#cf3a3a;background:#ffe4e3}
+.onp.v-con{border-color:#eaa6a0;color:#cf3a3a;background:#fff}
 .onp.v-con:hover{background:#d64545;color:#fff;border-color:#d64545}
-.onp.v-other{border-color:var(--line);color:var(--mut)}
+.onp.v-other{border-color:var(--line);color:var(--mut);background:#fff}
 .tresolved{font-size:12px;color:var(--green);margin-top:4px}
 .tresolved a{font-weight:600}
 .tfair{font-size:12px;color:var(--mut);margin-top:3px}
