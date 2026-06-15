@@ -2,7 +2,7 @@
   /* Science Live palette — matched to the platform.sciencelive4all.org / sciencelive4all.org
      design tokens (primary pink, navy foreground, chart green/orange/slate, destructive red). */
   --navy:#0c2c59; --navy2:#193967; --ink:#15294a; --mut:#505960;
-  --magenta:#be2e78; --magenta-soft:#f7e6ef; --green:#557a25; --green-soft:#eef3df;
+  --magenta:#be2e78; --magenta-soft:#f7e6ef; --green:#0a7d56; --green-soft:#e6f5ee;
   --line:#e2e5ea; --bg:#fafbfc; --card:#fff;
 }
 *{box-sizing:border-box}
@@ -64,7 +64,7 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .tpager button:hover:not(:disabled){border-color:var(--magenta);color:var(--magenta)}
 .tpager button:disabled{opacity:.4;cursor:default}
 .target{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:10px}
-.target.verified{background:var(--green-soft);border-color:#cfe0a8}
+.target.verified{background:var(--green-soft);border-color:#b4e1c8}
 .score{width:54px;height:54px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff;background:var(--magenta);flex-direction:column;line-height:1}
 .score small{font-size:8px;font-weight:600;opacity:.85;letter-spacing:.4px}
 .target.verified .score{background:var(--green)}
@@ -72,7 +72,7 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .t-meta{font-size:12.5px;color:var(--mut);margin-top:3px}
 .badge{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:5px;margin-right:6px}
 .badge.open{background:var(--magenta-soft);color:#a32a6a}
-.badge.verified{background:#e3eecb;color:var(--green)}
+.badge.verified{background:#d7efe2;color:var(--green)}
 .badge.cls{background:#eef2f9;color:var(--navy2)}
 .badge.yr{background:#eef2f9;color:var(--mut)}
 .badge.imp{background:#e7edf6;color:var(--navy2)}
@@ -80,7 +80,7 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .badge.munk{background:#fdecc8;color:#9a6206}
 .score .unv{font-size:7.5px;font-weight:700;letter-spacing:.2px;opacity:.95}
 .badge.st-ready{background:var(--magenta);color:#fff}
-.badge.st-val{background:#e3eecb;color:var(--green)}
+.badge.st-val{background:#d7efe2;color:var(--green)}
 .badge.st-con{background:#fdecc8;color:#9a6206}
 .badge.st-needs{background:#eef2f9;color:var(--mut)}
 .badge.st-dorm{background:#f0f1f4;color:#9aa7bd}
@@ -91,7 +91,7 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .tverdict{font-size:12px;color:var(--mut);margin-top:4px}
 .onp{display:inline-block;min-width:18px;text-align:center;border:1px solid var(--line);border-radius:4px;padding:0 6px;margin:0 2px;font-weight:700;font-size:11px;line-height:1.6}
 .onp:hover{text-decoration:none}
-.onp.v-ok{border-color:#cfe0a8;color:var(--green);background:var(--green-soft)}
+.onp.v-ok{border-color:#b4e1c8;color:var(--green);background:var(--green-soft)}
 .onp.v-ok:hover{background:var(--green);color:#fff;border-color:var(--green)}
 .onp.v-part{border-color:#f7d9a0;color:#9a6206;background:#fdecc8}
 .onp.v-part:hover{background:#f59e09;color:#fff;border-color:#f59e09}
@@ -127,7 +127,7 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .ochip.cites{background:transparent;color:var(--mut);padding-left:0}
 .vclaim{font-size:12.5px;color:var(--ink);margin:7px 0 4px;line-height:1.5}
 .vline{font-size:12.5px;color:var(--mut);margin-top:5px}
-.vrepl{font-size:12.5px;margin-top:8px;padding-top:8px;border-top:1px dashed #cfe0a8;color:var(--ink)}
+.vrepl{font-size:12.5px;margin-top:8px;padding-top:8px;border-top:1px dashed #b4e1c8;color:var(--ink)}
 .vrepl.muted{color:var(--mut);border-top-color:var(--line)}
 .vrepl a{font-weight:600}
 .fairline{display:flex;align-items:center;flex-wrap:wrap;gap:7px;font-size:12px;color:var(--mut);margin-top:6px}
