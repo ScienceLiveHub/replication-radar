@@ -95,7 +95,7 @@ const verdictLabel = (v) => /contradict/i.test(v) ? "Contradicted"
   : /partial/i.test(v) ? "Partial"
   : /validat|confirm|support/i.test(v) ? "Validated" : (v || "outcome");
 // Each replication outcome is a verdict-labelled, colour-coded chip linking to its signed nanopub
-// — green = confirmed, amber = partial, red = contradicted. No cryptic index numbers.
+// — navy = confirmed, amber = partial, red = contradicted. No cryptic index numbers.
 const outcomeLinks = (outs) => {
   if (!outs.length) return "";
   const lead = outs.length === 1 ? "replication outcome:" : `${outs.length} replication outcomes:`;
@@ -609,7 +609,7 @@ const GAP_ORDER = ["reproducible", "robust", "validated", "contested", "refuted"
 // previously near-identical light blue-greys; now a clear medium slate vs a light warm grey.
 // Platform chart colormap: chart-1 pink, chart-3 green, chart-4 orange, destructive red,
 // chart-5 slate + a light grey for the two "unchecked" states (which should recede).
-const GAP_COLOR = { reproducible: "#be2e78", robust: "#0a7d56", validated: "#5fbf90", contested: "#f59e09", refuted: "#ff6b6b", needs: "#64748b", dormant: "#d1d3d8" };
+const GAP_COLOR = { reproducible: "#be2e78", robust: "#1f4d8f", validated: "#6f93c8", contested: "#f59e09", refuted: "#ff6b6b", needs: "#64748b", dormant: "#d1d3d8" };
 const CHECKED = new Set(["robust", "validated", "contested", "refuted"]);
 function renderChart() {
   const counts = {};
