@@ -73,9 +73,28 @@ const STATUS = {
   needs:        { label: "❔ Needs check",         cls: "st-needs", tip: "not yet replicated and OpenAIRE links no materials — unknown (not absent); resolve from the paper" },
   dormant:      { label: "💤 Dormant",            cls: "st-dorm",  tip: "no verdict, older, low momentum, no materials surfaced — likely dormant" },
 };
+// Distinct replication OUTCOMES for a paper — one signed nanopub per independent replication
+// (deduped by outcome URI, since several replications target the same claim).
+const outcomesFor = (doi) => {
+  const seen = new Set(), out = [];
+  (VERDICTS[doi] || []).forEach((v, i) => {
+    const key = v.outcome_np || `__${i}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push({ np: v.outcome_np || null, verdict: v.verdict || "" });
+  });
+  return out;
+};
+// One link when a single replication; numbered links (each tooltipped with its verdict) when many.
+const outcomeLinks = (outs) => {
+  if (!outs.length) return "";
+  if (outs.length === 1) return ` · <a href="${outs[0].np}" target="_blank" rel="noopener">replication outcome →</a>`;
+  return ` · ${outs.length} replication outcomes: ` + outs.map((o, i) =>
+    `<a class="onp" href="${o.np}" target="_blank" rel="noopener" title="${esc(o.verdict)}">${i + 1}</a>`).join(" ");
+};
 // Agreement pattern across the independent replication verdicts — many-agree ≠ disagree.
 const agreementOf = (doi) => {
-  const vs = (VERDICTS[doi] || []).map((v) => v.verdict || "");
+  const vs = outcomesFor(doi).map((o) => o.verdict);
   const contra  = vs.filter((v) => /contradict|notsupport|refut/i.test(v)).length;
   const partial = vs.filter((v) => /partial/i.test(v)).length;
   const confirm = vs.filter((v) => /validat|confirm|support/i.test(v) && !/partial|contradict|notsupport|refut/i.test(v)).length;
@@ -316,8 +335,6 @@ async function radar(topic) {
   const rank = (r) => [CLASS_SCORE[impact(r).influenceClass] || .2, CLASS_SCORE[impact(r).citationClass] || .2, (impact(r).citationCount || 0)];
   pubs.sort((a, b) => { const A = rank(a), B = rank(b); return (B[0] - A[0]) || (B[1] - A[1]) || (B[2] - A[2]); });
 
-  const sw = await search(topic, "software", 25);   // field-level reusable tooling (shown once, below)
-
   const targets = pubs.slice(0, 50).map((p) => {
     const doi = doiOf(p);
     const verified = doi && VERDICTS[doi];
@@ -375,17 +392,6 @@ async function radar(topic) {
     .map((v) => ({ title: v.title, citations: v.citations, status: "VERIFIED" }));
   const chartItems = [...poolItems, ...extra].sort((a, b) => (b.citations || 0) - (a.citations || 0)).slice(0, 12);
 
-  // FIELD-LEVEL independent tooling — shown ONCE, not per paper (it isn't paper-specific).
-  // Reuse-ranked, de-duplicated, and we drop repos merely named after the query.
-  const slug = topic.toLowerCase().replace(/\s+/g, "-");
-  const seenT = new Set();
-  const tooling = sw
-    .filter((s) => reuse(s) >= 2 && !(s.mainTitle || "").toLowerCase().includes(slug))
-    .sort((a, b) => reuse(b) - reuse(a))
-    .map((s) => ({ title: s.mainTitle || "", link: s.codeRepositoryUrl || urlOf(s), swh: swh(s), swhUrl: swhUrlOf(s) }))
-    .filter((t) => { const k = t.link || t.title; if (!t.title || seenT.has(k)) return false; seenT.add(k); return true; })
-    .slice(0, 5);
-
   // Inject matched VERIFIED papers that OpenAIRE's keyword search didn't return, so
   // the paper you replicated always appears in the table (at its replicability rank).
   const have = new Set(targets.map((t) => t.doi));
@@ -436,7 +442,7 @@ async function radar(topic) {
     if (t.mat && t.mat.resolved && t.mat.code && parseGitHub(t.mat.code)) t.fair = await assessSoftware(t.mat.code);
   }));
 
-  return { topic, targets, inField, chartItems, tooling };
+  return { topic, targets, inField, chartItems };
 }
 
 // ---------- rendering ----------
@@ -471,8 +477,9 @@ function targetRow(t) {
   const cl = t.status === "VERIFIED" ? claimFor(t.outcome_np) : null;
   const claimLine = (cl && (cl.aida || cl.label))
     ? `<div class="tclaim"><span class="claimlbl">claim:</span> <span class="claimq">“${esc(cl.aida || cl.label)}”</span>${cl.type ? ` <span class="badge ctype" title="FORRT claim type">${esc(cl.type)}</span>` : ""}</div>` : "";
+  const outs = t.status === "VERIFIED" ? outcomesFor(t.doi).filter((o) => o.np) : [];
   const verdictLink = (t.status === "VERIFIED")
-    ? `<div class="tverdict">independently checked by Science Live — <b>${esc(agreementOf(t.doi).why)}</b>${t.outcome_np ? ` · <a href="${t.outcome_np}" target="_blank" rel="noopener">replication outcome →</a>` : ""}</div>` : "";
+    ? `<div class="tverdict">independently checked by Science Live — <b>${esc(agreementOf(t.doi).why)}</b>${outcomeLinks(outs)}</div>` : "";
   const resolvedNote = (t.mat && t.mat.resolved)
     ? `<div class="tresolved">↳ materials resolved from ${esc(t.mat.source || "the paper")} (not in OpenAIRE): <a href="${esc(t.mat.code || "")}" target="_blank" rel="noopener">code repo</a>${(t.mat.data && t.mat.data.length) ? ` · data: ${t.mat.data.map(esc).join(", ")}` : ""}</div>`
     : "";
@@ -528,13 +535,6 @@ window.filterTargets = (k) => {
   _tpage = 0; paintTargets();
 };
 
-function renderTooling(tooling) {
-  if (!tooling || !tooling.length) { el("fieldtools").innerHTML = ""; return; }
-  const items = tooling.map((t) =>
-    `${t.link ? `<a href="${t.link}" target="_blank" rel="noopener">${esc(t.title).slice(0, 40)}</a>` : esc(t.title).slice(0, 40)}${t.swh ? ` <a href="${t.swhUrl || t.link}" target="_blank" rel="noopener" class="swh" title="archived in Software Heritage">⬡</a>` : ""}`
-  ).join(" &nbsp;·&nbsp; ");
-  el("fieldtools").innerHTML = `<b>Independent reusable tooling in this area</b> — engines for replicating by a different route, not tied to any one paper below: ${items}`;
-}
 
 function renderVerified(inField) {
   const field = VERIFIED.filter((v) => inField.has(v.doi)).sort((a, b) => b.citations - a.citations);
@@ -563,6 +563,7 @@ function renderVerified(inField) {
     } else if (v.repo_doi) {
       repl = `<div class="vrepl muted">↳ replication deposit: <a href="${v.repo_doi.startsWith("http") ? esc(v.repo_doi) : "https://doi.org/" + esc(v.repo_doi)}" target="_blank" rel="noopener">${esc(v.repo_doi)}</a> <span class="ochip wait">awaiting OpenAIRE harvest</span></div>`;
     }
+    const vouts = outcomesFor(v.doi).filter((o) => o.np);
     const vcl = claimFor(v.outcome_np);
     const vClaimLine = (vcl && (vcl.aida || vcl.label))
       ? `<div class="vclaim"><span class="claimlbl">claim replicated</span> <span class="claimq">“${esc(vcl.aida || vcl.label)}”</span>${vcl.type ? ` <span class="badge ctype" title="FORRT claim type">${esc(vcl.type)}</span>` : ""}</div>` : "";
@@ -571,7 +572,7 @@ function renderVerified(inField) {
       <span class="vt">${esc(v.title).slice(0, 82)}</span>
       <div class="ochips">${chips}</div>
       ${vClaimLine}
-      <div class="vline"><span class="vv ${partialOf(v) ? "partial" : ""}">${v.verdicts.join(", ")}</span> — independently checked by Science Live ${v.outcome_np ? `· <a href="${v.outcome_np}" target="_blank" rel="noopener">replication outcome →</a>` : (v.cito_np ? `· <a href="${v.cito_np}" target="_blank" rel="noopener">verdict chain →</a>` : "")}</div>
+      <div class="vline"><span class="vv ${partialOf(v) ? "partial" : ""}">${v.verdicts.join(", ")}</span> — independently checked by Science Live ${vouts.length ? outcomeLinks(vouts) : (v.cito_np ? `· <a href="${v.cito_np}" target="_blank" rel="noopener">verdict chain →</a>` : "")}</div>
       ${repl}
     </li>`;
   };
@@ -613,7 +614,6 @@ async function run(topic, isExample) {
     const r = await radar(topic);
     el("results").hidden = false;
     renderTargets(r.targets);
-    renderTooling(r.tooling);
     renderVerified(r.inField);
     renderChart();
     const note = isExample ? ` <i>— showing an example; search your own field above.</i>` : "";

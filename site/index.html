@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Replication Radar — what to replicate next, from the OpenAIRE Graph</title>
-  <meta name="description" content="A live tool that turns the OpenAIRE Graph into a ranked replication queue: impact-ranked targets, independent reusable tooling, and whether a claim has already been checked." />
+  <meta name="description" content="A live tool that turns the OpenAIRE Graph into a ranked replication queue: impact-ranked targets, the claim each one makes, and whether it has already been independently checked — with what verdict." />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -12,7 +12,7 @@
     <div class="wrap">
       <h1>Replication&nbsp;Radar</h1>
       <p class="tag">What's worth replicating next — read straight off the OpenAIRE&nbsp;Graph.</p>
-      <p class="sub">Science Live × OpenAIRE · impact-ranked targets · independent tooling · already-checked overlay</p>
+      <p class="sub">Science Live × OpenAIRE · impact-ranked targets · the claim each makes · already-checked overlay</p>
     </div>
   </header>
 
@@ -79,7 +79,6 @@
       <div class="card">
         <h2>Top replication targets <span class="pill" id="tcount"></span></h2>
         <p class="hint">Candidates matching your search, ranked by <b>replication priority</b> (the PRIORITY score — the number and the order agree). OPEN = an opportunity; VERIFIED = already checked, with its agreement pattern. Paged, 10 at a time. See the legend above for the badges.</p>
-        <p id="fieldtools" class="fieldtools"></p>
         <div id="tfilters" class="tfilters"></div>
         <div id="targets" class="targets"></div>
         <div id="tpager" class="tpager"></div>
