@@ -61,7 +61,7 @@ demo lands with just `replication-radar`.
 
 ---
 
-## 3 · The recording — two beats
+## 3 · The recording — three beats
 
 ### Beat 1 — the money shot: verify + cite (≈35 s)
 
@@ -81,7 +81,31 @@ confirmed, 1 qualifies it; here are the signed verdicts to cite,"* with links.
 "settled"; the MCP shows it's been checked 5 times and hands you **signed, citable verdicts** —
 including the one that *qualifies* it. That's the difference between paraphrasing and citing.
 
-### Beat 2 — the discovery side (≈20 s, optional)
+### Beat 2 — abstract → atomic claim → verdict: the two-project synergy (≈30 s)
+
+This is the strongest AI beat: the agent turns a paper's **text into a structured claim** and
+then **verifies** it, in one turn — your two hackathon projects composing (Jean's Hackaweek
+claim-*extraction* pipeline + the Radar's claim-*verification* layer). Needs the MCP **≥ 0.3.3**
+(it now returns the paper's abstract).
+
+**Type this prompt:**
+
+> Read the abstract of Soroye et al. 2020 (DOI 10.1126/science.aax8591), extract its single
+> central finding as one atomic AIDA sentence, and then tell me whether that exact claim has
+> been independently replicated.
+
+**What to expect:** the agent calls **`replication_status("10.1126/science.aax8591")`**, which now
+returns the **abstract** alongside the verdicts. The agent reads the abstract, **writes the atomic
+claim itself** (something like *"An increasing frequency of unusually hot days raises local
+extinction and lowers site occupancy of bumble bees, independent of land-use change"*), and then
+reports it has been **independently replicated 5× (4 confirm, 1 qualifies)** with the signed
+nanopubs.
+
+**The point to land:** *from a paper's text → a structured, atomic claim → a signed, citable
+verdict, in one turn.* Generation meets verification — the full "graph of verified knowledge" arc,
+live.
+
+### Beat 3 — the discovery side (≈20 s, optional)
 
 **Type this prompt:**
 
