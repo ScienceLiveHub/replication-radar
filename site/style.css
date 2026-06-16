@@ -124,6 +124,11 @@ details.tabstract .absfull{margin-top:3px}
 .tresolved a{font-weight:600}
 .tfair{font-size:12px;color:var(--mut);margin-top:3px}
 .tfair b{color:var(--navy2)}
+details.tfair > summary{cursor:pointer;list-style:none}
+details.tfair > summary::-webkit-details-marker{display:none}
+details.tfair > summary::after{content:" ▸";color:var(--navy2)}
+details.tfair[open] > summary::after{content:" ▾"}
+details.tfair .fairrecs{margin-top:5px}
 .treplicate{margin-top:7px}
 .treplicate a{font-size:12px;font-weight:700;background:var(--magenta-soft);color:#a32a6a;padding:4px 11px;border-radius:7px;display:inline-block}
 .treplicate a:hover{background:var(--magenta);color:#fff;text-decoration:none}

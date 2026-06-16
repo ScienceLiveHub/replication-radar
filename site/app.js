@@ -529,6 +529,25 @@ const esc = (s) => (s || "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt
 const PER_PAGE = 10;
 let _targets = [], _tpage = 0, _tfilter = new Set();
 
+// FAIR-software block: a fold that expands to the 5 fair-software.eu recommendations (met/missing),
+// with a live Software Heritage link (browse the archived snapshot, or Save Code Now if not yet).
+const FAIR_REC = { repository: "public repository", license: "open licence", registry: "in a registry", citation: "citable (CITATION.cff / DOI)", quality: "quality artefacts" };
+// Software Heritage status as a link: archived → browse the snapshot; not yet → Save Code Now.
+const swhHtml = (repo, archived) => {
+  if (archived) {
+    const b = repo ? `https://archive.softwareheritage.org/browse/origin/directory/?origin_url=${encodeURIComponent(repo)}` : null;
+    return b ? `<a class="swhok" href="${b}" target="_blank" rel="noopener" title="Browse the archived snapshot in Software Heritage">in Software Heritage</a>` : `<span class="swhok">in Software Heritage</span>`;
+  }
+  return `<a class="swhno" href="https://archive.softwareheritage.org/save/" target="_blank" rel="noopener" title="Archive this repository in Software Heritage — Save Code Now${repo ? ` (paste: ${repo})` : ""}">not yet archived — save it →</a>`;
+};
+function fairBlock(f, repo) {
+  const recs = Object.entries(f.recs || {}).map(([k, ok]) =>
+    `<span class="${ok ? "rok" : "rno"}">${ok ? ICON.check : ICON.x}${FAIR_REC[k] || k}</span>`).join("");
+  // stop the SWH link's click from toggling the fold
+  const swh = ` · <span onclick="event.stopPropagation()">${swhHtml(repo, f.swh)}</span>`;
+  return `<details class="tfair"><summary>FAIR software <b>${f.score}/5</b> · ${ICON.star}${f.stars}${swh}</summary><div class="fairrecs">${recs}</div></details>`;
+}
+
 function targetRow(t) {
   const p = t.parts || {};
   const scoreTitle = t.status === "VERIFIED"
@@ -566,9 +585,7 @@ function targetRow(t) {
   const resolvedNote = (t.mat && t.mat.resolved)
     ? `<div class="tresolved">↳ materials resolved from ${esc(t.mat.source || "the paper")} (not in OpenAIRE): <a href="${esc(t.mat.code || "")}" target="_blank" rel="noopener">code repo</a>${(t.mat.data && t.mat.data.length) ? ` · data: ${t.mat.data.map(esc).join(", ")}` : ""}</div>`
     : "";
-  const fairNote = t.fair
-    ? `<div class="tfair">FAIR software <b>${t.fair.score}/5</b> · ${ICON.star}${t.fair.stars}${t.fair.swh ? " · in Software Heritage" : ""}</div>`
-    : "";
+  const fairNote = t.fair ? fairBlock(t.fair, t.mat && t.mat.code) : "";
   // OPEN targets get a next step: discovery here → the FORRT template handles the nanopub chain.
   const replicateCTA = (t.status !== "VERIFIED")
     ? `<div class="treplicate"><a href="https://github.com/ScienceLiveHub/forrt-replication-template" target="_blank" rel="noopener" title="Start a replication from the FORRT template — it scaffolds the repo and the signed nanopub chain (Claim · Study · Outcome)">▷ Replicate this with the template →</a></div>`
@@ -640,8 +657,8 @@ function renderVerified(inField) {
     if (v.repl) {
       const f = v.repl.fair;
       const fairBadge = f
-        ? `<div class="fairrecs"><b>FAIR software (${f.score}/5):</b> ${Object.entries(f.recs).map(([k, ok]) => `<span class="${ok ? "rok" : "rno"}">${ok ? ICON.check : ICON.x}${k}</span>`).join("")}</div>
-        <div class="fairline">${ICON.star}${f.stars} stars · ${ICON.fork}${f.forks} forks · ${f.swh ? `<span class="swhok">in Software Heritage</span>` : `<span class="swhno">not yet in Software Heritage</span>`}</div>`
+        ? `<div class="fairrecs"><b>FAIR software (${f.score}/5):</b> ${Object.entries(f.recs).map(([k, ok]) => `<span class="${ok ? "rok" : "rno"}">${ok ? ICON.check : ICON.x}${FAIR_REC[k] || k}</span>`).join("")}</div>
+        <div class="fairline">${ICON.star}${f.stars} stars · ${ICON.fork}${f.forks} forks · ${swhHtml(v.repl.code, f.swh)}</div>`
         : "";
       const nodeHref = v.repl.code && v.repl.code.includes("github") ? v.repl.code : v.repl.url;
       repl = `<div class="vrepl">↳ replication is an OpenAIRE node: <a href="${nodeHref}" target="_blank" rel="noopener">${esc(v.repl.title).slice(0, 44) || v.repl.doi}</a> <span class="ochip type">${esc(v.repl.type)}</span></div>${fairBadge}`;
