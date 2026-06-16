@@ -11,8 +11,10 @@
 *{box-sizing:border-box}
 body{margin:0;font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
 .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
-a{color:var(--magenta);text-decoration:none}
-a:hover{text-decoration:underline}
+/* underline inline links so they're distinguishable by more than colour (WCAG) */
+a{color:var(--magenta);text-decoration:underline}
+/* …except chip/button-styled links, which are distinguishable by their box */
+.onp,.treplicate a{text-decoration:none}
 button{font:inherit}
 /* visible keyboard-focus ring on every interactive control (mouse focus stays clean) */
 :focus-visible{outline:2px solid var(--magenta);outline-offset:2px}
@@ -72,7 +74,7 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .target{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:10px}
 .target.verified{background:var(--green-soft);border-color:#cbd9f0}
 .score{width:54px;height:54px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:#fff;background:var(--magenta);flex-direction:column;line-height:1}
-.score small{font-size:8px;font-weight:600;opacity:.85;letter-spacing:.4px}
+.score small{font-size:8px;font-weight:600;letter-spacing:.4px}
 .target.verified .score{background:var(--green)}
 .t-main b{font-size:15px;color:var(--ink)}
 .t-meta{font-size:12.5px;color:var(--mut);margin-top:3px}
