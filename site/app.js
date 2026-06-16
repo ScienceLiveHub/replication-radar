@@ -122,6 +122,12 @@ const outcomeLinks = (outs) => {
   return ` · ${lead} ` + outs.map((o) =>
     `<a class="onp ${verdictClass(o.verdict)}" href="${o.np}" target="_blank" rel="noopener" title="${esc(o.verdict)} — open the signed nanopub">${verdictLabel(o.verdict)}</a>`).join(" ");
 };
+// "See all replications" → the Science Live constellation page: every signed replication of this
+// paper's claims, grouped by claim, with each verdict + the full chain. (Switch the host to
+// platform.sciencelive4all.org once the page is deployed to prod.)
+const CONSTELLATION = "https://platform-dev.sciencelive4all.org/np/replications?doi=";
+const constellationLink = (doi, n) => !doi ? "" :
+  ` · <a class="seeall" href="${CONSTELLATION}${encodeURIComponent(doi)}" target="_blank" rel="noopener">see ${n === 1 ? "the replication" : `all ${n} replications`} →</a>`;
 // Agreement pattern across the independent replication verdicts — many-agree ≠ disagree.
 const agreementOf = (doi) => {
   const vs = outcomesFor(doi).map((o) => o.verdict);
@@ -592,7 +598,7 @@ function targetRow(t) {
     : "";
   const outs = t.status === "VERIFIED" ? outcomesFor(t.doi).filter((o) => o.np) : [];
   const verdictLink = (t.status === "VERIFIED")
-    ? `<div class="tverdict">independently checked by <a href="https://sciencelive4all.org" target="_blank" rel="noopener">Science Live</a> — <b>${esc(agreementOf(t.doi).why)}</b>${outcomeLinks(outs)}</div>` : "";
+    ? `<div class="tverdict">independently checked by <a href="https://sciencelive4all.org" target="_blank" rel="noopener">Science Live</a> — <b>${esc(agreementOf(t.doi).why)}</b>${constellationLink(t.doi, outs.length)}</div>` : "";
   const resolvedNote = (t.mat && t.mat.resolved)
     ? `<div class="tresolved">↳ materials resolved from ${esc(t.mat.source || "the paper")} (not in OpenAIRE): <a href="${esc(t.mat.code || "")}" target="_blank" rel="noopener">code repo</a>${(t.mat.data && t.mat.data.length) ? ` · data: ${t.mat.data.map(esc).join(", ")}` : ""}</div>`
     : "";
@@ -685,7 +691,7 @@ function renderVerified(inField) {
       <span class="vt">${esc(v.title).slice(0, 82)}</span>
       <div class="ochips">${chips}</div>
       ${vClaimLine}
-      <div class="vline"><span class="vv ${partialOf(v) ? "partial" : ""}">${v.verdicts.join(", ")}</span> — independently checked by <a href="https://sciencelive4all.org" target="_blank" rel="noopener">Science Live</a> ${vouts.length ? outcomeLinks(vouts) : (v.cito_np ? `· <a href="${v.cito_np}" target="_blank" rel="noopener">verdict chain →</a>` : "")}</div>
+      <div class="vline"><span class="vv ${partialOf(v) ? "partial" : ""}">${v.verdicts.join(", ")}</span> — independently checked by <a href="https://sciencelive4all.org" target="_blank" rel="noopener">Science Live</a> ${vouts.length ? constellationLink(v.doi, vouts.length) : (v.cito_np ? `· <a href="${v.cito_np}" target="_blank" rel="noopener">verdict chain →</a>` : "")}</div>
       ${repl}
     </li>`;
   };
