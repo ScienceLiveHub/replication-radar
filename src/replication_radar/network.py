@@ -49,6 +49,11 @@ SELECT DISTINCT ?cito ?subj ?rel ?orig WHERE {{ GRAPH ?g {{ ?cito ntpl:wasCreate
 _QV = f"""PREFIX ntpl: <https://w3id.org/np/o/ntemplate/> PREFIX npx: <http://purl.org/nanopub/x/> PREFIX dct: <http://purl.org/dc/terms/>
 SELECT DISTINCT ?np WHERE {{ GRAPH ?g {{ ?np ntpl:wasCreatedFromTemplate <{TPL_OUTCOME}> . }} GRAPH ?supg {{ ?sup ?act ?np . }} VALUES ?act {{ npx:retracts npx:invalidates npx:supersedes }} GRAPH ?cg1 {{ ?sup dct:creator ?cc . }} GRAPH ?cg2 {{ ?np dct:creator ?cc . }} }}"""
 
+# What EXACTLY was replicated: traverse Outcome →isOutcomeOf→ Study →targetsClaim→ Claim, reading
+# the claim's AIDA statement (the atomic claim sentence) and its FORRT claim type.
+_QC = f"""PREFIX np: <http://www.nanopub.org/nschema#> PREFIX ntpl: <https://w3id.org/np/o/ntemplate/> PREFIX slt: <https://w3id.org/sciencelive/o/terms/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?outcome ?claimLabel ?aida ?ctype WHERE {{ GRAPH ?og {{ ?outcome ntpl:wasCreatedFromTemplate <{TPL_OUTCOME}> . }} ?outcome np:hasAssertion ?oa . GRAPH ?oa {{ ?oc slt:isOutcomeOf ?study . }} GRAPH ?sg {{ ?study slt:targetsClaim ?claim . }} GRAPH ?cg {{ ?claim rdfs:label ?claimLabel . }} OPTIONAL {{ GRAPH ?cg {{ ?claim slt:asAidaStatement ?aida . }} }} OPTIONAL {{ GRAPH ?cg {{ ?claim a ?ctype . FILTER(CONTAINS(STR(?ctype),"-FORRT-Claim")) }} }} }} LIMIT 500"""
+
 
 def _sparql(query: str) -> list[dict]:
     url = f"{SPARQL}?{urllib.parse.urlencode({'query': query})}"
@@ -66,6 +71,21 @@ def _doi(uri: str) -> str:
     return re.sub(r".*doi\.org/", "", uri or "").lower()
 
 
+def _aida(uri: str) -> str:
+    """The AIDA sentence from its URI (…/aida/<url-encoded sentence>)."""
+    if not uri:
+        return ""
+    return urllib.parse.unquote(re.sub(r".*/aida/", "", uri).replace("+", " ")).strip()
+
+
+def _claim_type(uri: str) -> str:
+    """FORRT claim type from its URI, e.g. …/Descriptive_pattern-FORRT-Claim -> 'Descriptive pattern'."""
+    if not uri:
+        return ""
+    t = re.sub(r"-FORRT-Claim$", "", re.sub(r".*[/#]", "", uri))
+    return t.replace("_", " ").strip()
+
+
 def _clean_repo(repo: str) -> str | None:
     if not repo:
         return None
@@ -76,7 +96,10 @@ def _clean_repo(repo: str) -> str | None:
 
 @lru_cache(maxsize=1)
 def build_index() -> dict:
-    """{doi: [ {verdict, cito[], repo_doi, outcome_np, cito_np} ]} — network-wide, author-agnostic.
+    """{doi: [ {verdict, cito[], repo_doi, outcome_np, cito_np, claim} ]} — network-wide, author-agnostic.
+
+    `claim` (best-effort) = {label, aida, type}: the FORRT Claim the Outcome targets, i.e. what
+    EXACTLY was replicated — the atomic AIDA sentence and its claim type.
 
     Raises on network/parse failure so callers can fall back to the bundled index.
     """
@@ -86,6 +109,18 @@ def build_index() -> dict:
         invalid = {_hash(r.get("np")) for r in _sparql(_QV)}   # take down live verdicts
     except Exception:
         invalid = set()
+    claims: dict[str, dict] = {}                           # best-effort: claim traversal is optional
+    try:
+        for r in _sparql(_QC):
+            h = _hash(r.get("outcome"))
+            if h not in claims:
+                claims[h] = {
+                    "label": r.get("claimLabel") or "",
+                    "aida": _aida(r.get("aida")),
+                    "type": _claim_type(r.get("ctype")),
+                }
+    except Exception:
+        claims = {}
     by_hash: dict[str, list] = {}
     for r in citos:
         by_hash.setdefault(_hash(r.get("subj")), []).append({
@@ -108,5 +143,6 @@ def build_index() -> dict:
                 "repo_doi": repo_doi,
                 "outcome_np": o.get("outcome"),
                 "cito_np": c.get("cito"),
+                "claim": claims.get(_hash(o.get("outcome"))) or {},
             })
     return index

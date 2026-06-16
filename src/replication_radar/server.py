@@ -53,8 +53,15 @@ def replication_status(doi: str) -> dict:
     (author-agnostic) — with the validation status, CiTO relation, the replication's
     repository, and links to the signed Outcome/CiTO nanopubs. 'open' if not replicated.
     This is the reliability signal the OpenAIRE Graph structurally cannot hold.
-    Also returns the paper's `title` and `abstract` (from OpenAIRE, markup stripped), so
-    you can read or extract its atomic claim (an AIDA statement) to reason about it."""
+
+    Also returns:
+      - `agreement`: how the independent verdicts agree — pattern is one of
+        robustly_validated / validated / contested / refuted, with confirm/partial/
+        contradicted counts (so you can say *how robustly* it held, not just that it did).
+      - `claims`: the exact FORRT claim(s) that were replicated — each an atomic AIDA
+        statement plus its claim type (descriptive pattern, statistical significance, …).
+      - the paper's `title` and `abstract` (from OpenAIRE, markup stripped), so you can
+        read it or extract/compare the atomic claim yourself."""
     return _replication_status(doi)
 
 

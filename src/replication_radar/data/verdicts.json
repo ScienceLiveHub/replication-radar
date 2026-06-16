@@ -2,10 +2,24 @@
   "_meta": {
     "source": "snapshot of network.build_index()",
     "generated": "2026-06-16",
-    "note": "Offline fallback mirror of the live nanopub-network verdict index (CiTO->DOI, retraction/supersession-filtered). Regenerate by snapshotting replication_radar.network.build_index()."
+    "note": "Offline fallback mirror of the live nanopub-network verdict index (CiTO->DOI, retraction/supersession-filtered). Regenerate by snapshotting replication_radar.network.build_index(). Records now carry the targeted FORRT claim {label, aida, type}."
   },
   "verifications": {
     "10.1080/20964471.2024.2429847": [
+      {
+        "verdict": "Validated",
+        "cito": [
+          "confirms"
+        ],
+        "repo_doi": "10.5281/zenodo.19488374",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAXyttjp7732efY5f-_Sdl8mMflMBdCH2Y1w_ZvhLPLtA",
+        "cito_np": "https://w3id.org/np/RAZZu4THPbLhBrzHAA0E_dkTqIgOARIVLwcUuo5lokh2k",
+        "claim": {
+          "label": "Effect of HEALPix DGGS Indexing on Geospatial Data Performance",
+          "aida": "HEALPix indexing via healpix-geo achieves equivalent DGGS performance to H3 on both sphere and WGS84 ellipsoid.",
+          "type": "computational performance"
+        }
+      },
       {
         "verdict": "PartiallySupported",
         "cito": [
@@ -13,7 +27,12 @@
         ],
         "repo_doi": "10.5281/zenodo.18904498",
         "outcome_np": "https://w3id.org/np/RAwBlOHBCo6UoUNTLwh1ZiQQdQYOQJXIs7GSUhKdrxtfI",
-        "cito_np": "https://w3id.org/np/RATVV_WZcVV7BvHQYlzAiVkJ3TA4jDeFvDLD5soS6vsdM"
+        "cito_np": "https://w3id.org/np/RATVV_WZcVV7BvHQYlzAiVkJ3TA4jDeFvDLD5soS6vsdM",
+        "claim": {
+          "label": "Effect of DGGS Indexing on Associating Vector and Raster Geospatial Data",
+          "aida": "Indexing geospatial data to a DGGS makes vector and raster data associable using zone IDs as join keys.",
+          "type": "scalability"
+        }
       },
       {
         "verdict": "PartiallySupported",
@@ -22,165 +41,12 @@
         ],
         "repo_doi": "10.5281/zenodo.18904498",
         "outcome_np": "https://w3id.org/np/RA97Isy4tUYUOU1xk-v_Lz_qgN_qKFFj40G12nIEhmTI8",
-        "cito_np": "https://w3id.org/np/RAqvwI22UjiKX7zXgam2WCkhzrJJiAcvzmQWkwZaXG3Ns"
-      },
-      {
-        "verdict": "Validated",
-        "cito": [
-          "confirms"
-        ],
-        "repo_doi": "10.5281/zenodo.19488374",
-        "outcome_np": "https://w3id.org/sciencelive/np/RAXyttjp7732efY5f-_Sdl8mMflMBdCH2Y1w_ZvhLPLtA",
-        "cito_np": "https://w3id.org/np/RAZZu4THPbLhBrzHAA0E_dkTqIgOARIVLwcUuo5lokh2k"
-      }
-    ],
-    "10.48550/arxiv.1703.05175": [
-      {
-        "verdict": "PartiallySupported",
-        "cito": [
-          "qualifies"
-        ],
-        "repo_doi": "10.5281/zenodo.19607662",
-        "outcome_np": "https://w3id.org/sciencelive/np/RAUS6GbT3Bu-Np0Ue73q58G_c2HilLhh95Y2b8W18o--M",
-        "cito_np": "https://w3id.org/np/RAALsAuC-rCQZhQdvuQXnahjHTpl_zlv4kqRUuRu0inIY"
-      }
-    ],
-    "10.1007/978-3-030-58583-9_8": [
-      {
-        "verdict": "PartiallySupported",
-        "cito": [
-          "qualifies"
-        ],
-        "repo_doi": "10.5281/zenodo.19643138",
-        "outcome_np": "https://w3id.org/sciencelive/np/RA7OZmOmun07jDm8q6lq7Ris1W0MU3rptcp3bphOWUJj8",
-        "cito_np": "https://w3id.org/np/RAz-_LXnz6YKgOL2il9GSanBhRZL-tYRS2r2evosmzZdA"
-      },
-      {
-        "verdict": "Validated",
-        "cito": [
-          "confirms"
-        ],
-        "repo_doi": "10.5281/zenodo.19643139",
-        "outcome_np": "https://w3id.org/sciencelive/np/RAqs99x7CDi1tutYKJ6J1zes8PEbUhfjbpf3dkdqSoffQ",
-        "cito_np": "https://w3id.org/np/RAp2yTG9z_delGCiXFFn5EFEvtqJiVTt_ALcyhS6jCayU"
-      },
-      {
-        "verdict": "Validated",
-        "cito": [
-          "confirms"
-        ],
-        "repo_doi": "10.5281/zenodo.19643139",
-        "outcome_np": "https://w3id.org/sciencelive/np/RAqs99x7CDi1tutYKJ6J1zes8PEbUhfjbpf3dkdqSoffQ",
-        "cito_np": "https://w3id.org/np/RAMrV_MYWNoZRgJZixdJVLem7kC97ObmOJksmQuG12XDA"
-      },
-      {
-        "verdict": "Validated",
-        "cito": [
-          "confirms"
-        ],
-        "repo_doi": "10.5281/zenodo.19643138",
-        "outcome_np": "https://w3id.org/sciencelive/np/RA9PP1TVbvRwEv9UNHYfGWvfCXtxCe3f6_xJnf-YbAgSc",
-        "cito_np": "https://w3id.org/np/RAhVyTBdsfeFau7MUr_ZO3ep2KVSBoX4V3-FmAqj1ZtWg"
-      }
-    ],
-    "10.1126/science.aax8591": [
-      {
-        "verdict": "PartiallySupported",
-        "cito": [
-          "qualifies"
-        ],
-        "repo_doi": "10.5281/zenodo.20113787",
-        "outcome_np": "https://w3id.org/sciencelive/np/RAD19jydIHgfVpRQiA8mqvVUefOd7FFwA4tLIfkXmOJmc",
-        "cito_np": "https://w3id.org/sciencelive/np/RAumfa30WMPlQksc1f6XdslPtXS2z4-_3DCZC3ln57PKc"
-      },
-      {
-        "verdict": "Validated",
-        "cito": [
-          "confirms"
-        ],
-        "repo_doi": "10.5281/zenodo.19756174",
-        "outcome_np": "https://w3id.org/sciencelive/np/RABeytsVYYMfRz_Jb3O__naWSg8Z63WTnQsofidkdrVvk",
-        "cito_np": "https://w3id.org/sciencelive/np/RAdvbQt3vXT0HpyNYdwwMBs8fVnmyv5KWFT0eXfVTDXg0"
-      },
-      {
-        "verdict": "Validated",
-        "cito": [
-          "confirms"
-        ],
-        "repo_doi": "10.5281/zenodo.19762723",
-        "outcome_np": "https://w3id.org/sciencelive/np/RAIylrhtnfTH_vtp1nTDVAiGsv2u_Ea4Uvh35DrGySuWs",
-        "cito_np": "https://w3id.org/sciencelive/np/RApCQTLMP8h0jDYF9ggWU6lMTW7a_KG5_Jygbsx0aTpIo"
-      },
-      {
-        "verdict": "Validated",
-        "cito": [
-          "confirms"
-        ],
-        "repo_doi": "10.5281/zenodo.20113778",
-        "outcome_np": "https://w3id.org/sciencelive/np/RAPZMgcYbScSAXnrnSySQwZzgSA_rn-xodlMxNlwwQYY8",
-        "cito_np": "https://w3id.org/sciencelive/np/RALbHA-r6wIFOFPFlfIpwYqJEpzCFqeJ082iChgdfvhNM"
-      },
-      {
-        "verdict": "Validated",
-        "cito": [
-          "confirms"
-        ],
-        "repo_doi": "10.5281/zenodo.20113781",
-        "outcome_np": "https://w3id.org/sciencelive/np/RAa4QR41Hot9zxujcrCyTo82Ij7oaw_6z8zk8NxDqoJFM",
-        "cito_np": "https://w3id.org/sciencelive/np/RAhw9m0BEj0-9hXrTtJ2NHG5rMr-ZBf_mdBQTQRk6u3n4"
-      }
-    ],
-    "10.1126/science.1184695": [
-      {
-        "verdict": "PartiallySupported",
-        "cito": [
-          "extends"
-        ],
-        "repo_doi": "10.5281/zenodo.20266646",
-        "outcome_np": "https://w3id.org/sciencelive/np/RAPw01nGqrY3V9ech7nd3gUOyoW52N6SspeKTa41neLBo",
-        "cito_np": "https://w3id.org/sciencelive/np/RAIdXhqT3oPF-7XlRYeN2oAAYJwXN9auLGR57iw8ipWl0"
-      }
-    ],
-    "10.1073/pnas.0704469104": [
-      {
-        "verdict": "PartiallySupported",
-        "cito": [
-          "qualifies"
-        ],
-        "repo_doi": "10.5281/zenodo.20363556",
-        "outcome_np": "https://w3id.org/sciencelive/np/RAzeZKbUCEMXZXDc-WzgHZ4K5mOMwotYhS2uCKDDmdcHI",
-        "cito_np": "https://w3id.org/sciencelive/np/RALjFcvPtncy74ZL8QgSiEyRZv_-mOiZj4wvWuq8JK-2s"
-      }
-    ],
-    "10.1038/s43247-022-00498-3": [
-      {
-        "verdict": "PartiallySupported",
-        "cito": [
-          "qualifies"
-        ],
-        "repo_doi": "https://github.com/j34ni/forrt-replication",
-        "outcome_np": "https://w3id.org/sciencelive/np/RAZYUn5KQru5hr0vo3dwhK0-tQlOMlta4uv-xnGvH597c",
-        "cito_np": "https://w3id.org/sciencelive/np/RA-Q5_O6eDrQYthV0KarnyBFK33SUQuDXOjem3-4dTe7Y"
-      }
-    ],
-    "10.1038/s41597-022-01235-3": [
-      {
-        "verdict": "PartiallySupported",
-        "cito": [
-          "qualifies"
-        ],
-        "repo_doi": "10.5281/zenodo.20569075",
-        "outcome_np": "https://w3id.org/sciencelive/np/RAv0cF0rwxb1CFmUAJlk5B7PLVc9pls5OvlfOHHHhtgm8",
-        "cito_np": "https://w3id.org/sciencelive/np/RAnqtFUZHfmW7Dtmf3bcTQtjDAfrq5IGV4xQ8guW8L3vY"
-      },
-      {
-        "verdict": "PartiallySupported",
-        "cito": [
-          "qualifies"
-        ],
-        "repo_doi": "10.5281/zenodo.20585042",
-        "outcome_np": "https://w3id.org/sciencelive/np/RAlwDA35wFcmV-ZYzOUB_E3SrqPMIlIxWftoiPFbzN-7I",
-        "cito_np": "https://w3id.org/sciencelive/np/RA6JMK2CNN8MZITLdd3si08TwyR_-3fvbt6l6g3lf-YOg"
+        "cito_np": "https://w3id.org/np/RAqvwI22UjiKX7zXgam2WCkhzrJJiAcvzmQWkwZaXG3Ns",
+        "claim": {
+          "label": "Effect of DGGS Indexing on Associating Vector and Raster Geospatial Data",
+          "aida": "Indexing geospatial data to a DGGS makes vector and raster data associable using zone IDs as join keys.",
+          "type": "scalability"
+        }
       }
     ],
     "10.48550/arxiv.2506.16347": [
@@ -191,7 +57,12 @@
         ],
         "repo_doi": "https://github.com/annefou/zkp-environmental-compliance",
         "outcome_np": "https://w3id.org/sciencelive/np/RA2umDr4wFHRCk343H1FmxYsx2ijsZZ8tYtcfrWKdn7xI",
-        "cito_np": "https://w3id.org/np/RAOztCuMOjrb6RvI41JXS7RCzhenh40lFheb9ogo_m2Ps"
+        "cito_np": "https://w3id.org/np/RAOztCuMOjrb6RvI41JXS7RCzhenh40lFheb9ogo_m2Ps",
+        "claim": {
+          "label": "ZKP-based privacy-preserving environmental compliance verification",
+          "aida": "Zero-knowledge proofs based on zk-SNARKs can verify that environmental sensor readings satisfy regulatory compliance thresholds without revealing the underlying measurement values.",
+          "type": "data governance"
+        }
       }
     ],
     "10.1111/gcb.16633": [
@@ -202,7 +73,12 @@
         ],
         "repo_doi": "https://github.com/annefou/bio-oracle",
         "outcome_np": "https://w3id.org/sciencelive/np/RA7f-x8JBwYZCid2GYcvFzkrGQWyJkVyDXa1pvMH2FgwM",
-        "cito_np": "https://w3id.org/np/RAAiVtm6eJEOuZo48AGPMzyS68Xe5DHQrYOm41_q75yPk"
+        "cito_np": "https://w3id.org/np/RAAiVtm6eJEOuZo48AGPMzyS68Xe5DHQrYOm41_q75yPk",
+        "claim": {
+          "label": "SST as primary driver of fish community structure (NE Atlantic)",
+          "aida": "Sea surface temperature is the primary driver of fish community structure across Northeast Atlantic shelf seas.",
+          "type": "descriptive pattern"
+        }
       },
       {
         "verdict": "Validated",
@@ -211,7 +87,12 @@
         ],
         "repo_doi": "https://github.com/annefou/bio-oracle",
         "outcome_np": "https://w3id.org/sciencelive/np/RAjEJL1PpNdE7lBYjHkOQidLG9iYmyRtW2Of5PCTAotMg",
-        "cito_np": "https://w3id.org/np/RA4DAJhuU9w252N_aqPbY7skVtIDCHkBM47RRq8ZWZwAo"
+        "cito_np": "https://w3id.org/np/RA4DAJhuU9w252N_aqPbY7skVtIDCHkBM47RRq8ZWZwAo",
+        "claim": {
+          "label": "SST as primary driver of fish community structure (NE Atlantic)",
+          "aida": "Sea surface temperature is the primary driver of fish community structure across Northeast Atlantic shelf seas.",
+          "type": "descriptive pattern"
+        }
       },
       {
         "verdict": "Validated",
@@ -220,7 +101,70 @@
         ],
         "repo_doi": "https://github.com/annefou/bio-oracle",
         "outcome_np": "https://w3id.org/sciencelive/np/RAjEJL1PpNdE7lBYjHkOQidLG9iYmyRtW2Of5PCTAotMg",
-        "cito_np": "https://w3id.org/np/RA9U6q87mOl28mrGLU-03ioaaD00OBPZMxiNQoL6XqxfA"
+        "cito_np": "https://w3id.org/np/RA9U6q87mOl28mrGLU-03ioaaD00OBPZMxiNQoL6XqxfA",
+        "claim": {
+          "label": "SST as primary driver of fish community structure (NE Atlantic)",
+          "aida": "Sea surface temperature is the primary driver of fish community structure across Northeast Atlantic shelf seas.",
+          "type": "descriptive pattern"
+        }
+      }
+    ],
+    "10.1007/978-3-030-58583-9_8": [
+      {
+        "verdict": "Validated",
+        "cito": [
+          "confirms"
+        ],
+        "repo_doi": "10.5281/zenodo.19643139",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAqs99x7CDi1tutYKJ6J1zes8PEbUhfjbpf3dkdqSoffQ",
+        "cito_np": "https://w3id.org/np/RAp2yTG9z_delGCiXFFn5EFEvtqJiVTt_ALcyhS6jCayU",
+        "claim": {
+          "label": "Cross-domain few-shot benchmark results depend on exact architecture and training setup",
+          "aida": "Cross-domain few-shot classification accuracy on Sentinel-2 satellite imagery depends on matching the backbone architecture, image resolution, and training procedure of the original benchmark.",
+          "type": "model performance"
+        }
+      },
+      {
+        "verdict": "Validated",
+        "cito": [
+          "confirms"
+        ],
+        "repo_doi": "10.5281/zenodo.19643139",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAqs99x7CDi1tutYKJ6J1zes8PEbUhfjbpf3dkdqSoffQ",
+        "cito_np": "https://w3id.org/np/RAMrV_MYWNoZRgJZixdJVLem7kC97ObmOJksmQuG12XDA",
+        "claim": {
+          "label": "Cross-domain few-shot benchmark results depend on exact architecture and training setup",
+          "aida": "Cross-domain few-shot classification accuracy on Sentinel-2 satellite imagery depends on matching the backbone architecture, image resolution, and training procedure of the original benchmark.",
+          "type": "model performance"
+        }
+      },
+      {
+        "verdict": "Validated",
+        "cito": [
+          "confirms"
+        ],
+        "repo_doi": "10.5281/zenodo.19643138",
+        "outcome_np": "https://w3id.org/sciencelive/np/RA9PP1TVbvRwEv9UNHYfGWvfCXtxCe3f6_xJnf-YbAgSc",
+        "cito_np": "https://w3id.org/np/RAhVyTBdsfeFau7MUr_ZO3ep2KVSBoX4V3-FmAqj1ZtWg",
+        "claim": {
+          "label": "Supervised pretraining matches episodic meta-learning for cross-domain few-shot satellite classification",
+          "aida": "Standard supervised pretraining achieves comparable cross-domain few-shot classification accuracy on satellite imagery to episodic meta-learning with less training time.",
+          "type": "model performance"
+        }
+      },
+      {
+        "verdict": "PartiallySupported",
+        "cito": [
+          "qualifies"
+        ],
+        "repo_doi": "10.5281/zenodo.19643138",
+        "outcome_np": "https://w3id.org/sciencelive/np/RA7OZmOmun07jDm8q6lq7Ris1W0MU3rptcp3bphOWUJj8",
+        "cito_np": "https://w3id.org/np/RAz-_LXnz6YKgOL2il9GSanBhRZL-tYRS2r2evosmzZdA",
+        "claim": {
+          "label": "Prototypical Networks transfer from photographs to satellite imagery with a simple backbone",
+          "aida": "Prototypical Networks classify land cover types in Sentinel-2 satellite imagery from a small number of labeled examples.",
+          "type": "model performance"
+        }
       }
     ],
     "10.5194/amt-17-839-2024": [
@@ -231,7 +175,84 @@
         ],
         "repo_doi": "10.5281/zenodo.19709327",
         "outcome_np": "https://w3id.org/sciencelive/np/RAcHVf4mO1B4E-S4qx3obilKj5vBXqajmgscykqUCcsg8",
-        "cito_np": "https://w3id.org/sciencelive/np/RANOHJytFV4_sXH6qIV41aBpkoBXCZz7wjTWJBvT9QudI"
+        "cito_np": "https://w3id.org/sciencelive/np/RANOHJytFV4_sXH6qIV41aBpkoBXCZz7wjTWJBvT9QudI",
+        "claim": {
+          "label": "HEALPix DGGS conversion of EarthCARE Level-2 preserves variable-type aggregation semantics",
+          "aida": "EarthCARE Level-2 data from the Multi-Spectral Imager (MSI), Atmospheric Lidar (ATLID), and Cloud Profiling Radar (CPR) can be converted to HEALPix Discrete Global Grid System cells on the WGS84 ellipsoid while preserving variable-type aggregation semantics.",
+          "type": "data quality"
+        }
+      }
+    ],
+    "10.1126/science.aax8591": [
+      {
+        "verdict": "Validated",
+        "cito": [
+          "confirms"
+        ],
+        "repo_doi": "10.5281/zenodo.19756174",
+        "outcome_np": "https://w3id.org/sciencelive/np/RABeytsVYYMfRz_Jb3O__naWSg8Z63WTnQsofidkdrVvk",
+        "cito_np": "https://w3id.org/sciencelive/np/RAdvbQt3vXT0HpyNYdwwMBs8fVnmyv5KWFT0eXfVTDXg0",
+        "claim": {
+          "label": "Increasing thermal exposure raises local extirpation rate in bumble bee species",
+          "aida": "Local extirpation rate in bumble bee species increases with the frequency at which local temperatures exceed species-specific historically observed thermal tolerances.",
+          "type": "descriptive pattern"
+        }
+      },
+      {
+        "verdict": "Validated",
+        "cito": [
+          "confirms"
+        ],
+        "repo_doi": "10.5281/zenodo.19762723",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAIylrhtnfTH_vtp1nTDVAiGsv2u_Ea4Uvh35DrGySuWs",
+        "cito_np": "https://w3id.org/sciencelive/np/RApCQTLMP8h0jDYF9ggWU6lMTW7a_KG5_Jygbsx0aTpIo",
+        "claim": {
+          "label": "Increasing thermal exposure raises local extirpation rate in bumble bee species",
+          "aida": "Local extirpation rate in bumble bee species increases with the frequency at which local temperatures exceed species-specific historically observed thermal tolerances.",
+          "type": "descriptive pattern"
+        }
+      },
+      {
+        "verdict": "Validated",
+        "cito": [
+          "confirms"
+        ],
+        "repo_doi": "10.5281/zenodo.20113778",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAPZMgcYbScSAXnrnSySQwZzgSA_rn-xodlMxNlwwQYY8",
+        "cito_np": "https://w3id.org/sciencelive/np/RALbHA-r6wIFOFPFlfIpwYqJEpzCFqeJ082iChgdfvhNM",
+        "claim": {
+          "label": "TEI_delta GLMM coefficient is positive and credibly above zero on Iberian Bombus at HEALPix nside=64",
+          "aida": "Increased thermal exposure between historical baseline and recent climate predicts higher probability of local extirpation in Iberian Bombus populations.",
+          "type": "statistical significance"
+        }
+      },
+      {
+        "verdict": "Validated",
+        "cito": [
+          "confirms"
+        ],
+        "repo_doi": "10.5281/zenodo.20113781",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAa4QR41Hot9zxujcrCyTo82Ij7oaw_6z8zk8NxDqoJFM",
+        "cito_np": "https://w3id.org/sciencelive/np/RAhw9m0BEj0-9hXrTtJ2NHG5rMr-ZBf_mdBQTQRk6u3n4",
+        "claim": {
+          "label": "TEI_delta GLMM coefficient is positive and credibly above zero on Iberian Bombus at HEALPix nside=64",
+          "aida": "Increased thermal exposure between historical baseline and recent climate predicts higher probability of local extirpation in Iberian Bombus populations.",
+          "type": "statistical significance"
+        }
+      },
+      {
+        "verdict": "PartiallySupported",
+        "cito": [
+          "qualifies"
+        ],
+        "repo_doi": "10.5281/zenodo.20113787",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAD19jydIHgfVpRQiA8mqvVUefOd7FFwA4tLIfkXmOJmc",
+        "cito_np": "https://w3id.org/sciencelive/np/RAumfa30WMPlQksc1f6XdslPtXS2z4-_3DCZC3ln57PKc",
+        "claim": {
+          "label": "TEI-based extirpation projection per-species ranking is grid-coupled at the projection step for low-N species",
+          "aida": "Projected per-species rankings of Iberian Bombus extirpation risk under future climate are sensitive to the spatial grid resolution of the analysis, particularly for species with sparse historical distribution.",
+          "type": "model performance"
+        }
       }
     ],
     "10.3389/fmars.2025.1699781": [
@@ -242,7 +263,12 @@
         ],
         "repo_doi": "10.5281/zenodo.19709129",
         "outcome_np": "https://w3id.org/sciencelive/np/RAn_DYEINS9hSmULEWNd8JmdPOykzptJPJCSqiatNLBrA",
-        "cito_np": "https://w3id.org/sciencelive/np/RArFs1V-cAEw19zHbMFXmTr-R34PlGdMHCOt6EQeW64jU"
+        "cito_np": "https://w3id.org/sciencelive/np/RArFs1V-cAEw19zHbMFXmTr-R34PlGdMHCOt6EQeW64jU",
+        "claim": {
+          "label": "Phytoplankton CNN classification across 95 classes",
+          "aida": "A convolutional neural network identifies phytoplankton taxa across 95 classes with 86.3% top-1 accuracy and 98.8% top-5 accuracy.",
+          "type": "model performance"
+        }
       },
       {
         "verdict": "Validated",
@@ -251,7 +277,12 @@
         ],
         "repo_doi": "10.5281/zenodo.19701108",
         "outcome_np": "https://w3id.org/sciencelive/np/RAIqyPwP8PzMKSKCMKb04vzR1CpttIsAYqIRy6RkaBPZk",
-        "cito_np": "https://w3id.org/sciencelive/np/RA8BSfq4Cbs3A4chU6fvafk0px-yDZwsYKFIO9cnzkyx4"
+        "cito_np": "https://w3id.org/sciencelive/np/RA8BSfq4Cbs3A4chU6fvafk0px-yDZwsYKFIO9cnzkyx4",
+        "claim": {
+          "label": "Scattering features complement CNN for plankton classification",
+          "aida": "Stacking multi-scale scattering features on top of a convolutional neural network's softmax probabilities lifts mean rare-class recall on plankton classification by 8.4 percentage points at a 0.72 percentage-point cost to aggregate top-1 accuracy.",
+          "type": "model performance"
+        }
       }
     ],
     "10.1051/0004-6361/202244566": [
@@ -262,7 +293,12 @@
         ],
         "repo_doi": "10.5281/zenodo.19707889",
         "outcome_np": "https://w3id.org/sciencelive/np/RAmEYMywIv9uDQPHuvPcPLEONpl7Et4M9hikmvDrRdVG0",
-        "cito_np": "https://w3id.org/sciencelive/np/RAAKbihIlG-DgS_LBhWCGPGc8-fKHWvIM-ee03u7t9kqs"
+        "cito_np": "https://w3id.org/sciencelive/np/RAAKbihIlG-DgS_LBhWCGPGc8-fKHWvIM-ee03u7t9kqs",
+        "claim": {
+          "label": "Spherical scattering transform synthesis",
+          "aida": "Scattering transforms on the sphere can synthesise astrophysical maps that match the multi-scale non-Gaussian statistics of a target input.",
+          "type": "model performance"
+        }
       },
       {
         "verdict": "Validated",
@@ -271,7 +307,12 @@
         ],
         "repo_doi": "10.5281/zenodo.19707888",
         "outcome_np": "https://w3id.org/sciencelive/np/RAK2ynlqgA3L_YVbEo-cVoXZ7T63q4eCFZqf9CPWWNc40",
-        "cito_np": "https://w3id.org/sciencelive/np/RAA6_hyyQvv4h0l4bFNt-9tEn2KRRIL4mVE0pRzt4W31k"
+        "cito_np": "https://w3id.org/sciencelive/np/RAA6_hyyQvv4h0l4bFNt-9tEn2KRRIL4mVE0pRzt4W31k",
+        "claim": {
+          "label": "SST gap-filling via scattering transforms",
+          "aida": "Scattering transforms can fill cloud gaps in satellite sea surface temperature observations using a gap-free reference product as a statistical target.",
+          "type": "model performance"
+        }
       }
     ],
     "10.1038/s41597-023-01966-x": [
@@ -282,7 +323,12 @@
         ],
         "repo_doi": "10.5281/zenodo.19848749",
         "outcome_np": "https://w3id.org/sciencelive/np/RAgeOXE6WGAdKnWcmSFvE1BnQBXdj6IviGGZzIqtFvIIw",
-        "cito_np": "https://w3id.org/sciencelive/np/RAfDT5MEvTEZDidePQP3bves89sl9D34qgIsl6c0SECdM"
+        "cito_np": "https://w3id.org/sciencelive/np/RAfDT5MEvTEZDidePQP3bves89sl9D34qgIsl6c0SECdM",
+        "claim": {
+          "label": "HEALPix family is fit for purpose as the common DGGS substrate for biodiversity × Copernicus EO × Destination Earth integration",
+          "aida": "The HEALPix family — including HEALPix-on-WGS84 via authalic-sphere mapping (healpix-geo / Ellipsoidal HEALPix) and rHEALPix — is fit for purpose as the common Discrete Global Grid System substrate for integrating biodiversity occurrence data with high-resolution Copernicus Earth-observation products and Destination Earth climate-model output.",
+          "type": "data quality"
+        }
       }
     ],
     "10.1016/j.ecolmodel.2007.03.041": [
@@ -293,7 +339,12 @@
         ],
         "repo_doi": "10.5281/zenodo.19848749",
         "outcome_np": "https://w3id.org/sciencelive/np/RAgeOXE6WGAdKnWcmSFvE1BnQBXdj6IviGGZzIqtFvIIw",
-        "cito_np": "https://w3id.org/sciencelive/np/RAfDT5MEvTEZDidePQP3bves89sl9D34qgIsl6c0SECdM"
+        "cito_np": "https://w3id.org/sciencelive/np/RAfDT5MEvTEZDidePQP3bves89sl9D34qgIsl6c0SECdM",
+        "claim": {
+          "label": "HEALPix family is fit for purpose as the common DGGS substrate for biodiversity × Copernicus EO × Destination Earth integration",
+          "aida": "The HEALPix family — including HEALPix-on-WGS84 via authalic-sphere mapping (healpix-geo / Ellipsoidal HEALPix) and rHEALPix — is fit for purpose as the common Discrete Global Grid System substrate for integrating biodiversity occurrence data with high-resolution Copernicus Earth-observation products and Destination Earth climate-model output.",
+          "type": "data quality"
+        }
       }
     ],
     "10.1559/152304003100011090": [
@@ -304,7 +355,12 @@
         ],
         "repo_doi": "10.5281/zenodo.19848749",
         "outcome_np": "https://w3id.org/sciencelive/np/RAgeOXE6WGAdKnWcmSFvE1BnQBXdj6IviGGZzIqtFvIIw",
-        "cito_np": "https://w3id.org/sciencelive/np/RAfDT5MEvTEZDidePQP3bves89sl9D34qgIsl6c0SECdM"
+        "cito_np": "https://w3id.org/sciencelive/np/RAfDT5MEvTEZDidePQP3bves89sl9D34qgIsl6c0SECdM",
+        "claim": {
+          "label": "HEALPix family is fit for purpose as the common DGGS substrate for biodiversity × Copernicus EO × Destination Earth integration",
+          "aida": "The HEALPix family — including HEALPix-on-WGS84 via authalic-sphere mapping (healpix-geo / Ellipsoidal HEALPix) and rHEALPix — is fit for purpose as the common Discrete Global Grid System substrate for integrating biodiversity occurrence data with high-resolution Copernicus Earth-observation products and Destination Earth climate-model output.",
+          "type": "data quality"
+        }
       }
     ],
     "10.1086/427976": [
@@ -315,7 +371,12 @@
         ],
         "repo_doi": "10.5281/zenodo.19848749",
         "outcome_np": "https://w3id.org/sciencelive/np/RAgeOXE6WGAdKnWcmSFvE1BnQBXdj6IviGGZzIqtFvIIw",
-        "cito_np": "https://w3id.org/sciencelive/np/RAfDT5MEvTEZDidePQP3bves89sl9D34qgIsl6c0SECdM"
+        "cito_np": "https://w3id.org/sciencelive/np/RAfDT5MEvTEZDidePQP3bves89sl9D34qgIsl6c0SECdM",
+        "claim": {
+          "label": "HEALPix family is fit for purpose as the common DGGS substrate for biodiversity × Copernicus EO × Destination Earth integration",
+          "aida": "The HEALPix family — including HEALPix-on-WGS84 via authalic-sphere mapping (healpix-geo / Ellipsoidal HEALPix) and rHEALPix — is fit for purpose as the common Discrete Global Grid System substrate for integrating biodiversity occurrence data with high-resolution Copernicus Earth-observation products and Destination Earth climate-model output.",
+          "type": "data quality"
+        }
       },
       {
         "verdict": "Validated",
@@ -324,7 +385,12 @@
         ],
         "repo_doi": "10.5281/zenodo.19848749",
         "outcome_np": "https://w3id.org/sciencelive/np/RAydqzcPo3ZNMYU2Gk9wd4u4OgITCaXwL01IQtxyoBloA",
-        "cito_np": "https://w3id.org/sciencelive/np/RABbVtjiCRIhjzf3G0oVKhYD2NyEV6LJMswjWUgezDW9I"
+        "cito_np": "https://w3id.org/sciencelive/np/RABbVtjiCRIhjzf3G0oVKhYD2NyEV6LJMswjWUgezDW9I",
+        "claim": {
+          "label": "Sphere-harmonic matched filter on HEALPix maintains detection accuracy at high latitudes; lat-lon flat matched filter does not ",
+          "aida": "On the HEALPix-NESTED substrate, a sphere-harmonic band-pass matched filter trained on low-latitude marine-heatwave events maintains 1.000 detection accuracy at the 70-80° latitude band while an equivalent lat-lon flat matched filter trained identically collapses to 0.500 detection accuracy at the same band.",
+          "type": "model performance"
+        }
       },
       {
         "verdict": "Validated",
@@ -333,7 +399,12 @@
         ],
         "repo_doi": "10.5281/zenodo.20082933",
         "outcome_np": "https://w3id.org/sciencelive/np/RAvIzcWGL89mxdBXTTjgRRd0QJBBAdu7wUqkdHRCssSqs",
-        "cito_np": "https://w3id.org/sciencelive/np/RAPIqs6m96yf2zaw052KE4SxnGDtrXtzEJo9WnUw5PG6c"
+        "cito_np": "https://w3id.org/sciencelive/np/RAPIqs6m96yf2zaw052KE4SxnGDtrXtzEJo9WnUw5PG6c",
+        "claim": {
+          "label": "Sphere-harmonic matched filter on HEALPix transfers cross-discipline at 1.000 without retraining; lat-lon flat matched filter drops to 0.845 on the same transfer",
+          "aida": "On the HEALPix-NESTED substrate, a sphere-harmonic band-pass matched filter trained on a cosmology-like Domain A with features at uniformly-random sphere locations classifies a climate-like Domain B with features confined to high latitudes at 1.000 accuracy without retraining, while an equivalent lat-lon flat matched filter trained identically drops from 1.000 in-domain to 0.845 on the same cross-domain transfer.",
+          "type": "model performance"
+        }
       }
     ],
     "10.1029/2023ms004021": [
@@ -344,7 +415,12 @@
         ],
         "repo_doi": "10.5281/zenodo.19848749",
         "outcome_np": "https://w3id.org/sciencelive/np/RAydqzcPo3ZNMYU2Gk9wd4u4OgITCaXwL01IQtxyoBloA",
-        "cito_np": "https://w3id.org/sciencelive/np/RABbVtjiCRIhjzf3G0oVKhYD2NyEV6LJMswjWUgezDW9I"
+        "cito_np": "https://w3id.org/sciencelive/np/RABbVtjiCRIhjzf3G0oVKhYD2NyEV6LJMswjWUgezDW9I",
+        "claim": {
+          "label": "Sphere-harmonic matched filter on HEALPix maintains detection accuracy at high latitudes; lat-lon flat matched filter does not ",
+          "aida": "On the HEALPix-NESTED substrate, a sphere-harmonic band-pass matched filter trained on low-latitude marine-heatwave events maintains 1.000 detection accuracy at the 70-80° latitude band while an equivalent lat-lon flat matched filter trained identically collapses to 0.500 detection accuracy at the same band.",
+          "type": "model performance"
+        }
       },
       {
         "verdict": "Validated",
@@ -353,7 +429,12 @@
         ],
         "repo_doi": "10.5281/zenodo.20082933",
         "outcome_np": "https://w3id.org/sciencelive/np/RAvIzcWGL89mxdBXTTjgRRd0QJBBAdu7wUqkdHRCssSqs",
-        "cito_np": "https://w3id.org/sciencelive/np/RAPIqs6m96yf2zaw052KE4SxnGDtrXtzEJo9WnUw5PG6c"
+        "cito_np": "https://w3id.org/sciencelive/np/RAPIqs6m96yf2zaw052KE4SxnGDtrXtzEJo9WnUw5PG6c",
+        "claim": {
+          "label": "Sphere-harmonic matched filter on HEALPix transfers cross-discipline at 1.000 without retraining; lat-lon flat matched filter drops to 0.845 on the same transfer",
+          "aida": "On the HEALPix-NESTED substrate, a sphere-harmonic band-pass matched filter trained on a cosmology-like Domain A with features at uniformly-random sphere locations classifies a climate-like Domain B with features confined to high latitudes at 1.000 accuracy without retraining, while an equivalent lat-lon flat matched filter trained identically drops from 1.000 in-domain to 0.845 on the same cross-domain transfer.",
+          "type": "model performance"
+        }
       }
     ],
     "10.1126/science.aad8745": [
@@ -364,7 +445,12 @@
         ],
         "repo_doi": "10.5281/zenodo.20082933",
         "outcome_np": "https://w3id.org/sciencelive/np/RAoW3q1q1Wyt5DXbFl2PI3woyhuYZuU8HYtJ3m0LyrP9M",
-        "cito_np": "https://w3id.org/sciencelive/np/RAUuipi5julhQ_M3pYhg_8UW-m2XmqXBfoHPeRfkNYzoc"
+        "cito_np": "https://w3id.org/sciencelive/np/RAUuipi5julhQ_M3pYhg_8UW-m2XmqXBfoHPeRfkNYzoc",
+        "claim": {
+          "label": "94 percent of marine GBIF records in the Western Australian region during 2011 sat on HEALPix cells that experienced MHW conditions during the documented Ningaloo Niño event",
+          "aida": "On the HEALPix-NESTED substrate, 719 of 765 (94.0 percent) marine biodiversity occurrences from GBIF in the Western Australian region during 2011 sat on cells that experienced marine-heatwave conditions during the documented Ningaloo Niño event of February-March 2011.",
+          "type": "descriptive pattern"
+        }
       }
     ],
     "10.1016/j.ocemod.2024.102387": [
@@ -375,7 +461,12 @@
         ],
         "repo_doi": "10.5281/zenodo.20348366",
         "outcome_np": "https://w3id.org/sciencelive/np/RAG8PjhjvPQFZo54BTaV_b7TryMonH--aDGzEXLhzvQ4w",
-        "cito_np": "https://w3id.org/sciencelive/np/RAuvGPQk_nxEcBWzADcLnyfqgjJ9Hr2aSWxwof2sDAung"
+        "cito_np": "https://w3id.org/sciencelive/np/RAuvGPQk_nxEcBWzADcLnyfqgjJ9Hr2aSWxwof2sDAung",
+        "claim": {
+          "label": "Coastal-ROM trade-off in coupled ADCIRC+SWAN hindcasts (Loveland et al. 2024)",
+          "aida": "In coupled ADCIRC SWAN (storm-surge plus spectral-wave) hindcasts of Gulf of Mexico hurricanes, the third-generation ST6 source-term package in SWAN yields no improvement in water-surface-elevation root-mean-square error at NOAA gauges over the first- or second-generation source-term packages, while increasing wall-clock run time.",
+          "type": "computational performance"
+        }
       }
     ],
     "10.1890/07-2153.1": [
@@ -386,7 +477,106 @@
         ],
         "repo_doi": "10.5281/zenodo.20473156",
         "outcome_np": "https://w3id.org/sciencelive/np/RA_uV84IchQAkkmCP_6amQir_flgCmvvt97DWIDmbu_V0",
-        "cito_np": "https://w3id.org/sciencelive/np/RAWsmCzWMKYQQK_ovRvE1o2wqjYkoxjfZRncHEcWAvv2g"
+        "cito_np": "https://w3id.org/sciencelive/np/RAWsmCzWMKYQQK_ovRvE1o2wqjYkoxjfZRncHEcWAvv2g",
+        "claim": {
+          "label": "Target-group background improves presence-only SDM AUC",
+          "aida": "Using target-group background increases the mean AUC of presence-only species distribution models relative to using random background.",
+          "type": "model performance"
+        }
+      }
+    ],
+    "10.48550/arxiv.1703.05175": [
+      {
+        "verdict": "PartiallySupported",
+        "cito": [
+          "qualifies"
+        ],
+        "repo_doi": "10.5281/zenodo.19607662",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAUS6GbT3Bu-Np0Ue73q58G_c2HilLhh95Y2b8W18o--M",
+        "cito_np": "https://w3id.org/np/RAALsAuC-rCQZhQdvuQXnahjHTpl_zlv4kqRUuRu0inIY",
+        "claim": {
+          "label": "Few-shot Prototypical Networks generalize to novel satellite land cover classes",
+          "aida": "Prototypical Networks classify land cover types in Sentinel-2 satellite imagery from a small number of labeled examples.",
+          "type": "model performance"
+        }
+      }
+    ],
+    "10.1126/science.1184695": [
+      {
+        "verdict": "PartiallySupported",
+        "cito": [
+          "extends"
+        ],
+        "repo_doi": "10.5281/zenodo.20266646",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAPw01nGqrY3V9ech7nd3gUOyoW52N6SspeKTa41neLBo",
+        "cito_np": "https://w3id.org/sciencelive/np/RAIdXhqT3oPF-7XlRYeN2oAAYJwXN9auLGR57iw8ipWl0",
+        "claim": {
+          "label": "Sinervo 2010 h_r mechanism for heliothermic lizard local extinction",
+          "aida": "Heliothermic lizard populations experience local extinction when the cumulative daily hours of activity restriction during the critical reproductive period (h_r, computed as the hours per day when operative temperature exceeds the species' preferred body temperature) exceed a family-specific threshold.",
+          "type": "descriptive pattern"
+        }
+      }
+    ],
+    "10.1073/pnas.0704469104": [
+      {
+        "verdict": "PartiallySupported",
+        "cito": [
+          "qualifies"
+        ],
+        "repo_doi": "10.5281/zenodo.20363556",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAzeZKbUCEMXZXDc-WzgHZ4K5mOMwotYhS2uCKDDmdcHI",
+        "cito_np": "https://w3id.org/sciencelive/np/RALjFcvPtncy74ZL8QgSiEyRZv_-mOiZj4wvWuq8JK-2s",
+        "claim": {
+          "label": "Scale-dependent misidentification of bird richness hotspots from range maps (Hurlbert & Jetz 2007)",
+          "aida": "Aggregating expert-drawn bird range maps onto spatial grids finer than approximately two degrees misidentifies up to two-thirds of species-richness hotspots relative to atlas survey data.",
+          "type": "descriptive pattern"
+        }
+      }
+    ],
+    "10.1038/s43247-022-00498-3": [
+      {
+        "verdict": "PartiallySupported",
+        "cito": [
+          "qualifies"
+        ],
+        "repo_doi": "https://github.com/j34ni/forrt-replication",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAZYUn5KQru5hr0vo3dwhK0-tQlOMlta4uv-xnGvH597c",
+        "cito_np": "https://w3id.org/sciencelive/np/RA-Q5_O6eDrQYthV0KarnyBFK33SUQuDXOjem3-4dTe7Y",
+        "claim": {
+          "label": "Arctic Amplification ratio — Rantanen et al. 2022",
+          "aida": "The mean Arctic Amplification ratio (Arctic OLS warming trend / global OLS warming trend, 1979–2021) was 3.8 across four observational datasets (ERA5, GISTEMP v4, Berkeley Earth, HadCRUT5), indicating that the Arctic warmed approximately four times faster than the global mean.",
+          "type": "descriptive pattern"
+        }
+      }
+    ],
+    "10.1038/s41597-022-01235-3": [
+      {
+        "verdict": "PartiallySupported",
+        "cito": [
+          "qualifies"
+        ],
+        "repo_doi": "10.5281/zenodo.20569075",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAv0cF0rwxb1CFmUAJlk5B7PLVc9pls5OvlfOHHHhtgm8",
+        "cito_np": "https://w3id.org/sciencelive/np/RAnqtFUZHfmW7Dtmf3bcTQtjDAfrq5IGV4xQ8guW8L3vY",
+        "claim": {
+          "label": "Open temperature-at-depth geolocation reproduces juvenile white shark positions less accurately than the original light-based method",
+          "aida": "In juvenile white sharks tracked by archival tags, an open hidden Markov geolocation method that matches tag temperature-at-depth against an ocean reanalysis reproduces the released satellite-tracked positions less accurately than the original proprietary light-based method.",
+          "type": "model performance"
+        }
+      },
+      {
+        "verdict": "PartiallySupported",
+        "cito": [
+          "qualifies"
+        ],
+        "repo_doi": "10.5281/zenodo.20585042",
+        "outcome_np": "https://w3id.org/sciencelive/np/RAlwDA35wFcmV-ZYzOUB_E3SrqPMIlIxWftoiPFbzN-7I",
+        "cito_np": "https://w3id.org/sciencelive/np/RA6JMK2CNN8MZITLdd3si08TwyR_-3fvbt6l6g3lf-YOg",
+        "claim": {
+          "label": "PAT light-level geolocation of juvenile white sharks",
+          "aida": "Pop-up archival tag light-level data yield accurate daily geolocations of juvenile white sharks in the northeast Pacific.",
+          "type": "model performance"
+        }
       }
     ]
   },

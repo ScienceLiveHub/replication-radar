@@ -164,6 +164,7 @@ def radar(topic: str, limit: int = 8, pool: int = 30) -> dict:
                 # replication-readiness only meaningful for OPEN targets (VERIFIED = already done)
                 "readiness": _readiness(_impact_score(p), bool(indep_tools), has_data) if open_target else None,
                 "verification": st["summary"],
+                "agreement": st["agreement"],
                 "verifications": st["verifications"],
                 "independent_tooling": [
                     {"title": s.title, "code_repo": s.code_repo, "swh": s.swh_archived}
@@ -197,6 +198,7 @@ def radar(topic: str, limit: int = 8, pool: int = 30) -> dict:
                     "impact": {"citationClass": p.citation_class, "influenceClass": p.influence_class},
                     "status": "VERIFIED",
                     "verification": st["summary"],
+                    "agreement": st["agreement"],
                     "verifications": st["verifications"],
                 }
             )
