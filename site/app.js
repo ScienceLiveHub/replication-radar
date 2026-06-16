@@ -188,6 +188,15 @@ const subjectsOf = (rec, scheme) => [...new Set((rec.subjects || []).filter((s) 
 const cleanFos = (arr) => [...new Set(arr.map((v) => v.replace(/^\d+\s+/, "")).filter((v) => v && !/^\d+$/.test(v)))];
 const oaOf = (rec) => rec.openAccessColor || ((rec.bestAccessRight || {}).label || "").toLowerCase();
 const urlOf = (rec) => (rec.instances && rec.instances[0] && rec.instances[0].urls && rec.instances[0].urls[0]) || null;
+// Paper abstract from OpenAIRE `descriptions` — strip JATS/HTML tags, decode entities, collapse
+// whitespace (mirrors the Python _abstract). Gives an OPEN target the context of what it claims.
+const abstractOf = (rec) => {
+  let t = (rec.descriptions || []).filter((d) => typeof d === "string").join(" ");
+  if (!t) return "";
+  t = t.replace(/<[^>]+>/g, " ");
+  const d = document.createElement("textarea"); d.innerHTML = t; t = d.value;   // decode entities
+  return t.replace(/\s+/g, " ").trim();
+};
 
 // ---------- software FAIR + usage assessment (grounded, live from GitHub + SWH) ----------
 // Computes the fair-software.eu 5 recommendations + usage from authoritative sources
@@ -412,6 +421,7 @@ async function radar(topic) {
     const readiness = readinessFrom(mat.score, impactScore, momentum);   // computed for ALL (incl. verified)
     return {
       title: p.mainTitle || "", doi, citations: impact(p).citationCount || 0,
+      abstract: abstractOf(p),
       cls: impact(p).citationClass, infl: impact(p).influenceClass,
       year: yearOf(p), impl: impact(p).impulseClass || null,
       mat, parts: { mat: mat.score, impact: impactScore, momentum },
@@ -543,6 +553,9 @@ function targetRow(t) {
   const cl = t.status === "VERIFIED" ? claimFor(t.outcome_np) : null;
   const claimLine = (cl && (cl.aida || cl.label))
     ? `<div class="tclaim"><span class="claimlbl">claim:</span> <span class="claimq">“${esc(cl.aida || cl.label)}”</span>${cl.type ? ` <span class="badge ctype" title="FORRT claim type">${esc(cl.type)}</span>` : ""}</div>` : "";
+  // OPEN targets have no verdict-chain claim yet — show the abstract for context on what you'd test.
+  const absLine = (t.status !== "VERIFIED" && t.abstract)
+    ? `<div class="tabstract" title="${esc(t.abstract)}"><span class="claimlbl">abstract</span> ${esc(t.abstract.slice(0, 220))}${t.abstract.length > 220 ? "…" : ""}</div>` : "";
   const outs = t.status === "VERIFIED" ? outcomesFor(t.doi).filter((o) => o.np) : [];
   const verdictLink = (t.status === "VERIFIED")
     ? `<div class="tverdict">independently checked by <a href="https://sciencelive4all.org" target="_blank" rel="noopener">Science Live</a> — <b>${esc(agreementOf(t.doi).why)}</b>${outcomeLinks(outs)}</div>` : "";
@@ -558,7 +571,7 @@ function targetRow(t) {
     : "";
   return `<div class="target ${t.status === "VERIFIED" ? "verified" : ""}">
     ${score}
-    <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${meta}${claimLine}${verdictLink}${resolvedNote}${fairNote}${replicateCTA}</div>
+    <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${meta}${claimLine}${absLine}${verdictLink}${resolvedNote}${fairNote}${replicateCTA}</div>
     <div class="t-right">${t.citations.toLocaleString()} cites<br>${link}</div>
   </div>`;
 }
