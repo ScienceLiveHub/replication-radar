@@ -380,7 +380,7 @@ async function loadCurated() {
     if (rec) {
       c.title = rec.mainTitle || doi; c.citations = impact(rec).citationCount || 0;
       c.cls = impact(rec).citationClass; c.infl = impact(rec).influenceClass;
-      c.impl = impact(rec).impulseClass; c.year = yearOf(rec);
+      c.impl = impact(rec).impulseClass; c.year = yearOf(rec); c.abstract = abstractOf(rec);
     } else { c.title = c.title || doi; }
   }));
 }
@@ -500,7 +500,7 @@ async function radar(topic) {
     const matScore = c.state === "rocrate" ? 1.0 : 0.6;
     targets.push({
       title: c.title, doi, citations: c.citations || 0, cls: c.cls, infl: c.infl,
-      year: c.year || null, impl: c.impl || null,
+      year: c.year || null, impl: c.impl || null, abstract: c.abstract || "",
       mat: { score: matScore, state: c.state, code: c.code || null, resolved: true, data: c.data || [], source: c.source || "the paper", lang: c.lang },
       parts: { mat: matScore, impact: impactScore, momentum },
       status: VERDICTS[doi] ? "VERIFIED" : "OPEN",
