@@ -540,27 +540,16 @@ const swhHtml = (repo, archived) => {
     return b ? `<a class="swhok" href="${b}" target="_blank" rel="noopener" title="Browse the archived snapshot in Software Heritage">in Software Heritage</a>` : `<span class="swhok">in Software Heritage</span>`;
   }
   if (!repo) return `<a class="swhno" href="https://archive.softwareheritage.org/save/" target="_blank" rel="noopener">not yet archived</a>`;
-  return `<button type="button" class="swhsave" data-repo="${esc(repo)}" onclick="swhSave(this)" title="Archive this repository in Software Heritage — Save Code Now (one click, no account needed)">not yet archived — archive it now →</button>`;
+  return `<button type="button" class="swhsave" data-repo="${esc(repo)}" onclick="swhSave(this)" title="Open Software Heritage Save Code Now and copy this repo's URL ready to paste">not yet archived — archive it →</button>`;
 };
-// One-click Save Code Now: POST the repo to the SWH save API. CORS is open and anonymous saves
-// are accepted; on failure, fall back to opening the form.
+// SWH's save API can't be called cross-origin from a static page (the repo URL sits in the request
+// path and the form can't be pre-filled), so do the reliable thing: copy the repo URL to the
+// clipboard and open the Save Code Now form — one click, then paste (Cmd/Ctrl-V) and submit.
 window.swhSave = async (btn) => {
-  const repo = (btn.dataset.repo || "").replace(/\/+$/, "");
-  if (!repo) return;
-  btn.disabled = true;
-  btn.innerHTML = "requesting archival…";
-  try {
-    const r = await fetch(`https://archive.softwareheritage.org/api/1/origin/save/git/url/${repo}/`, { method: "POST", headers: { Accept: "application/json" } });
-    const d = await r.json().catch(() => ({}));
-    if (r.ok && (d.save_request_status === "accepted" || d.id)) {
-      btn.classList.add("done");
-      btn.innerHTML = `${ICON.check}archival requested — it will appear in Software Heritage shortly`;
-    } else { throw new Error(d.reason || r.status); }
-  } catch (e) {
-    btn.disabled = false;
-    btn.innerHTML = "couldn’t reach Software Heritage — open the form ↗";
-    btn.onclick = () => window.open("https://archive.softwareheritage.org/save/", "_blank", "noopener");
-  }
+  const repo = btn.dataset.repo || "";
+  try { if (repo && navigator.clipboard) { await navigator.clipboard.writeText(repo); btn.classList.add("done"); btn.innerHTML = `${ICON.check}repo URL copied — paste it into the form`; } }
+  catch (e) { /* clipboard blocked — the form still opens */ }
+  window.open("https://archive.softwareheritage.org/save/", "_blank", "noopener");
 };
 function fairBlock(f, repo) {
   const recs = Object.entries(f.recs || {}).map(([k, ok]) =>
