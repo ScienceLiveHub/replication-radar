@@ -1,0 +1,59 @@
+{
+  "title": "Replication Radar — methodology & data provenance",
+  "summary": "Replication Radar joins three public, grounded sources into one view of a research field: the OpenAIRE Graph (what exists and how cited it is), the Science Live nanopublication network (whether a claim has been independently replicated and with what verdict), and FAIR-software signals (whether the replication's code is reusable). This document states, for every label and score in the interface, exactly where it comes from and how it is computed. It is served as JSON (this file) and rendered as a page at /methodology.html.",
+  "version": "0.3.2",
+  "updated": "2026-06-16",
+  "license": "CC-BY-4.0",
+  "sources": [
+    { "id": "openaire", "name": "OpenAIRE Graph", "url": "https://graph.openaire.eu/", "api": "https://api.openaire.eu/graph/v1", "role": "Research products (papers, software, datasets), citation-impact indicators, open-access status, subject classification (FOS, SDG), and code/data links. Queried live from the browser; no key required." },
+    { "id": "bip", "name": "BIP! citation indicators (via OpenAIRE)", "url": "https://bip.imsi.athenarc.gr/", "role": "The C1–C5 impact and impulse classes are BIP! indicators carried in the OpenAIRE record." },
+    { "id": "sciencelive", "name": "Science Live nanopublication network", "url": "https://sciencelive4all.org", "api": "https://query.knowledgepixels.com/repo/full", "role": "FORRT replication chains as signed nanopublications: the Outcome (verdict), the Study (method), the Claim (what was tested) and CiTO citations to the original paper. Queried live via SPARQL; author-agnostic (any signer)." },
+    { "id": "fairsoftware", "name": "fair-software.eu recommendations", "url": "https://fair-software.eu/", "role": "The five FAIR-for-research-software recommendations we score a replication's code against." },
+    { "id": "github", "name": "GitHub REST API", "url": "https://docs.github.com/rest", "role": "Repository existence, licence, citation file, release/quality signals, stars and forks for the FAIR-software check (unauthenticated, 60 requests/hour)." },
+    { "id": "swh", "name": "Software Heritage API", "url": "https://archive.softwareheritage.org/api/", "role": "Whether the replication's code is archived in Software Heritage (long-term preservation), for the FAIR-software check." },
+    { "id": "zenodo", "name": "Zenodo API", "url": "https://developers.zenodo.org/", "role": "Resolving a Zenodo deposit to its source GitHub repository and DOI when OpenAIRE lacks a direct code link." }
+  ],
+  "signals": [
+    { "id": "targets", "name": "Replication targets (the ranked list)", "shownAs": "the list of candidate papers", "source": "openaire",
+      "means": "High-impact papers matching your search term.", "computed": "OpenAIRE free-text search (terms are AND-ed; keep queries short), de-duplicated by DOI and by normalised title, with peer-review reports filtered out. Verified papers matching the field are injected so a replicated paper always appears.", "limits": "Keyword recall is OpenAIRE's; long queries can return nothing, and loosely-matched terms add noise." },
+    { "id": "impact", "name": "Citation impact class (C1–C5)", "shownAs": "C1 … C5 badge", "source": "bip",
+      "means": "Global citation percentile across all of science. C1 = top 0.01%, C2 = top 0.1%, C3 = top 1%, C4 = top 10%, C5 = the rest.", "computed": "The maximum of the BIP! influence and popularity classes in the OpenAIRE record.", "limits": "Citation count is orthogonal to whether a claim is true — high impact means worth checking, not correct." },
+    { "id": "momentum", "name": "Citation momentum (impulse)", "shownAs": "impulse C1 … C5 badge", "source": "bip",
+      "means": "How fast the paper is currently being cited (early/ongoing momentum).", "computed": "The BIP! impulse class in the OpenAIRE record.", "limits": "Recent papers can show high impulse without yet being highly cited overall." },
+    { "id": "oa", "name": "Open-access route", "shownAs": "gold / hybrid / green / bronze / diamond OA chip", "source": "openaire",
+      "means": "How the paper is free to read — gold/diamond = OA journal, hybrid = OA in a subscription journal, green = self-archived copy, bronze = free on the publisher site with no open licence.", "computed": "OpenAIRE's openAccessColor / bestAccessRight.", "limits": "Reflects OpenAIRE's harvested access metadata." },
+    { "id": "fos", "name": "Field of Science (FOS)", "shownAs": "subject chip, e.g. 'biological sciences'", "source": "openaire",
+      "means": "The research field, on the OECD Fields of Science and Technology scheme.", "computed": "OpenAIRE subject classification with scheme = FOS (the leading OECD code is dropped for display).", "limits": "Auto-classified by OpenAIRE; can be broad or imperfect." },
+    { "id": "sdg", "name": "UN Sustainable Development Goal", "shownAs": "SDG chip, e.g. '13. Climate action'", "source": "openaire",
+      "means": "The UN SDG the paper is relevant to; the chip links to the UN goal definition.", "computed": "OpenAIRE subject classification with scheme = SDG.", "limits": "Assigned by OpenAIRE's SDG classifier, not by the authors." },
+    { "id": "materials", "name": "Materials availability (reproducible)", "shownAs": "the 'Reproducible' status / RO-Crate / code badge", "source": "openaire",
+      "means": "Whether the original code/data are available, so the paper can be RE-RUN (reproduced). Reproduction is distinct from replication.", "computed": "An RO-Crate research object scores 1.0; a linked code repository (GitHub/GitLab/Bitbucket) scores 0.6; otherwise the materials state is UNKNOWN (null), never zero. A few papers are resolved from their Data/Code Availability statement when OpenAIRE links nothing.", "limits": "OpenAIRE's absence of a link is not real absence (the 'unknown ≠ absent' rule); unknown materials are common in live search." },
+    { "id": "verdict", "name": "Replication verdict", "shownAs": "Validated / PartiallySupported / Contradicted", "source": "sciencelive",
+      "means": "Whether an independent replication of a claim from this paper held up.", "computed": "FORRT Outcome nanopublications whose CiTO citation verdict-cites the paper's DOI (confirms / qualifies / disputes / critiques / extends / supports / refutes). Pulled live, author-agnostic. Outcomes retracted, invalidated or superseded by their own signer are excluded.", "limits": "Coverage is whatever the network holds; a paper with no verdict is 'not yet checked', not 'unreplicable'." },
+    { "id": "claim", "name": "The claim that was replicated", "shownAs": "CLAIM: “…” + FORRT claim type", "source": "sciencelive",
+      "means": "The atomic statement the replication actually tested (not just the paper title).", "computed": "Traverse the chain Outcome → isOutcomeOf → Study → targetsClaim → Claim, reading the claim's AIDA statement and FORRT claim type.", "limits": "Present only when the chain records a claim; paper-rooted chains may carry no separate PICO/PCC question." },
+    { "id": "agreement", "name": "Agreement pattern", "shownAs": "Robustly validated / Validated / Contested / Refuted badge", "source": "sciencelive",
+      "means": "Whether independent replications agree. Many-agree differs from disagree.", "computed": "From the verdict counts across all of a paper's outcomes — see the 'agreement' score below.", "limits": "Depends on how many replications exist; one confirmation is weaker evidence than several." },
+    { "id": "fair", "name": "FAIR-software score (N/5)", "shownAs": "FAIR software N/5 + per-recommendation checks", "source": "fairsoftware",
+      "means": "How reusable the replication's code is, on the five fair-software.eu recommendations: public repository, open licence, in a registry, citable (CITATION.cff / DOI), and quality artefacts.", "computed": "Computed live from the GitHub API (repository, licence, citation file, quality), Software Heritage (archival/registry) and Zenodo (DOI). One point per met recommendation. Only ever run on a replication we have a real repository URL for.", "limits": "GitHub unauthenticated rate limit is 60/hour; a check can be skipped if the limit is hit." },
+    { "id": "gap", "name": "The replication-gap map", "shownAs": "the composition bar at the top", "source": "sciencelive",
+      "means": "How much of the matched high-impact work has actually been independently checked — the rest is the replication gap.", "computed": "A composition of the ranked list by status (reproducible / validated / contested / needs check / dormant).", "limits": "Reflects the current search and the current network coverage." }
+  ],
+  "scores": [
+    { "id": "priority", "name": "Replication PRIORITY (the 0–1 score the list is sorted by)",
+      "formula": "OPEN papers: 0.45·materials + 0.35·impact + 0.20·momentum (materials contributes 0 when unknown, so a paper with materials always out-ranks an equally-cited one without). VERIFIED papers: impact × agreement-weight, where weight = { robustly-validated 0.2, validated 0.4, contested 0.95, refuted 0.55 }. DORMANT (old, cold, no materials, no verdict) is halved.",
+      "explanation": "Impact and momentum are mapped C1=1.0, C2=0.8, C3=0.6, C4=0.4, C5=0.2. The number and the sort order agree: a contested high-impact result rises (worth re-checking), a robustly-validated one sinks (it's settled), and an unchecked paper with available materials rises above one without." },
+    { "id": "agreement", "name": "Agreement pattern",
+      "formula": "Count the verdicts across a paper's distinct outcomes: confirm, partial, contradict. If contra and (confirm or partial) → Contested. If contra only → Refuted. If ≥2 confirm and no partial → Robustly validated. If ≥1 confirm → Validated. If partial only → Validated (partially supported).",
+      "explanation": "Each outcome is one signed nanopublication; records without a signed outcome are not counted." },
+    { "id": "fair", "name": "FAIR-software score",
+      "formula": "1 point for each met recommendation, out of 5: public repository · open licence · in a registry · citable (CITATION.cff or DOI) · quality artefacts.",
+      "explanation": "fair-software.eu's five recommendations, evaluated from live GitHub / Software Heritage / Zenodo signals." }
+  ],
+  "guardrails": [
+    "Grounded sources only — every signal comes from a real, named source (above); no relevance-by-keyword-guessing.",
+    "Unknown is not absent — OpenAIRE not linking code/data is scored as unknown, never as zero.",
+    "Retraction-aware — replication outcomes retracted, invalidated or superseded by their original signer are filtered out (only the original author can retract their own work; disapproval is not retraction).",
+    "Author-agnostic — replication verdicts are read from the whole nanopublication network by template, regardless of who signed them."
+  ]
+}

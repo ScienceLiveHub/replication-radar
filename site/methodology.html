@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Replication Radar — Methodology &amp; data provenance</title>
+  <meta name="description" content="Where every label and score in Replication Radar comes from, and how each is computed. Machine-readable (methodology.json) and human-readable." />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .mwrap{max-width:880px}
+    .lead{font-size:16px;color:var(--ink);line-height:1.6;margin:0 0 8px}
+    .msection{margin:30px 0}
+    .msection > h2{font-size:20px;color:var(--navy);margin:0 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+    .srcgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media(max-width:720px){.srcgrid{grid-template-columns:1fr}}
+    .srccard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--card)}
+    .srccard h3{margin:0 0 4px;font-size:14px;color:var(--navy)}
+    .srccard p{margin:0;font-size:13px;color:var(--mut);line-height:1.55}
+    .sig{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:12px;background:var(--card)}
+    .sig h3{margin:0 0 2px;font-size:15px;color:var(--ink)}
+    .sig .shown{font-size:12.5px;color:var(--mut);margin-bottom:8px}
+    .srcbadge{display:inline-block;font-size:11px;font-weight:700;background:var(--magenta-soft);color:#a32a6a;border-radius:20px;padding:2px 10px;margin-bottom:10px;text-decoration:none}
+    a.srcbadge:hover{background:var(--magenta);color:#fff}
+    .sig dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+    .sig dt{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--navy2);padding-top:2px}
+    .sig dd{margin:0;font-size:13px;color:var(--ink);line-height:1.55}
+    .sig dd.lim{color:var(--mut)}
+    .scorecard{border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:12px;background:var(--card)}
+    .scorecard h3{margin:0 0 8px;font-size:15px;color:var(--navy)}
+    .scorecard .formula{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:#f3f5f9;border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--ink);line-height:1.6;white-space:pre-wrap}
+    .scorecard .expl{font-size:13px;color:var(--mut);line-height:1.55;margin-top:8px}
+    .guards{list-style:none;padding:0;margin:0}
+    .guards li{padding:9px 0 9px 26px;position:relative;font-size:13.5px;color:var(--ink);border-bottom:1px solid var(--line)}
+    .guards li:last-child{border:0}
+    .guards li::before{content:"";position:absolute;left:4px;top:14px;width:9px;height:9px;border-radius:2px;background:var(--magenta)}
+    .backbar{margin:6px 0 18px;font-size:13.5px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Methodology &amp; data provenance</h1>
+      <p class="tag">Where every label and score comes from — and how it's computed.</p>
+      <p class="sub">Replication Radar · human-readable here, machine-readable as <a href="methodology.json" style="color:#fff;text-decoration:underline">methodology.json</a></p>
+    </div>
+  </header>
+  <main class="wrap mwrap">
+    <p class="backbar">← <a href="index.html">Back to the Radar</a></p>
+    <p id="lead" class="lead"></p>
+    <div id="content"></div>
+  </main>
+  <footer>
+    <div class="wrap">
+      <span>This page is rendered from <a href="methodology.json">methodology.json</a> — one source of truth, machine- and human-readable.</span>
+      <span><a href="index.html">Replication Radar</a> · <a href="https://github.com/ScienceLiveHub/replication-radar">code (MIT)</a></span>
+    </div>
+  </footer>
+  <script>
+    const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    fetch("methodology.json").then((r) => r.json()).then((m) => {
+      document.title = m.title;
+      document.getElementById("lead").textContent = m.summary;
+      const srcById = Object.fromEntries(m.sources.map((s) => [s.id, s]));
+      const out = [];
+
+      out.push(`<section class="msection"><h2>Data sources</h2><div class="srcgrid">` +
+        m.sources.map((s) => `<div class="srccard"><h3><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a></h3><p>${esc(s.role)}</p></div>`).join("") +
+        `</div></section>`);
+
+      out.push(`<section class="msection"><h2>What every label means — and who provides it</h2>` +
+        m.signals.map((g) => {
+          const s = srcById[g.source] || {};
+          return `<div class="sig"><h3>${esc(g.name)}</h3><div class="shown">shown as: ${esc(g.shownAs)}</div>` +
+            `<a class="srcbadge" href="${esc(s.url || "#")}" target="_blank" rel="noopener">source: ${esc(s.name || g.source)}</a>` +
+            `<dl><dt>Means</dt><dd>${esc(g.means)}</dd><dt>Computed</dt><dd>${esc(g.computed)}</dd><dt>Limits</dt><dd class="lim">${esc(g.limits)}</dd></dl></div>`;
+        }).join("") + `</section>`);
+
+      out.push(`<section class="msection"><h2>How the scores are computed</h2>` +
+        m.scores.map((s) => `<div class="scorecard"><h3>${esc(s.name)}</h3><div class="formula">${esc(s.formula)}</div><p class="expl">${esc(s.explanation)}</p></div>`).join("") +
+        `</section>`);
+
+      out.push(`<section class="msection"><h2>Guardrails</h2><ul class="guards">` +
+        m.guardrails.map((g) => `<li>${esc(g)}</li>`).join("") + `</ul></section>`);
+
+      document.getElementById("content").innerHTML = out.join("");
+    }).catch((e) => {
+      document.getElementById("content").innerHTML = `<p class="lead">Could not load methodology.json (${esc(e.message)}).</p>`;
+    });
+  </script>
+</body>
+</html>
