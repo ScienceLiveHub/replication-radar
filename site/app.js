@@ -632,7 +632,7 @@ function renderVerified(inField) {
   const fieldHtml = field.length
     ? `<ul class="vlist">${field.map(matchCard).join("")}</ul>`
     : `<p class="vnone">No Science Live verdict matching your search yet — every paper on the left is an <b>open</b> replication opportunity.</p>`;
-  const moreHtml = `<p class="vmore-stat">Verdicts are pulled <b>live</b> from the nanopub network (any signer), filtered for retracted/superseded versions. <a href="https://github.com/ScienceLiveHub/replication-radar/blob/main/src/replication_radar/data/verdicts.json" target="_blank" rel="noopener">offline fallback index →</a></p>`;
+  const moreHtml = `<p class="vmore-stat">Verdicts are read <b>live</b> from the nanopub network — any signer, retraction- and supersession-filtered. <a href="methodology.html">How this works →</a></p>`;
   el("verified").innerHTML = fieldHtml + moreHtml;
 }
 
