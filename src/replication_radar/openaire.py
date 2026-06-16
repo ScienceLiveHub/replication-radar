@@ -12,8 +12,10 @@ Operational rules learned from the connector spike (2026-06-13):
 """
 from __future__ import annotations
 
+import html
 import json
 import os
+import re
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
@@ -21,6 +23,23 @@ from typing import Any
 
 BASE = os.environ.get("RADAR_OPENAIRE_BASE", "https://api.openaire.eu/graph/v1")
 _TIMEOUT = float(os.environ.get("RADAR_HTTP_TIMEOUT", "30"))
+
+
+def _abstract(rec: dict, limit: int = 2500) -> str:
+    """The paper's abstract from OpenAIRE's `descriptions`, with JATS/HTML markup stripped.
+
+    OpenAIRE returns abstracts wrapped in JATS XML (<jats:p>…</jats:p>); we strip tags,
+    unescape entities and collapse whitespace so an agent (or the UI) gets clean prose it
+    can read — e.g. to extract the paper's atomic claim as an AIDA statement.
+    """
+    descs = rec.get("descriptions") or []
+    text = " ".join(d for d in descs if isinstance(d, str) and d.strip())
+    if not text:
+        return ""
+    text = re.sub(r"<[^>]+>", " ", text)        # drop JATS/HTML tags
+    text = html.unescape(text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text[:limit]
 
 _CLASS_RANK = {"C1": 1, "C2": 2, "C3": 3, "C4": 4, "C5": 5, None: 9}
 
@@ -91,6 +110,7 @@ class Product:
     code_repo: str | None
     swh_archived: bool
     downloads: int
+    abstract: str = ""
     raw_id: str | None = None
 
     @property
@@ -135,6 +155,7 @@ def _to_product(rec: dict) -> Product:
         code_repo=rec.get("codeRepositoryUrl"),
         swh_archived=any("softwareheritage.org" in (u or "") for u in urls),
         downloads=int(usage.get("downloads") or 0),
+        abstract=_abstract(rec),
         raw_id=rec.get("id"),
     )
 

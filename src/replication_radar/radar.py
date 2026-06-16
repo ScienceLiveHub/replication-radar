@@ -62,7 +62,13 @@ def _independence(target_authors: list[str], cand_authors: list[str]) -> bool:
 
 def replication_status(doi: str) -> dict:
     st = verdicts.status_for(doi)
-    return {"doi": doi.lower(), **st}
+    paper = openaire.get_by_doi(doi)   # for the title + abstract (an agent can extract the claim)
+    return {
+        "doi": doi.lower(),
+        "title": paper.title if paper else None,
+        "abstract": paper.abstract if paper else "",
+        **st,
+    }
 
 
 def verified_claims() -> dict:
@@ -147,6 +153,7 @@ def radar(topic: str, limit: int = 8, pool: int = 30) -> dict:
                 "title": p.title,
                 "doi": p.doi,
                 "year": p.year,
+                "abstract": p.abstract,
                 "citations": p.citation_count,
                 "impact": {
                     "citationClass": p.citation_class,

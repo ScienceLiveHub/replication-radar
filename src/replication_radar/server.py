@@ -29,8 +29,9 @@ def radar(topic: str, limit: int = 8) -> dict:
     """Impact-ranked replication targets in a research field.
 
     Returns high-impact OpenAIRE papers worth replicating, each flagged OPEN
-    (opportunity) or VERIFIED (already checked by a Science Live replication, with
-    the verdict), plus independent reusable tooling and a field funder-context panel.
+    (opportunity) or VERIFIED (already checked by a Science Live replication, with the
+    verdict), each with its `abstract` (markup stripped — read it or extract the paper's
+    atomic claim), plus independent reusable tooling.
     Keep `topic` short (2-3 words); OpenAIRE free-text terms are AND-ed.
     """
     return _radar(topic, limit=limit)
@@ -51,7 +52,9 @@ def replication_status(doi: str) -> dict:
     Science Live verdict — pulled LIVE from the nanopub network, any signer
     (author-agnostic) — with the validation status, CiTO relation, the replication's
     repository, and links to the signed Outcome/CiTO nanopubs. 'open' if not replicated.
-    This is the reliability signal the OpenAIRE Graph structurally cannot hold."""
+    This is the reliability signal the OpenAIRE Graph structurally cannot hold.
+    Also returns the paper's `title` and `abstract` (from OpenAIRE, markup stripped), so
+    you can read or extract its atomic claim (an AIDA statement) to reason about it."""
     return _replication_status(doi)
 
 
