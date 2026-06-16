@@ -526,7 +526,7 @@ function targetRow(t) {
     ? `<div class="tclaim"><span class="claimlbl">claim:</span> <span class="claimq">“${esc(cl.aida || cl.label)}”</span>${cl.type ? ` <span class="badge ctype" title="FORRT claim type">${esc(cl.type)}</span>` : ""}</div>` : "";
   const outs = t.status === "VERIFIED" ? outcomesFor(t.doi).filter((o) => o.np) : [];
   const verdictLink = (t.status === "VERIFIED")
-    ? `<div class="tverdict">independently checked by Science Live — <b>${esc(agreementOf(t.doi).why)}</b>${outcomeLinks(outs)}</div>` : "";
+    ? `<div class="tverdict">independently checked by <a href="https://sciencelive4all.org" target="_blank" rel="noopener">Science Live</a> — <b>${esc(agreementOf(t.doi).why)}</b>${outcomeLinks(outs)}</div>` : "";
   const resolvedNote = (t.mat && t.mat.resolved)
     ? `<div class="tresolved">↳ materials resolved from ${esc(t.mat.source || "the paper")} (not in OpenAIRE): <a href="${esc(t.mat.code || "")}" target="_blank" rel="noopener">code repo</a>${(t.mat.data && t.mat.data.length) ? ` · data: ${t.mat.data.map(esc).join(", ")}` : ""}</div>`
     : "";
@@ -594,9 +594,11 @@ function renderVerified(inField) {
   const matchCard = (v) => {
     const chips = [
       v.oa ? `<span class="ochip oa" title="Open-access route (OpenAIRE) — how the paper is free to read: gold/diamond = OA journal, hybrid = OA in a subscription journal, green = self-archived copy, bronze = free on the publisher site with no open licence">${esc(v.oa)} OA</span>` : "",
-      ...(v.fos || []).map((f) => `<span class="ochip">${esc(f).slice(0, 24)}</span>`),
-      ...(v.sdg || []).map((s) => `<span class="ochip sdg">${esc(s).slice(0, 22)}</span>`),
-      `<span class="ochip cites">${v.citations.toLocaleString()} cites</span>`,
+      ...(v.fos || []).map((f) => `<span class="ochip" title="Field of Science (OECD FOS scheme) — subject classification assigned by OpenAIRE">${esc(f).slice(0, 24)}</span>`),
+      ...(v.sdg || []).map((s) => { const m = /^(\d+)\./.exec(s); return m
+        ? `<a class="ochip sdg" href="https://sdgs.un.org/goals/goal${m[1]}" target="_blank" rel="noopener" title="UN Sustainable Development Goal ${m[1]} — assigned by OpenAIRE's SDG classifier (opens the UN definition)">${esc(s).slice(0, 22)}</a>`
+        : `<span class="ochip sdg" title="UN Sustainable Development Goal — assigned by OpenAIRE's SDG classifier">${esc(s).slice(0, 22)}</span>`; }),
+      `<span class="ochip cites" title="Citation count from the OpenAIRE Graph">${v.citations.toLocaleString()} cites</span>`,
     ].join("");
     let repl = "";
     if (v.repl) {
@@ -619,7 +621,7 @@ function renderVerified(inField) {
       <span class="vt">${esc(v.title).slice(0, 82)}</span>
       <div class="ochips">${chips}</div>
       ${vClaimLine}
-      <div class="vline"><span class="vv ${partialOf(v) ? "partial" : ""}">${v.verdicts.join(", ")}</span> — independently checked by Science Live ${vouts.length ? outcomeLinks(vouts) : (v.cito_np ? `· <a href="${v.cito_np}" target="_blank" rel="noopener">verdict chain →</a>` : "")}</div>
+      <div class="vline"><span class="vv ${partialOf(v) ? "partial" : ""}">${v.verdicts.join(", ")}</span> — independently checked by <a href="https://sciencelive4all.org" target="_blank" rel="noopener">Science Live</a> ${vouts.length ? outcomeLinks(vouts) : (v.cito_np ? `· <a href="${v.cito_np}" target="_blank" rel="noopener">verdict chain →</a>` : "")}</div>
       ${repl}
     </li>`;
   };
