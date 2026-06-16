@@ -39,6 +39,7 @@ def _abstract(rec: dict, limit: int = 2500) -> str:
     text = re.sub(r"<[^>]+>", " ", text)        # drop JATS/HTML tags
     text = html.unescape(text)
     text = re.sub(r"\s+", " ", text).strip()
+    text = re.sub(r"^abstract[\s:.\-–—]*", "", text, flags=re.I)   # drop redundant "Abstract" prefix
     return text[:limit]
 
 _CLASS_RANK = {"C1": 1, "C2": 2, "C3": 3, "C4": 4, "C5": 5, None: 9}

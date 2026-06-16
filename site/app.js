@@ -195,7 +195,7 @@ const abstractOf = (rec) => {
   if (!t) return "";
   t = t.replace(/<[^>]+>/g, " ");
   const d = document.createElement("textarea"); d.innerHTML = t; t = d.value;   // decode entities
-  return t.replace(/\s+/g, " ").trim();
+  return t.replace(/\s+/g, " ").trim().replace(/^abstract[\s:.\-–—]*/i, "");    // drop redundant "Abstract" prefix
 };
 
 // ---------- software FAIR + usage assessment (grounded, live from GitHub + SWH) ----------
@@ -553,9 +553,13 @@ function targetRow(t) {
   const cl = t.status === "VERIFIED" ? claimFor(t.outcome_np) : null;
   const claimLine = (cl && (cl.aida || cl.label))
     ? `<div class="tclaim"><span class="claimlbl">claim:</span> <span class="claimq">“${esc(cl.aida || cl.label)}”</span>${cl.type ? ` <span class="badge ctype" title="FORRT claim type">${esc(cl.type)}</span>` : ""}</div>` : "";
-  // OPEN targets have no verdict-chain claim yet — show the abstract for context on what you'd test.
+  // OPEN targets have no verdict-chain claim yet — show the abstract for context on what you'd
+  // test. Long ones fold (click to expand the full text) so the card stays compact.
   const absLine = (t.status !== "VERIFIED" && t.abstract)
-    ? `<div class="tabstract" title="${esc(t.abstract)}"><span class="claimlbl">abstract</span> ${esc(t.abstract.slice(0, 220))}${t.abstract.length > 220 ? "…" : ""}</div>` : "";
+    ? (t.abstract.length <= 240
+        ? `<div class="tabstract"><span class="claimlbl">abstract</span> ${esc(t.abstract)}</div>`
+        : `<details class="tabstract"><summary><span class="claimlbl">abstract</span> <span class="absnip">${esc(t.abstract.slice(0, 200))}…</span></summary><div class="absfull">${esc(t.abstract)}</div></details>`)
+    : "";
   const outs = t.status === "VERIFIED" ? outcomesFor(t.doi).filter((o) => o.np) : [];
   const verdictLink = (t.status === "VERIFIED")
     ? `<div class="tverdict">independently checked by <a href="https://sciencelive4all.org" target="_blank" rel="noopener">Science Live</a> — <b>${esc(agreementOf(t.doi).why)}</b>${outcomeLinks(outs)}</div>` : "";
