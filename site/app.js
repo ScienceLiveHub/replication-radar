@@ -682,7 +682,7 @@ async function run(topic, isExample) {
 }
 
 // ---------- wire up ----------
-el("chips").innerHTML = EXAMPLES.map((e) => `<span class="chip">${e}</span>`).join("");
+el("chips").innerHTML = EXAMPLES.map((e) => `<button type="button" class="chip">${e}</button>`).join("");
 el("chips").addEventListener("click", (e) => { if (e.target.classList.contains("chip")) { el("topic").value = e.target.textContent; run(e.target.textContent); } });
 el("go").addEventListener("click", () => run(el("topic").value));
 el("topic").addEventListener("keydown", (e) => { if (e.key === "Enter") run(el("topic").value); });
