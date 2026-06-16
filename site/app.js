@@ -4,6 +4,10 @@
 
 const API = "https://api.openaire.eu/graph/v1";
 const CLASS_SCORE = { C1: 1, C2: 0.8, C3: 0.6, C4: 0.4, C5: 0.2 };
+// Per-class tooltip text so EVERY class (not just C1/C5) explains itself on hover.
+const CLS_PCT = { C1: "top 0.01%", C2: "top 0.1%", C3: "top 1%", C4: "top 10%", C5: "the rest (outside the top 10%)" };
+const impactTip = (c) => `OpenAIRE BIP! citation-impact class — ${c} = ${CLS_PCT[c] || "—"} most-cited across all of science (C1 highest · C5 lowest)`;
+const impulseTip = (c) => `OpenAIRE BIP! impulse class — ${c} = ${CLS_PCT[c] || "—"} by recent citation momentum (C1 highest · C5 lowest)`;
 const EXAMPLES = ["species distribution", "marine heatwave", "bumble bee climate", "presence-only", "range maps scale"];
 
 let VERDICTS = {};      // doi -> [verifications]
@@ -508,7 +512,7 @@ function targetRow(t) {
   const score = `<div class="score" title="${esc(scoreTitle)}"><span>${t.priority != null ? t.priority.toFixed(2) : "—"}</span><small>PRIORITY</small></div>`;
   const st = STATUS[t.statusKey] || STATUS.needs;
   const badge = `<span class="badge ${st.cls}" title="${esc(st.tip)}">${st.icon}${st.label}</span>`
-    + (t.cls ? `<span class="badge cls" title="OpenAIRE BIP! impact class — C1 = top 0.01% most-cited globally, C5 = the rest">${t.cls}</span>` : "");
+    + (t.cls ? `<span class="badge cls" title="${esc(impactTip(t.cls))}">${t.cls}</span>` : "");
   // Materials badge ONLY when positively known. OpenAIRE rarely links code/data to a
   // paper, so 'unknown' is the norm in live search and would be noise on every row —
   // it's carried in the score breakdown tooltip, and resolved in the baked demo set.
@@ -517,7 +521,7 @@ function targetRow(t) {
     : "";
   const meta = `<div class="t-meta">`
     + (t.year ? `<span class="badge yr">${t.year}</span>` : "")
-    + (t.impl ? `<span class="badge imp" title="OpenAIRE BIP! impulse class — early citation momentum (C1 highest)">impulse ${t.impl}</span>` : "")
+    + (t.impl ? `<span class="badge imp" title="${esc(impulseTip(t.impl))}">impulse ${t.impl}</span>` : "")
     + matMeta + `</div>`;
   const link = t.doi ? `<a href="https://doi.org/${t.doi}" target="_blank" rel="noopener">${t.doi}</a>` : "";
   // what EXACTLY was replicated — the claim's AIDA statement (atomic sentence) + its FORRT type
