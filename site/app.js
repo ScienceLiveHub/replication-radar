@@ -532,13 +532,35 @@ let _targets = [], _tpage = 0, _tfilter = new Set();
 // FAIR-software block: a fold that expands to the 5 fair-software.eu recommendations (met/missing),
 // with a live Software Heritage link (browse the archived snapshot, or Save Code Now if not yet).
 const FAIR_REC = { repository: "public repository", license: "open licence", registry: "in a registry", citation: "citable (CITATION.cff / DOI)", quality: "quality artefacts" };
-// Software Heritage status as a link: archived → browse the snapshot; not yet → Save Code Now.
+// Software Heritage status: archived → browse the snapshot; not yet → a one-click "archive it"
+// button that POSTs to the SWH Save-Code-Now API (anonymous, CORS-open, no account needed).
 const swhHtml = (repo, archived) => {
   if (archived) {
     const b = repo ? `https://archive.softwareheritage.org/browse/origin/directory/?origin_url=${encodeURIComponent(repo)}` : null;
     return b ? `<a class="swhok" href="${b}" target="_blank" rel="noopener" title="Browse the archived snapshot in Software Heritage">in Software Heritage</a>` : `<span class="swhok">in Software Heritage</span>`;
   }
-  return `<a class="swhno" href="https://archive.softwareheritage.org/save/" target="_blank" rel="noopener" title="Archive this repository in Software Heritage — Save Code Now${repo ? ` (paste: ${repo})` : ""}">not yet archived — save it →</a>`;
+  if (!repo) return `<a class="swhno" href="https://archive.softwareheritage.org/save/" target="_blank" rel="noopener">not yet archived</a>`;
+  return `<button type="button" class="swhsave" data-repo="${esc(repo)}" onclick="swhSave(this)" title="Archive this repository in Software Heritage — Save Code Now (one click, no account needed)">not yet archived — archive it now →</button>`;
+};
+// One-click Save Code Now: POST the repo to the SWH save API. CORS is open and anonymous saves
+// are accepted; on failure, fall back to opening the form.
+window.swhSave = async (btn) => {
+  const repo = (btn.dataset.repo || "").replace(/\/+$/, "");
+  if (!repo) return;
+  btn.disabled = true;
+  btn.innerHTML = "requesting archival…";
+  try {
+    const r = await fetch(`https://archive.softwareheritage.org/api/1/origin/save/git/url/${repo}/`, { method: "POST", headers: { Accept: "application/json" } });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok && (d.save_request_status === "accepted" || d.id)) {
+      btn.classList.add("done");
+      btn.innerHTML = `${ICON.check}archival requested — it will appear in Software Heritage shortly`;
+    } else { throw new Error(d.reason || r.status); }
+  } catch (e) {
+    btn.disabled = false;
+    btn.innerHTML = "couldn’t reach Software Heritage — open the form ↗";
+    btn.onclick = () => window.open("https://archive.softwareheritage.org/save/", "_blank", "noopener");
+  }
 };
 function fairBlock(f, repo) {
   const recs = Object.entries(f.recs || {}).map(([k, ok]) =>

@@ -167,6 +167,11 @@ details.tfair .fairrecs{margin-top:5px}
 .fairbar i{display:block;height:100%;background:var(--green)}
 .swhok{color:var(--green);font-weight:600}
 .swhno{color:#8a5804}
+.swhsave{background:none;border:0;padding:0;margin:0;font:inherit;font-weight:600;color:#8a5804;cursor:pointer;text-decoration:underline}
+.swhsave:hover:not(:disabled){color:#6f560f}
+.swhsave:disabled{cursor:default;text-decoration:none}
+.swhsave.done{color:var(--green);text-decoration:none}
+.swhsave .ic{margin-right:3px}
 .ochip.wait{background:#fdecc8;color:#8a5804}
 .vnone{color:#a32a6a;background:var(--magenta-soft);padding:12px 14px;border-radius:8px;font-size:13.5px}
 .vmore-stat{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:12.5px;color:var(--mut)}
