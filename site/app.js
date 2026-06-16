@@ -166,12 +166,21 @@ async function search(topic, type, size) {
 
 // resolve a single record by DOI (any type) — used for the original paper AND the
 // replication's own OpenAIRE node. OpenAIRE free-text matches the DOI string.
+// Session caches — re-scanning reuses successful lookups instead of re-hitting the APIs.
+// This is what makes repeated scans STABLE (and stops exhausting GitHub's 60/hour unauth
+// limit, which used to make FAIR badges flicker). Only successes are cached, so a transient
+// failure retries next time and the cache converges to complete.
+const _DOI = new Map(), _FAIR = new Map();
 async function fetchByDoi(doi) {
   if (!doi) return null;
+  if (_DOI.has(doi)) return _DOI.get(doi);
+  let res = null;
   try {
     const hits = (await (await fetch(`${API}/researchProducts?search=${encodeURIComponent(doi)}&pageSize=5`)).json()).results || [];
-    return hits.find((h) => doiOf(h) === doi.toLowerCase()) || hits[0] || null;
-  } catch (e) { return null; }
+    res = hits.find((h) => doiOf(h) === doi.toLowerCase()) || hits[0] || null;
+  } catch (e) { res = null; }
+  if (res) _DOI.set(doi, res);
+  return res;
 }
 
 // OpenAIRE richness we already receive but were hiding
@@ -201,6 +210,12 @@ async function githubFromZenodo(doi) {
 }
 
 async function assessSoftware(url) {
+  if (_FAIR.has(url)) return _FAIR.get(url);   // cached success → stable across scans, saves rate limit
+  const res = await _assessSoftware(url);
+  if (res) _FAIR.set(url, res);
+  return res;
+}
+async function _assessSoftware(url) {
   const g = parseGitHub(url);
   if (!g) return null;
   const base = `https://api.github.com/repos/${g.owner}/${g.repo}`;
