@@ -73,16 +73,17 @@ const STATUS = {
   needs:        { label: "❔ Needs check",         cls: "st-needs", tip: "not yet replicated and OpenAIRE links no materials — unknown (not absent); resolve from the paper" },
   dormant:      { label: "💤 Dormant",            cls: "st-dorm",  tip: "no verdict, older, low momentum, no materials surfaced — likely dormant" },
 };
-// Distinct replication OUTCOMES for a paper — one signed nanopub per independent replication
-// (deduped by outcome URI, since several replications target the same claim).
+// Distinct replication OUTCOMES for a paper — one SIGNED nanopub per independent replication
+// (deduped by outcome URI). A record with no outcome nanopub isn't a replication (e.g. a stale
+// non-verdict citation in the bundled fallback), so it's dropped — this keeps the count
+// (agreementOf) and the rendered chips (outcomeLinks) in agreement.
 const outcomesFor = (doi) => {
   const seen = new Set(), out = [];
-  (VERDICTS[doi] || []).forEach((v, i) => {
-    const key = v.outcome_np || `__${i}`;
-    if (seen.has(key)) return;
-    seen.add(key);
-    out.push({ np: v.outcome_np || null, verdict: v.verdict || "" });
-  });
+  for (const v of VERDICTS[doi] || []) {
+    if (!v.outcome_np || seen.has(v.outcome_np)) continue;
+    seen.add(v.outcome_np);
+    out.push({ np: v.outcome_np, verdict: v.verdict || "" });
+  }
   return out;
 };
 // Colour an outcome chip by its verdict so the agreement pattern is legible at a glance.
@@ -223,15 +224,27 @@ const aidaText = (u) => { if (!u) return ""; try { return decodeURIComponent(u.r
 const claimType = (u) => (!u ? "" : u.replace(/.*\/terms\//, "").replace(/-FORRT-Claim$/, "").replace(/_/g, " "));
 const claimFor = (outcome_np) => CLAIMS[npHash(outcome_np)] || null;
 
-async function sparqlCsv(query) {
-  const r = await fetch(`${NP_SPARQL}?query=${encodeURIComponent(query)}`, { headers: { Accept: "text/csv" } });
-  if (!r.ok) throw new Error(`nanopub-query ${r.status}`);
-  const lines = (await r.text()).trim().split(/\r?\n/);
-  const head = lines.shift().split(",");
-  return lines.map((line) => {
-    const cells = (line.match(/("([^"]*)"|[^,]*)(,|$)/g) || []).map((c) => c.replace(/,$/, "").replace(/^"|"$/g, ""));
-    const o = {}; head.forEach((h, i) => (o[h] = cells[i])); return o;
-  });
+// The public nanopub-query endpoint 504s intermittently under load; one retry turns most of
+// those transient failures into success, so the app stays on the LIVE index instead of dropping
+// to the bundled snapshot (the source of the "random" differences).
+async function sparqlCsv(query, tries = 3) {
+  let lastErr;
+  for (let i = 0; i < tries; i++) {
+    try {
+      const r = await fetch(`${NP_SPARQL}?query=${encodeURIComponent(query)}`, { headers: { Accept: "text/csv" } });
+      if (!r.ok) throw new Error(`nanopub-query ${r.status}`);
+      const lines = (await r.text()).trim().split(/\r?\n/);
+      const head = lines.shift().split(",");
+      return lines.map((line) => {
+        const cells = (line.match(/("([^"]*)"|[^,]*)(,|$)/g) || []).map((c) => c.replace(/,$/, "").replace(/^"|"$/g, ""));
+        const o = {}; head.forEach((h, i) => (o[h] = cells[i])); return o;
+      });
+    } catch (e) {
+      lastErr = e;
+      if (i + 1 < tries) await new Promise((res) => setTimeout(res, 700 * (i + 1)));
+    }
+  }
+  throw lastErr;
 }
 
 async function buildIndexFromNetwork() {
