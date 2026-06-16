@@ -63,15 +63,30 @@ const readinessFrom = (matScore, impactScore, momentum) => {
   const r = 0.45 * (matScore || 0) + 0.35 * impactScore + 0.20 * momentum;
   return Math.round(r * 100) / 100;
 };
-// Status taxonomy — "not replicated" is DISAMBIGUATED, not penalised.
+// Inline Lucide icons (monochrome, inherit currentColor → the app's navy/pink/grey palette).
+const svg = (p, s = 13) => `<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+const ICON = {
+  robust: svg('<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>'),
+  validated: svg('<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>'),
+  contested: svg('<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>'),
+  refuted: svg('<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>'),
+  reproducible: svg('<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'),
+  needs: svg('<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>'),
+  dormant: svg('<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>'),
+  check: svg('<path d="M20 6 9 17l-5-5"/>', 13),
+  x: svg('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>', 13),
+  star: svg('<path d="M11.5 2.3a.5.5 0 0 1 .9 0l2.3 4.7a2.1 2.1 0 0 0 1.6 1.1l5.2.8a.5.5 0 0 1 .3.9l-3.7 3.6a2.1 2.1 0 0 0-.6 1.9l.9 5.1a.5.5 0 0 1-.8.6l-4.6-2.4a2.1 2.1 0 0 0-2 0L6.7 21.3a.5.5 0 0 1-.8-.6l.9-5.1a2.1 2.1 0 0 0-.6-1.9l-3.7-3.6a.5.5 0 0 1 .3-.9l5.2-.8a2.1 2.1 0 0 0 1.6-1.1z"/>', 13),
+  fork: svg('<circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"/><path d="M12 12v3"/>', 13),
+};
+// Status taxonomy — "not replicated" is DISAMBIGUATED, not penalised. (label = plain text; icon = SVG)
 const STATUS = {
-  robust:       { label: "✅ Robustly validated", cls: "st-val",   tip: "multiple independent replications, all confirmed — a settled, reliable result" },
-  validated:    { label: "✅ Validated",          cls: "st-val",   tip: "independently replicated and it held up" },
-  contested:    { label: "⚠️ Contested",          cls: "st-con",   tip: "independent replications DISAGREE (some confirm, some contradict/partial) — worth re-checking" },
-  refuted:      { label: "❌ Refuted",            cls: "st-con",   tip: "independent replication(s) contradicted it, none confirmed" },
-  reproducible: { label: "🔁 Reproducible",       cls: "st-ready", tip: "original code/data are available, so it can be RE-RUN (reproduced). Note: replication ≠ reproduction — replication tests the same claim with DIFFERENT data/methods (FORRT)." },
-  needs:        { label: "❔ Needs check",         cls: "st-needs", tip: "not yet replicated and OpenAIRE links no materials — unknown (not absent); resolve from the paper" },
-  dormant:      { label: "💤 Dormant",            cls: "st-dorm",  tip: "no verdict, older, low momentum, no materials surfaced — likely dormant" },
+  robust:       { label: "Robustly validated", icon: ICON.robust,       cls: "st-val",   tip: "multiple independent replications, all confirmed — a settled, reliable result" },
+  validated:    { label: "Validated",          icon: ICON.validated,    cls: "st-val",   tip: "independently replicated and it held up" },
+  contested:    { label: "Contested",          icon: ICON.contested,    cls: "st-con",   tip: "independent replications DISAGREE (some confirm, some contradict/partial) — worth re-checking" },
+  refuted:      { label: "Refuted",            icon: ICON.refuted,      cls: "st-ref",   tip: "independent replication(s) contradicted it, none confirmed" },
+  reproducible: { label: "Reproducible",       icon: ICON.reproducible, cls: "st-ready", tip: "original code/data are available, so it can be RE-RUN (reproduced). Note: replication ≠ reproduction — replication tests the same claim with DIFFERENT data/methods (FORRT)." },
+  needs:        { label: "Needs check",        icon: ICON.needs,        cls: "st-needs", tip: "not yet replicated and OpenAIRE links no materials — unknown (not absent); resolve from the paper" },
+  dormant:      { label: "Dormant",            icon: ICON.dormant,      cls: "st-dorm",  tip: "no verdict, older, low momentum, no materials surfaced — likely dormant" },
 };
 // Distinct replication OUTCOMES for a paper — one SIGNED nanopub per independent replication
 // (deduped by outcome URI). A record with no outcome nanopub isn't a replication (e.g. a stale
@@ -492,13 +507,13 @@ function targetRow(t) {
     : `replication priority = 0.45·materials + 0.35·impact + 0.20·momentum  —  materials ${p.mat == null ? "unverified" : p.mat.toFixed(2)} · impact ${(p.impact || 0).toFixed(2)} · momentum ${(p.momentum || 0).toFixed(2)}`;
   const score = `<div class="score" title="${esc(scoreTitle)}"><span>${t.priority != null ? t.priority.toFixed(2) : "—"}</span><small>PRIORITY</small></div>`;
   const st = STATUS[t.statusKey] || STATUS.needs;
-  const badge = `<span class="badge ${st.cls}" title="${esc(st.tip)}">${st.label}</span>`
+  const badge = `<span class="badge ${st.cls}" title="${esc(st.tip)}">${st.icon}${st.label}</span>`
     + (t.cls ? `<span class="badge cls" title="OpenAIRE BIP! impact class — C1 = top 0.01% most-cited globally, C5 = the rest">${t.cls}</span>` : "");
   // Materials badge ONLY when positively known. OpenAIRE rarely links code/data to a
   // paper, so 'unknown' is the norm in live search and would be noise on every row —
   // it's carried in the score breakdown tooltip, and resolved in the baked demo set.
-  const matMeta = (t.mat && t.mat.state === "rocrate") ? `<span class="badge mok" title="RO-Crate research object — code + data + provenance bundled">RO-Crate ✓</span>`
-    : (t.mat && t.mat.state === "code") ? `<span class="badge mok" title="code repository linked to this paper">code ✓</span>`
+  const matMeta = (t.mat && t.mat.state === "rocrate") ? `<span class="badge mok" title="RO-Crate research object — code + data + provenance bundled">${ICON.check}RO-Crate</span>`
+    : (t.mat && t.mat.state === "code") ? `<span class="badge mok" title="code repository linked to this paper">${ICON.check}code</span>`
     : "";
   const meta = `<div class="t-meta">`
     + (t.year ? `<span class="badge yr">${t.year}</span>` : "")
@@ -516,7 +531,7 @@ function targetRow(t) {
     ? `<div class="tresolved">↳ materials resolved from ${esc(t.mat.source || "the paper")} (not in OpenAIRE): <a href="${esc(t.mat.code || "")}" target="_blank" rel="noopener">code repo</a>${(t.mat.data && t.mat.data.length) ? ` · data: ${t.mat.data.map(esc).join(", ")}` : ""}</div>`
     : "";
   const fairNote = t.fair
-    ? `<div class="tfair">FAIR software <b>${t.fair.score}/5</b> · ⭐ ${t.fair.stars}${t.fair.swh ? " · in Software Heritage" : ""}</div>`
+    ? `<div class="tfair">FAIR software <b>${t.fair.score}/5</b> · ${ICON.star}${t.fair.stars}${t.fair.swh ? " · in Software Heritage" : ""}</div>`
     : "";
   // OPEN targets get a next step: discovery here → the FORRT template handles the nanopub chain.
   const replicateCTA = (t.status !== "VERIFIED")
@@ -587,8 +602,8 @@ function renderVerified(inField) {
     if (v.repl) {
       const f = v.repl.fair;
       const fairBadge = f
-        ? `<div class="fairrecs"><b>FAIR software (${f.score}/5):</b> ${Object.entries(f.recs).map(([k, ok]) => `<span class="${ok ? "rok" : "rno"}">${ok ? "✓" : "✗"} ${k}</span>`).join("")}</div>
-        <div class="fairline">⭐ ${f.stars} stars · ${f.forks} forks · ${f.swh ? `<span class="swhok">in Software Heritage</span>` : `<span class="swhno">not yet in Software Heritage</span>`}</div>`
+        ? `<div class="fairrecs"><b>FAIR software (${f.score}/5):</b> ${Object.entries(f.recs).map(([k, ok]) => `<span class="${ok ? "rok" : "rno"}">${ok ? ICON.check : ICON.x}${k}</span>`).join("")}</div>
+        <div class="fairline">${ICON.star}${f.stars} stars · ${ICON.fork}${f.forks} forks · ${f.swh ? `<span class="swhok">in Software Heritage</span>` : `<span class="swhno">not yet in Software Heritage</span>`}</div>`
         : "";
       const nodeHref = v.repl.code && v.repl.code.includes("github") ? v.repl.code : v.repl.url;
       repl = `<div class="vrepl">↳ replication is an OpenAIRE node: <a href="${nodeHref}" target="_blank" rel="noopener">${esc(v.repl.title).slice(0, 44) || v.repl.doi}</a> <span class="ochip type">${esc(v.repl.type)}</span></div>${fairBadge}`;
