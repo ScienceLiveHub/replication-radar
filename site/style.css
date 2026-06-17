@@ -125,11 +125,16 @@ details.tabstract .absfull{margin-top:3px}
 .tresolved a{font-weight:600}
 .tfair{font-size:12px;color:var(--mut);margin-top:3px}
 .tfair b{color:var(--navy2)}
-details.tfair > summary{cursor:pointer;list-style:none}
+details.tfair > summary{cursor:pointer;list-style:none;display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px}
 details.tfair > summary::-webkit-details-marker{display:none}
-details.tfair > summary::after{content:" ▸";color:var(--navy2)}
-details.tfair[open] > summary::after{content:" ▾"}
-details.tfair .fairrecs{margin-top:5px}
+/* the FAIR score IS the expand control — make it look like a button */
+.fairtoggle{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border:1px solid #cdd9ee;background:var(--green-soft);border-radius:999px;color:var(--navy2);font-weight:600}
+.fairtoggle:hover{border-color:#a9bfe0;background:#dde7f5}
+.fairtoggle .ic{margin:0;opacity:.85;transition:transform .15s}
+details.tfair[open] .fairtoggle .ic{transform:rotate(180deg)}
+.fairhint{font-weight:500;font-size:11px;color:var(--mut)}
+.fairmeta{color:var(--mut)}
+details.tfair .fairrecs{margin-top:6px}
 .treplicate{margin-top:7px}
 .treplicate a{font-size:12px;font-weight:700;background:var(--magenta-soft);color:#a32a6a;padding:4px 11px;border-radius:7px;display:inline-block}
 .treplicate a:hover{background:var(--magenta);color:#fff;text-decoration:none}

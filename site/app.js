@@ -81,6 +81,7 @@ const ICON = {
   x: svg('<path d="M18 6 6 18"/><path d="m6 6 12 12"/>', 13),
   star: svg('<path d="M11.5 2.3a.5.5 0 0 1 .9 0l2.3 4.7a2.1 2.1 0 0 0 1.6 1.1l5.2.8a.5.5 0 0 1 .3.9l-3.7 3.6a2.1 2.1 0 0 0-.6 1.9l.9 5.1a.5.5 0 0 1-.8.6l-4.6-2.4a2.1 2.1 0 0 0-2 0L6.7 21.3a.5.5 0 0 1-.8-.6l.9-5.1a2.1 2.1 0 0 0-.6-1.9l-3.7-3.6a.5.5 0 0 1 .3-.9l5.2-.8a2.1 2.1 0 0 0 1.6-1.1z"/>', 13),
   fork: svg('<circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9"/><path d="M12 12v3"/>', 13),
+  chevron: svg('<path d="m6 9 6 6 6-6"/>', 13),
 };
 // Status taxonomy — "not replicated" is DISAMBIGUATED, not penalised. (label = plain text; icon = SVG)
 const STATUS = {
@@ -560,9 +561,14 @@ window.swhSave = async (btn) => {
 function fairBlock(f, repo) {
   const recs = Object.entries(f.recs || {}).map(([k, ok]) =>
     `<span class="${ok ? "rok" : "rno"}">${ok ? ICON.check : ICON.x}${FAIR_REC[k] || k}</span>`).join("");
-  // stop the SWH link's click from toggling the fold
-  const swh = ` · <span onclick="event.stopPropagation()">${swhHtml(repo, f.swh)}</span>`;
-  return `<details class="tfair"><summary>FAIR software <b>${f.score}/5</b> · ${ICON.star}${f.stars}${swh}</summary><div class="fairrecs">${recs}</div></details>`;
+  // The pill is the expand control (the FAIR score). Stars + Software Heritage are
+  // separate metadata — Software Heritage is about archival, not the FAIR breakdown —
+  // and the SWH link stops its click from toggling the fold.
+  const swh = `<span onclick="event.stopPropagation()">${swhHtml(repo, f.swh)}</span>`;
+  return `<details class="tfair"><summary>` +
+    `<span class="fairtoggle">FAIR software <b>${f.score}/5</b>${ICON.chevron}<span class="fairhint">see what's checked</span></span>` +
+    `<span class="fairmeta">${ICON.star}${f.stars} · ${swh}</span>` +
+    `</summary><div class="fairrecs">${recs}</div></details>`;
 }
 
 function targetRow(t) {
