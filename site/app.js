@@ -571,12 +571,43 @@ function fairBlock(f, repo) {
     `</summary><div class="fairrecs">${recs}</div></details>`;
 }
 
+// Structured, readable breakdown of the priority score (replaces a run-on `title` tooltip).
+function scoreBreakdown(t) {
+  const p = t.parts || {};
+  const num = (x) => (x == null ? 0 : x);
+  const bar = (v) => `<span class="pbar"><i style="width:${Math.round(Math.max(0, Math.min(1, v)) * 100)}%"></i></span>`;
+  const row = (k, v, contrib) =>
+    `<div class="poprow"><span class="pk">${k}</span>${bar(v)}<span class="pv">${v.toFixed(2)}</span><span class="pc">→ ${contrib.toFixed(2)}</span></div>`;
+  if (t.status === "VERIFIED") {
+    const imp = Math.max(CLASS_SCORE[t.infl] || 0.2, CLASS_SCORE[t.cls] || 0.2);
+    const w = VERDICT_WEIGHT[t.statusKey] ?? 0.4;
+    return `<div class="poptitle">Replication priority <b>${t.priority.toFixed(2)}</b></div>`
+      + `<div class="popsub">already checked — ranked by whether it's worth re-checking</div>`
+      + `<div class="popformula">impact × agreement</div>`
+      + `<div class="poprows">${row("impact", imp, imp)}`
+      + `<div class="poprow"><span class="pk">agreement</span>${bar(w)}<span class="pv">${w.toFixed(2)}</span><span class="pc">${esc(t.statusKey)}</span></div></div>`
+      + `<div class="poptot">${imp.toFixed(2)} × ${w.toFixed(2)} = <b>${t.priority.toFixed(2)}</b></div>`
+      + `<div class="popnote">A contested result rises (worth re-checking); a robustly-validated one sinks (it's settled).</div>`;
+  }
+  const mat = num(p.mat), impact = num(p.impact), mom = num(p.momentum);
+  const cMat = 0.45 * mat, cImp = 0.35 * impact, cMom = 0.20 * mom, sub = cMat + cImp + cMom;
+  const dormant = t.statusKey === "dormant";
+  return `<div class="poptitle">Replication priority <b>${t.priority.toFixed(2)}</b></div>`
+    + `<div class="popsub">how worth-replicating this is (0–1)</div>`
+    + `<div class="popformula">0.45·materials + 0.35·impact + 0.20·momentum</div>`
+    + `<div class="poprows">${row("materials", mat, cMat)}${row("impact", impact, cImp)}${row("momentum", mom, cMom)}</div>`
+    + (dormant
+        ? `<div class="poptot">${sub.toFixed(2)} × 0.5 <span class="pdormant">dormant</span> = <b>${t.priority.toFixed(2)}</b></div>`
+        : `<div class="poptot">= <b>${t.priority.toFixed(2)}</b></div>`)
+    + `<div class="popnote">materials = code &amp; data linked to the paper${p.mat == null ? " (unverified → counts as 0)" : ""} · impact = citation class · momentum = recent citations${dormant ? " · dormant (old, cold, no materials) → ×0.5" : ""}</div>`;
+}
+
 function targetRow(t) {
   const p = t.parts || {};
-  const scoreTitle = t.status === "VERIFIED"
-    ? `replication priority — already checked: impact modulated by agreement (${t.statusKey}). A robustly-validated result sinks (it's settled); a contested one rises (worth re-checking).`
-    : `replication priority = 0.45·materials + 0.35·impact + 0.20·momentum  —  materials ${p.mat == null ? "unverified" : p.mat.toFixed(2)} · impact ${(p.impact || 0).toFixed(2)} · momentum ${(p.momentum || 0).toFixed(2)}`;
-  const score = `<div class="score" title="${esc(scoreTitle)}"><span>${t.priority != null ? t.priority.toFixed(2) : "—"}</span><small>PRIORITY</small></div>`;
+  const scoreAria = t.status === "VERIFIED"
+    ? `Replication priority ${t.priority != null ? t.priority.toFixed(2) : "—"}. Already checked; ranked by whether it's worth re-checking (${t.statusKey}).`
+    : `Replication priority ${t.priority != null ? t.priority.toFixed(2) : "—"} of 1. Materials ${p.mat == null ? "unverified" : p.mat.toFixed(2)}, impact ${(p.impact || 0).toFixed(2)}, momentum ${(p.momentum || 0).toFixed(2)}.`;
+  const score = `<div class="score" tabindex="0" role="note" aria-label="${esc(scoreAria)}"><span>${t.priority != null ? t.priority.toFixed(2) : "—"}</span><small>PRIORITY</small><div class="scorepop" role="tooltip">${scoreBreakdown(t)}</div></div>`;
   const st = STATUS[t.statusKey] || STATUS.needs;
   const badge = `<span class="badge ${st.cls}" title="${esc(st.tip)}">${st.icon}${st.label}</span>`
     + (t.cls ? `<span class="badge cls" title="${esc(impactTip(t.cls))}">${t.cls}</span>` : "");
