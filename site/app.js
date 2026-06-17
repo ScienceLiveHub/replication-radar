@@ -578,6 +578,9 @@ function scoreBreakdown(t) {
   const bar = (v) => `<span class="pbar"><i style="width:${Math.round(Math.max(0, Math.min(1, v)) * 100)}%"></i></span>`;
   const row = (k, v, contrib) =>
     `<div class="poprow"><span class="pk">${k}</span>${bar(v)}<span class="pv">${v.toFixed(2)}</span><span class="pc">→ ${contrib.toFixed(2)}</span></div>`;
+  // weighted row: shows score × weight = contribution explicitly, so the formula's weights are traceable
+  const wrow = (k, v, w, contrib) =>
+    `<div class="poprow wt"><span class="pk">${k}</span>${bar(v)}<span class="pv">${v.toFixed(2)}</span><span class="pw">×${w.toFixed(2)}</span><span class="pc">= ${contrib.toFixed(2)}</span></div>`;
   if (t.status === "VERIFIED") {
     const imp = Math.max(CLASS_SCORE[t.infl] || 0.2, CLASS_SCORE[t.cls] || 0.2);
     const w = VERDICT_WEIGHT[t.statusKey] ?? 0.4;
@@ -595,7 +598,8 @@ function scoreBreakdown(t) {
   return `<div class="poptitle">Replication priority <b>${t.priority.toFixed(2)}</b></div>`
     + `<div class="popsub">how worth-replicating this is (0–1)</div>`
     + `<div class="popformula">0.45·materials + 0.35·impact + 0.20·momentum</div>`
-    + `<div class="poprows">${row("materials", mat, cMat)}${row("impact", impact, cImp)}${row("momentum", mom, cMom)}</div>`
+    + `<div class="pophow">each score is 0–1; multiplied by its weight, the three parts add up to the priority</div>`
+    + `<div class="poprows">${wrow("materials", mat, 0.45, cMat)}${wrow("impact", impact, 0.35, cImp)}${wrow("momentum", mom, 0.20, cMom)}</div>`
     + (dormant
         ? `<div class="poptot">${sub.toFixed(2)} × 0.5 <span class="pdormant">dormant</span> = <b>${t.priority.toFixed(2)}</b></div>`
         : `<div class="poptot">= <b>${t.priority.toFixed(2)}</b></div>`)
