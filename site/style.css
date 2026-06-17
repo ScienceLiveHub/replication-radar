@@ -103,6 +103,8 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .poptot b{color:var(--navy2)}
 .pdormant{color:#5d6470;font-weight:600}
 .popnote{margin-top:7px;font-size:10.5px;line-height:1.45;color:var(--mut)}
+.popdefs{margin-top:8px;display:flex;flex-direction:column;gap:3px;font-size:10.5px;line-height:1.4;color:var(--mut)}
+.popdefs b{color:var(--navy2);font-weight:600}
 .t-main b{font-size:15px;color:var(--ink)}
 .t-meta{font-size:12.5px;color:var(--mut);margin-top:3px}
 .badge{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:5px;margin-right:6px}

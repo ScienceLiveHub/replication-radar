@@ -603,7 +603,12 @@ function scoreBreakdown(t) {
     + (dormant
         ? `<div class="poptot">${sub.toFixed(2)} × 0.5 <span class="pdormant">dormant</span> = <b>${t.priority.toFixed(2)}</b></div>`
         : `<div class="poptot">= <b>${t.priority.toFixed(2)}</b></div>`)
-    + `<div class="popnote">materials = code &amp; data linked to the paper${p.mat == null ? " (unverified → counts as 0)" : ""} · impact = BIP! citation class · momentum = BIP! impulse class (recent citation rate) — both from OpenAIRE${dormant ? " · dormant (old, cold, no materials) → ×0.5" : ""}</div>`;
+    + `<div class="popdefs">`
+    + `<div><b>materials</b> — code &amp; data linked to the paper${p.mat == null ? " (unverified → counts as 0)" : ""}</div>`
+    + `<div><b>impact</b> — BIP! citation class (OpenAIRE)</div>`
+    + `<div><b>momentum</b> — BIP! impulse class, recent citation rate (OpenAIRE)</div>`
+    + (dormant ? `<div><b>dormant</b> — old, cold, no materials → ×0.5</div>` : "")
+    + `</div>`;
 }
 
 function targetRow(t) {
