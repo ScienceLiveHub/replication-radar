@@ -1,3 +1,12 @@
+---
+name: Anne Fouilloux
+role: CTO, LifeWatch ERIC · turning CoARA into practice
+linkedin: https://www.linkedin.com/in/annefouilloux/
+github: https://github.com/annefou
+orcid: https://orcid.org/0000-0002-1784-2920
+photo:
+---
+
 CTO of **LifeWatch ERIC**. In Science Live she works to turn **CoARA from principle into
 practice** — not just arguing that diverse, reproducible outputs should count, but building
 the infrastructure that makes them first-class: findable, verifiable and citable.

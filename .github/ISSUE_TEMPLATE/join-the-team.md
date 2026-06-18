@@ -26,10 +26,30 @@ team. Filling this in is all it takes to get started — no pressure on any fiel
 
 ### Adding yourself (optional — we can do it for you)
 
-The team page renders from Markdown, so adding yourself is two small files in a pull request:
+Adding yourself to the team page is **one file**: create `site/bios/your-name.md` with a
+short YAML header on top of your bio in Markdown, like this:
 
-1. Write your bio as Markdown in `site/bios/your-name.md` — a sentence, then a few bullets.
-2. Add one entry to `site/team.json` (there's a copy-paste example on
-   [the team page](https://openaire-hackathon.netlify.app/team.html) under "Join the team").
+```markdown
+---
+name: Your Name
+role: Your role — e.g. Research Software Engineer
+linkedin: https://www.linkedin.com/in/...
+github: https://github.com/...
+orcid: https://orcid.org/0000-...
+photo:        # optional: a URL or a filename in site/
+---
+
+One sentence: who you are and what you do.
+
+- A highlight — e.g. wrote Nanopublications 101
+- A project you maintain or a community you're part of
+- Up to ~5 short bullets, written in Markdown
+```
+
+The easiest way: on [the team page](https://openaire-hackathon.netlify.app/team.html),
+click **"Add your bio (pre-filled file)"** — it opens GitHub's editor with this template
+ready to fill. You don't need write access; GitHub forks the project for you and opens the
+pull request. Once merged, you appear automatically, in alphabetical order — there's no
+list to edit.
 
 Prefer not to? Just fill in the details above and we'll add you. Either way — glad to have you. 💜

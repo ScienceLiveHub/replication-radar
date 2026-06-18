@@ -27,8 +27,7 @@
     .join{border:1px solid var(--line);border-radius:14px;padding:22px 24px;background:var(--magenta-soft)}
     .join h2{margin:0 0 8px;font-size:20px;color:var(--navy)}
     .join p{font-size:14px;color:var(--ink);line-height:1.6;margin:0 0 12px}
-    .join ol{margin:0 0 16px;padding-left:20px;font-size:14px;color:var(--ink);line-height:1.6}
-    .join ol li{margin:6px 0}
+    .forknote{font-size:13px;color:var(--mut)}
     .join code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:#fff;border:1px solid var(--line);border-radius:5px;padding:1px 6px}
     .join pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;line-height:1.55;color:var(--ink)}
     .joinbtns{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 16px}
@@ -55,57 +54,99 @@
   </main>
   <footer>
     <div class="wrap">
-      <span>This page renders from <a href="team.json">team.json</a> + Markdown bios in <a href="https://github.com/ScienceLiveHub/replication-radar/tree/main/site/bios">site/bios/</a>.</span>
+      <span>This page lists every Markdown bio in <a href="https://github.com/ScienceLiveHub/replication-radar/tree/main/site/bios">site/bios/</a> automatically.</span>
       <span><a href="index.html">Replication Radar</a> · <a href="methodology.html">methodology</a> · <a href="https://github.com/ScienceLiveHub/replication-radar">code (MIT)</a></span>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
+    const REPO = "ScienceLiveHub/replication-radar";
+    const BIOS_PATH = "site/bios";
     const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
     const md = (s) => (window.marked ? marked.parse(String(s || "")) : esc(s).replace(/\n/g, "<br>"));
-    const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
+    const initials = (name) => (name || "?").split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
 
-    const LINK_LABELS = { linkedin: "LinkedIn", github: "GitHub", orcid: "ORCID", web: "Website" };
-    const renderLinks = (links) => Object.entries(links || {})
-      .filter(([, url]) => url && /^https?:\/\//.test(url))
-      .map(([k, url]) => `<a class="mlink" href="${esc(url)}" target="_blank" rel="noopener">${esc(LINK_LABELS[k] || k)}</a>`)
+    // Minimal YAML-frontmatter parser: flat "key: value" lines between leading --- fences.
+    function parseBio(text) {
+      const m = text.match(/^﻿?---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/);
+      if (!m) return { meta: {}, body: text };
+      const meta = {};
+      m[1].split("\n").forEach((line) => {
+        const i = line.indexOf(":");
+        if (i < 0) return;
+        const k = line.slice(0, i).trim();
+        let v = line.slice(i + 1).replace(/\s+#.*$/, "").trim().replace(/^["']|["']$/g, "");
+        if (k) meta[k] = v;
+      });
+      return { meta, body: m[2] };
+    }
+
+    const LINK_ORDER = [["linkedin", "LinkedIn"], ["github", "GitHub"], ["orcid", "ORCID"], ["web", "Website"]];
+    const renderLinks = (meta) => LINK_ORDER
+      .filter(([k]) => meta[k] && /^https?:\/\//.test(meta[k]))
+      .map(([k, label]) => `<a class="mlink" href="${esc(meta[k])}" target="_blank" rel="noopener">${esc(label)}</a>`)
       .join("");
 
-    const avatar = (m) => m.photo && /^https?:|\.(png|jpe?g|webp|svg)$/i.test(m.photo)
-      ? `<img class="avatar" src="${esc(m.photo)}" alt="${esc(m.name)}" />`
-      : `<div class="avatar" aria-hidden="true">${esc(initials(m.name))}</div>`;
+    const avatar = (meta) => meta.photo && /^https?:|\.(png|jpe?g|webp|svg)$/i.test(meta.photo)
+      ? `<img class="avatar" src="${esc(meta.photo)}" alt="${esc(meta.name || "")}" />`
+      : `<div class="avatar" aria-hidden="true">${esc(initials(meta.name))}</div>`;
 
-    fetch("team.json").then((r) => r.json()).then(async (t) => {
-      document.title = t.title;
-      document.getElementById("lead").innerHTML = md(t.intro);
+    // Discover bio files: GitHub Contents API (always reflects main), with a static index.json fallback.
+    async function listBios() {
+      try {
+        const r = await fetch(`https://api.github.com/repos/${REPO}/contents/${BIOS_PATH}`, { headers: { Accept: "application/vnd.github+json" } });
+        if (r.ok) {
+          const files = (await r.json()).filter((f) => f.type === "file" && f.name.endsWith(".md")).map((f) => f.name);
+          if (files.length) return files.sort();
+        }
+      } catch (e) { /* fall through */ }
+      try {
+        const r = await fetch("bios/index.json");
+        if (r.ok) return (await r.json()).slice().sort();
+      } catch (e) { /* fall through */ }
+      return [];
+    }
 
-      const bios = await Promise.all(t.members.map((m) =>
-        m.bio ? fetch(m.bio).then((r) => (r.ok ? r.text() : "")).catch(() => "") : Promise.resolve("")
-      ));
-
-      document.getElementById("members").innerHTML = t.members.map((m, i) => `
-        <article class="member">
-          <div class="mhead">${avatar(m)}<div><h2 class="mname">${esc(m.name)}</h2><p class="mrole">${esc(m.role || "")}</p></div></div>
-          <div class="bio">${md(bios[i])}</div>
-          <div class="mlinks">${renderLinks(m.links)}</div>
-        </article>`).join("");
-
-      const c = t.contribute || {};
+    function renderContribute(c) {
+      c = c || {};
+      // GitHub's new-file editor, pre-filled with the filename + template. For anyone
+      // without write access, GitHub automatically forks the repo and opens a pull request.
+      const newFileUrl = `https://github.com/${REPO}/new/main?filename=${encodeURIComponent("site/bios/your-name.md")}&value=${encodeURIComponent(c.example || "")}`;
       document.getElementById("join").innerHTML = `
         <section class="join">
           <h2>${esc(c.heading || "Join the team")}</h2>
-          <p>${esc(c.body || "")}</p>
-          ${(c.steps || []).length ? `<ol>${c.steps.map((s) => `<li>${md(s)}</li>`).join("")}</ol>` : ""}
+          <p>${md(c.body || "")}</p>
           <div class="joinbtns">
             ${c.issueUrl ? `<a class="joinbtn primary" href="${esc(c.issueUrl)}" target="_blank" rel="noopener">Open an issue to say hi</a>` : ""}
-            ${c.fileUrl ? `<a class="joinbtn ghost" href="${esc(c.fileUrl)}" target="_blank" rel="noopener">Edit team.json on GitHub</a>` : ""}
+            <a class="joinbtn ghost" href="${esc(newFileUrl)}" target="_blank" rel="noopener">Add your bio (pre-filled file)</a>
           </div>
-          ${c.example ? `<p>Your <code>team.json</code> entry looks like this:</p><pre>${esc(JSON.stringify(c.example, null, 2))}</pre>` : ""}
+          <p class="forknote">No repo access needed — GitHub forks the project for you and opens a pull request. Just rename the file, fill in the template, and click <b>Propose new file</b>.</p>
+          ${c.example ? `<p>The template you'll get:</p><pre>${esc(c.example)}</pre>` : ""}
         </section>`;
-    }).catch((e) => {
-      document.getElementById("lead").innerHTML = `Could not load team.json (${esc(e.message)}).`;
-    });
+    }
+
+    (async () => {
+      let cfg = {};
+      try { cfg = await (await fetch("team.json")).json(); } catch (e) { /* page still works from bios alone */ }
+      document.title = cfg.title || document.title;
+      document.getElementById("lead").innerHTML = md(cfg.intro || "");
+      renderContribute(cfg.contribute);
+
+      const names = await listBios();
+      const bios = await Promise.all(names.map((n) =>
+        fetch(`bios/${n}`).then((r) => (r.ok ? r.text() : "")).then(parseBio).catch(() => ({ meta: {}, body: "" }))
+      ));
+
+      const el = document.getElementById("members");
+      if (!bios.length) { el.innerHTML = `<p class="lead">No bios found yet — be the first to <a href="${esc((cfg.contribute || {}).newFileUrl || "#")}">add yours</a>.</p>`; return; }
+      el.innerHTML = bios.map(({ meta, body }) => `
+        <article class="member">
+          <div class="mhead">${avatar(meta)}<div><h2 class="mname">${esc(meta.name || "")}</h2><p class="mrole">${esc(meta.role || "")}</p></div></div>
+          <div class="bio">${md(body)}</div>
+          <div class="mlinks">${renderLinks(meta)}</div>
+        </article>`).join("");
+    })();
   </script>
 </body>
 </html>
