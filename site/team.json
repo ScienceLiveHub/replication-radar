@@ -1,0 +1,49 @@
+{
+  "title": "The team — Replication Radar",
+  "intro": "Replication Radar is built in the open for the OpenAIRE AI Hackathon. It's a small, growing team — and contributors become part of it. Each bio below is a Markdown file in `site/bios/`. If you'd like to help, see \"Join the team\" at the bottom.",
+  "members": [
+    {
+      "name": "Anne Fouilloux",
+      "role": "CTO, LifeWatch ERIC · turning CoARA into practice",
+      "bio": "bios/anne-fouilloux.md",
+      "links": {
+        "orcid": "https://orcid.org/0000-0002-1784-2920",
+        "github": "https://github.com/annefou",
+        "linkedin": "https://www.linkedin.com/in/annefouilloux/"
+      },
+      "photo": ""
+    },
+    {
+      "name": "Jean Iaquinta",
+      "role": "CEO, VitenHub AS",
+      "bio": "bios/jean-iaquinta.md",
+      "links": {
+        "linkedin": "https://www.linkedin.com/in/jean-iaquinta-680839407/",
+        "orcid": "https://orcid.org/0000-0002-8763-1643"
+      },
+      "photo": ""
+    }
+  ],
+  "contribute": {
+    "heading": "Join the team",
+    "body": "Want to help? Open an issue to say hi, then add yourself with a short pull request — two small steps:",
+    "steps": [
+      "Write your bio as Markdown in `site/bios/your-name.md` (a sentence, then a few bullets — whatever you like).",
+      "Add one entry to `site/team.json` with your name, role, the path to your `.md`, your links and (optionally) a photo."
+    ],
+    "issueUrl": "https://github.com/ScienceLiveHub/replication-radar/issues/new?template=join-the-team.md",
+    "fileUrl": "https://github.com/ScienceLiveHub/replication-radar/blob/main/site/team.json",
+    "example": {
+      "name": "Your Name",
+      "role": "Your role — e.g. Research Software Engineer",
+      "bio": "bios/your-name.md",
+      "links": {
+        "linkedin": "https://www.linkedin.com/in/...",
+        "github": "",
+        "orcid": "",
+        "web": ""
+      },
+      "photo": "optional — a headshot URL or filename in site/, only if you'd like one"
+    }
+  }
+}

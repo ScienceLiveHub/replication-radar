@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Replication Radar — the team</title>
+  <meta name="description" content="The people building Replication Radar for the OpenAIRE AI Hackathon — built in the open, contributors welcome." />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .twrap{max-width:880px}
+    .lead{font-size:16px;color:var(--ink);line-height:1.6;margin:0 0 8px}
+    .backbar{margin:6px 0 22px;font-size:13.5px}
+    .members{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:8px 0 34px}
+    @media(max-width:720px){.members{grid-template-columns:1fr}}
+    .member{border:1px solid var(--line);border-radius:14px;padding:20px 22px;background:var(--card)}
+    .mhead{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+    .avatar{width:54px;height:54px;border-radius:50%;flex:0 0 54px;object-fit:cover;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700;letter-spacing:.5px}
+    .mname{margin:0;font-size:17px;color:var(--navy)}
+    .mrole{margin:2px 0 0;font-size:13px;color:var(--mut)}
+    .bio{font-size:14px;color:var(--ink);line-height:1.6}
+    .bio p{margin:0 0 10px}
+    .bio ul{margin:0;padding-left:18px}
+    .bio li{margin:4px 0}
+    .mlinks{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+    .mlink{font-size:12px;font-weight:700;border:1px solid var(--line);border-radius:20px;padding:3px 12px;text-decoration:none;color:var(--navy2)}
+    a.mlink:hover{border-color:var(--magenta);color:var(--magenta)}
+    .join{border:1px solid var(--line);border-radius:14px;padding:22px 24px;background:var(--magenta-soft)}
+    .join h2{margin:0 0 8px;font-size:20px;color:var(--navy)}
+    .join p{font-size:14px;color:var(--ink);line-height:1.6;margin:0 0 12px}
+    .join ol{margin:0 0 16px;padding-left:20px;font-size:14px;color:var(--ink);line-height:1.6}
+    .join ol li{margin:6px 0}
+    .join code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:#fff;border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+    .join pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;line-height:1.55;color:var(--ink)}
+    .joinbtns{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 16px}
+    .joinbtn{display:inline-block;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:11px 20px}
+    .joinbtn.primary{background:var(--magenta);color:#fff}
+    .joinbtn.primary:hover{background:#a32a6a}
+    .joinbtn.ghost{background:#fff;color:var(--navy2);border:1px solid var(--line)}
+    .joinbtn.ghost:hover{border-color:var(--magenta);color:var(--magenta)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>The team</h1>
+      <p class="tag">Built in the open — and contributors become part of it.</p>
+      <p class="sub">Replication Radar · Science Live × OpenAIRE AI Hackathon</p>
+    </div>
+  </header>
+  <main class="wrap twrap">
+    <p class="backbar">← <a href="index.html">Back to the Radar</a></p>
+    <p id="lead" class="lead"></p>
+    <div id="members" class="members"></div>
+    <div id="join"></div>
+  </main>
+  <footer>
+    <div class="wrap">
+      <span>This page renders from <a href="team.json">team.json</a> + Markdown bios in <a href="https://github.com/ScienceLiveHub/replication-radar/tree/main/site/bios">site/bios/</a>.</span>
+      <span><a href="index.html">Replication Radar</a> · <a href="methodology.html">methodology</a> · <a href="https://github.com/ScienceLiveHub/replication-radar">code (MIT)</a></span>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const md = (s) => (window.marked ? marked.parse(String(s || "")) : esc(s).replace(/\n/g, "<br>"));
+    const initials = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
+
+    const LINK_LABELS = { linkedin: "LinkedIn", github: "GitHub", orcid: "ORCID", web: "Website" };
+    const renderLinks = (links) => Object.entries(links || {})
+      .filter(([, url]) => url && /^https?:\/\//.test(url))
+      .map(([k, url]) => `<a class="mlink" href="${esc(url)}" target="_blank" rel="noopener">${esc(LINK_LABELS[k] || k)}</a>`)
+      .join("");
+
+    const avatar = (m) => m.photo && /^https?:|\.(png|jpe?g|webp|svg)$/i.test(m.photo)
+      ? `<img class="avatar" src="${esc(m.photo)}" alt="${esc(m.name)}" />`
+      : `<div class="avatar" aria-hidden="true">${esc(initials(m.name))}</div>`;
+
+    fetch("team.json").then((r) => r.json()).then(async (t) => {
+      document.title = t.title;
+      document.getElementById("lead").innerHTML = md(t.intro);
+
+      const bios = await Promise.all(t.members.map((m) =>
+        m.bio ? fetch(m.bio).then((r) => (r.ok ? r.text() : "")).catch(() => "") : Promise.resolve("")
+      ));
+
+      document.getElementById("members").innerHTML = t.members.map((m, i) => `
+        <article class="member">
+          <div class="mhead">${avatar(m)}<div><h2 class="mname">${esc(m.name)}</h2><p class="mrole">${esc(m.role || "")}</p></div></div>
+          <div class="bio">${md(bios[i])}</div>
+          <div class="mlinks">${renderLinks(m.links)}</div>
+        </article>`).join("");
+
+      const c = t.contribute || {};
+      document.getElementById("join").innerHTML = `
+        <section class="join">
+          <h2>${esc(c.heading || "Join the team")}</h2>
+          <p>${esc(c.body || "")}</p>
+          ${(c.steps || []).length ? `<ol>${c.steps.map((s) => `<li>${md(s)}</li>`).join("")}</ol>` : ""}
+          <div class="joinbtns">
+            ${c.issueUrl ? `<a class="joinbtn primary" href="${esc(c.issueUrl)}" target="_blank" rel="noopener">Open an issue to say hi</a>` : ""}
+            ${c.fileUrl ? `<a class="joinbtn ghost" href="${esc(c.fileUrl)}" target="_blank" rel="noopener">Edit team.json on GitHub</a>` : ""}
+          </div>
+          ${c.example ? `<p>Your <code>team.json</code> entry looks like this:</p><pre>${esc(JSON.stringify(c.example, null, 2))}</pre>` : ""}
+        </section>`;
+    }).catch((e) => {
+      document.getElementById("lead").innerHTML = `Could not load team.json (${esc(e.message)}).`;
+    });
+  </script>
+</body>
+</html>
