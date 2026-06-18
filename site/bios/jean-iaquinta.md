@@ -4,7 +4,7 @@ role: CEO, VitenHub AS
 linkedin: https://www.linkedin.com/in/jean-iaquinta-680839407/
 github: https://github.com/j34ni
 orcid: https://orcid.org/0000-0002-8763-1643
-photo:
+photo: https://www.usit.uio.no/om/organisasjon/ffu/bt/ansatte/jeani/jeani.jpg
 ---
 
 CEO of **VitenHub AS**. Brings the citation-graph perspective to the Radar — how a

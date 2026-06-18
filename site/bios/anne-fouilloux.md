@@ -4,7 +4,7 @@ role: CTO, LifeWatch ERIC · turning CoARA into practice
 linkedin: https://www.linkedin.com/in/annefouilloux/
 github: https://github.com/annefou
 orcid: https://orcid.org/0000-0002-1784-2920
-photo:
+photo: https://www.lifewatch.eu/wp-content/uploads/2025/11/Anne-Fouilloux.jpg
 ---
 
 CTO of **LifeWatch ERIC**. In Science Live she works to turn **CoARA from principle into
