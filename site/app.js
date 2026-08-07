@@ -600,7 +600,9 @@ function fairBlock(f, repo) {
     : pr.ci
       ? `<span class="rmid" title="continuous integration is configured, but the latest run isn't passing (or couldn't be read)">${ICON.contested}CI configured</span>`
       : `<span class="rno" title="no continuous-integration configuration found in the repository">${ICON.x}CI</span>`;
-  const practices = `<div class="fairrecs practices"><span class="practlbl" title="Good engineering practices beyond the FAIR-software basics — each grounded in the repository's own files">RSE practices</span>${prItem(pr.documented, "documented")}${prItem(pr.tests, "tests")}${ci}</div>`;
+  // "what & why →" deep-links to the methodology page's explainer (definitions + external reading).
+  const practMore = `<a class="practmore" href="methodology.html#practices" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="What these practices are, why they matter, and links to go deeper (The Turing Way, goodpractice, NumFOCUS, Imperial)">what &amp; why →</a>`;
+  const practices = `<div class="fairrecs practices"><span class="practlbl" title="Good engineering practices beyond the FAIR-software basics — each grounded in the repository's own files">RSE practices</span>${prItem(pr.documented, "documented")}${prItem(pr.tests, "tests")}${ci}${practMore}</div>`;
   // At-a-glance reproducibility cue on the COLLAPSED summary (Saranjeet: "at first glance I can't
   // tell if the code was checked for reproducibility") — shown only when the repo's CI is green.
   const reproChip = f.ciPass === true
