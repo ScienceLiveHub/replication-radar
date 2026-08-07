@@ -15,7 +15,8 @@
     { "id": "turingway", "name": "The Turing Way", "url": "https://the-turing-way.netlify.app/", "role": "A community handbook for reproducible, ethical and collaborative research — the language-agnostic reference behind the 'RSE practices' explanations (documentation, testing, continuous integration)." },
     { "id": "goodpractice", "name": "goodpractice (rOpenSci)", "url": "https://docs.ropensci.org/goodpractice/", "role": "An R package that codifies good software-engineering practice (tests, coverage, CI, style) — a concrete checklist that inspired the RSE-practices signals." },
     { "id": "numfocus", "name": "NumFOCUS project standards", "url": "https://numfocus.org/projects-overview", "role": "Standards and recommendations for sustainable open-source scientific projects (documentation, testing, CI, community health)." },
-    { "id": "imperialese", "name": "Imperial — Essential Software Engineering for Researchers", "url": "https://imperialcollegelondon.github.io/grad_school_software_engineering_course/", "role": "Openly-licensed course materials from Imperial College London's RSE team covering version control, testing, documentation and CI for researchers." }
+    { "id": "imperialese", "name": "Imperial — Essential Software Engineering for Researchers", "url": "https://imperialcollegelondon.github.io/grad_school_software_engineering_course/", "role": "Openly-licensed course materials from Imperial College London's RSE team covering version control, testing, documentation and CI for researchers." },
+    { "id": "covenant", "name": "Contributor Covenant", "url": "https://www.contributor-covenant.org/", "role": "The widely-adopted code-of-conduct standard for open-source communities — referenced by the 'Code of conduct' practice." }
   ],
   "signals": [
     { "id": "targets", "name": "Replication targets (the ranked list)", "shownAs": "the list of candidate papers", "source": "openaire",
@@ -78,6 +79,22 @@
       "links": [
         { "label": "The Turing Way — Continuous integration", "url": "https://the-turing-way.netlify.app/reproducible-research/ci" },
         { "label": "NumFOCUS — project standards", "url": "https://numfocus.org/projects-overview" }
+      ] },
+    { "id": "contributing", "name": "Contributing guide",
+      "what": "A CONTRIBUTING file that tells a newcomer how to set up the project, run the tests, and propose a change (issues, pull requests, review).",
+      "why": "It lowers the barrier to outside contributions — a core NumFOCUS sustainability signal. Software others can safely extend outlives its original author.",
+      "checked": "GitHub's community-profile API reports a CONTRIBUTING file (in the repo root, .github/ or docs/).",
+      "links": [
+        { "label": "The Turing Way — Building a contributor community", "url": "https://the-turing-way.netlify.app/collaboration/new-community" },
+        { "label": "GitHub — Healthy contributions", "url": "https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions" }
+      ] },
+    { "id": "conduct", "name": "Code of conduct",
+      "what": "A CODE_OF_CONDUCT that sets the standards for respectful participation and how concerns are handled.",
+      "why": "A clear, enforced code of conduct is what makes a scientific community safe to join, and is expected of sustainable open-source projects (NumFOCUS, Contributor Covenant).",
+      "checked": "GitHub's community-profile API reports a CODE_OF_CONDUCT file.",
+      "links": [
+        { "label": "Contributor Covenant", "url": "https://www.contributor-covenant.org/" },
+        { "label": "GitHub — Healthy contributions", "url": "https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions" }
       ] }
   ],
   "guardrails": [

@@ -271,6 +271,17 @@ async function _assessSoftware(url) {
       if (r && r.status === "completed") ciPass = r.conclusion === "success";
     } catch (e) { /* leave unknown */ }
   }
+  // Community-health files (NumFOCUS-style): CONTRIBUTING + CODE_OF_CONDUCT. They often live in
+  // .github/ or docs/, not the root, so ask GitHub's community-profile endpoint (authoritative,
+  // CORS-open) rather than guessing from the root listing.
+  practices.contributing = false;
+  practices.conduct = false;
+  try {
+    const prof = await (await fetch(`${base}/community/profile`)).json();
+    const cf = (prof && prof.files) || {};
+    practices.contributing = !!cf.contributing;
+    practices.conduct = !!cf.code_of_conduct;
+  } catch (e) { /* leave false */ }
   return { stars: repo.stargazers_count || 0, forks: repo.forks_count || 0, license: (repo.license || {}).spdx_id, swh, recs, score, pct: Math.round((score / 5) * 100), practices, ciPass };
 }
 
@@ -580,8 +591,10 @@ window.swhSave = async (btn) => {
 };
 // RSE good-practice labels + tooltips (beyond the fair-software.eu 5 — Saranjeet's feedback).
 const PRACTICE = {
-  documented: ["Documented", "a README, docs/ folder, docs site (GitHub Pages) or wiki is present"],
-  tests:      ["Tests", "an automated-test directory or config (tests/, pytest, tox, testthat…) is present in the repo"],
+  documented:   ["Documented", "a README, docs/ folder, docs site (GitHub Pages) or wiki is present"],
+  tests:        ["Tests", "an automated-test directory or config (tests/, pytest, tox, testthat…) is present in the repo"],
+  contributing: ["Contributing", "a CONTRIBUTING guide tells others how to set up the project, run the tests and propose changes (NumFOCUS-style community health)"],
+  conduct:      ["Code of conduct", "a CODE_OF_CONDUCT sets the standards for respectful participation — expected of sustainable open-source projects"],
 };
 function fairBlock(f, repo) {
   const recs = Object.entries(f.recs || {}).map(([k, ok]) =>
@@ -605,7 +618,7 @@ function fairBlock(f, repo) {
       : `<span class="rno" title="no continuous-integration configuration found in the repository">${ICON.x}CI</span>`;
   // "what & why →" deep-links to the methodology page's explainer (definitions + external reading).
   const practMore = `<a class="practmore" href="methodology.html#practices" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="What these practices are, why they matter, and links to go deeper (The Turing Way, goodpractice, NumFOCUS, Imperial)">what &amp; why →</a>`;
-  const practices = `<div class="fairrecs practices"><span class="practlbl" title="Good engineering practices beyond the fair-software.eu 5 — each grounded in the repository's own files. Signals, NOT counted in the FAIR score.">RSE practices <em class="lblnote">· extra, not in the score</em></span>${prItem(pr.documented, "documented")}${prItem(pr.tests, "tests")}${ci}${practMore}</div>`;
+  const practices = `<div class="fairrecs practices"><span class="practlbl" title="Good engineering practices beyond the fair-software.eu 5 — each grounded in the repository's own files. Signals, NOT counted in the FAIR score.">RSE practices <em class="lblnote">· extra, not in the score</em></span>${prItem(pr.documented, "documented")}${prItem(pr.tests, "tests")}${ci}${prItem(pr.contributing, "contributing")}${prItem(pr.conduct, "conduct")}${practMore}</div>`;
   // At-a-glance reproducibility cue on the COLLAPSED summary (Saranjeet: "at first glance I can't
   // tell if the code was checked for reproducibility") — shown only when the repo's CI is green.
   const reproChip = f.ciPass === true
