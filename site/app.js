@@ -251,7 +251,27 @@ async function _assessSoftware(url) {
     quality: has("codemeta.json") || has("environment.yml") || has("dockerfile") || has("pixi.toml") || has(".github"), // reproducibility/quality artefacts
   };
   const score = Object.values(recs).filter(Boolean).length;
-  return { stars: repo.stargazers_count || 0, forks: repo.forks_count || 0, license: (repo.license || {}).spdx_id, swh, recs, score, pct: Math.round((score / 5) * 100) };
+  // RSE good practices, BEYOND the fair-software.eu 5 (Saranjeet's feedback): documented / tested /
+  // CI. Grounded in the repo's OWN root entries — the GitHub contents listing already includes
+  // directory names (docs, tests, .github), so no extra call is needed to detect these.
+  const practices = {
+    documented: has("readme.md") || has("readme.rst") || has("readme") || has("docs") || repo.has_pages || !!(repo.homepage && repo.homepage.trim()) || repo.has_wiki,
+    tests: has("tests") || has("test") || has("conftest.py") || has("pytest.ini") || has("tox.ini") || has("testthat"),
+    ci: has(".github") || has(".gitlab-ci.yml") || has(".circleci") || has(".travis.yml") || has("azure-pipelines.yml") || has("jenkinsfile"),
+  };
+  // Item 3 (reproducibility): the honest, grounded proxy for "was the linked code checked" is whether
+  // the repo's OWN automated checks pass. Only look when CI exists; leave `null` (unknown) if there's
+  // no CI or the call fails — never guess. A green run means the code builds & its tests pass; it is
+  // NOT a claim of independent reproduction (the replication VERDICT covers the claim, separately).
+  let ciPass = null;
+  if (practices.ci) {
+    try {
+      const runs = await (await fetch(`${base}/actions/runs?per_page=1`)).json();
+      const r = ((runs && runs.workflow_runs) || [])[0];
+      if (r && r.status === "completed") ciPass = r.conclusion === "success";
+    } catch (e) { /* leave unknown */ }
+  }
+  return { stars: repo.stargazers_count || 0, forks: repo.forks_count || 0, license: (repo.license || {}).spdx_id, swh, recs, score, pct: Math.round((score / 5) * 100), practices, ciPass };
 }
 
 // ---------- author-agnostic verdict index, live from the nanopub network ----------
@@ -534,7 +554,7 @@ const el = (id) => document.getElementById(id);
 const esc = (s) => (s || "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 
 const PER_PAGE = 10;
-let _targets = [], _tpage = 0, _tfilter = new Set();
+let _targets = [], _tpage = 0, _tfilter = new Set(), _codeOnly = false;
 
 // FAIR-software block: a fold that expands to the 5 fair-software.eu recommendations (met/missing),
 // with a live Software Heritage link (browse the archived snapshot, or Save Code Now if not yet).
@@ -558,6 +578,11 @@ window.swhSave = async (btn) => {
   catch (e) { /* clipboard blocked — the form still opens */ }
   window.open("https://archive.softwareheritage.org/save/", "_blank", "noopener");
 };
+// RSE good-practice labels + tooltips (beyond the fair-software.eu 5 — Saranjeet's feedback).
+const PRACTICE = {
+  documented: ["Documented", "a README, docs/ folder, docs site (GitHub Pages) or wiki is present"],
+  tests:      ["Tests", "an automated-test directory or config (tests/, pytest, tox, testthat…) is present in the repo"],
+};
 function fairBlock(f, repo) {
   const recs = Object.entries(f.recs || {}).map(([k, ok]) =>
     `<span class="${ok ? "rok" : "rno"}">${ok ? ICON.check : ICON.x}${FAIR_REC[k] || k}</span>`).join("");
@@ -565,10 +590,26 @@ function fairBlock(f, repo) {
   // separate metadata — Software Heritage is about archival, not the FAIR breakdown —
   // and the SWH link stops its click from toggling the fold.
   const swh = `<span onclick="event.stopPropagation()">${swhHtml(repo, f.swh)}</span>`;
+  // RSE good-practice group — a SEPARATE row from the fair-software.eu 5, so the standard score
+  // stays comparable while RSEs get the finer signals they asked for.
+  const pr = f.practices || {};
+  const prItem = (ok, k) => `<span class="${ok ? "rok" : "rno"}" title="${esc(PRACTICE[k][1])}">${ok ? ICON.check : ICON.x}${PRACTICE[k][0]}</span>`;
+  // CI is tri-state: green (passing), amber (configured but latest run isn't green / unreadable), absent.
+  const ci = f.ciPass === true
+    ? `<span class="rok" title="the repository's own automated checks (CI) currently pass — the code builds &amp; its tests run green. A reproducibility signal, NOT a claim of independent reproduction (the replication verdict covers the claim, separately).">${ICON.check}CI passing</span>`
+    : pr.ci
+      ? `<span class="rmid" title="continuous integration is configured, but the latest run isn't passing (or couldn't be read)">${ICON.contested}CI configured</span>`
+      : `<span class="rno" title="no continuous-integration configuration found in the repository">${ICON.x}CI</span>`;
+  const practices = `<div class="fairrecs practices"><span class="practlbl" title="Good engineering practices beyond the FAIR-software basics — each grounded in the repository's own files">RSE practices</span>${prItem(pr.documented, "documented")}${prItem(pr.tests, "tests")}${ci}</div>`;
+  // At-a-glance reproducibility cue on the COLLAPSED summary (Saranjeet: "at first glance I can't
+  // tell if the code was checked for reproducibility") — shown only when the repo's CI is green.
+  const reproChip = f.ciPass === true
+    ? `<span class="reprook" title="the repository's own CI is green — the code builds and its tests pass">${ICON.reproducible}CI green</span>` : "";
   return `<details class="tfair"><summary>` +
     `<span class="fairtoggle">FAIR software <b>${f.score}/5</b>${ICON.chevron}<span class="fairhint">see what's checked</span></span>` +
+    reproChip +
     `<span class="fairmeta">${ICON.star}${f.stars} · ${swh}</span>` +
-    `</summary><div class="fairrecs">${recs}</div></details>`;
+    `</summary><div class="fairrecs">${recs}</div>${practices}</details>`;
 }
 
 // Structured, readable breakdown of the priority score (replaces a run-on `title` tooltip).
@@ -623,8 +664,8 @@ function targetRow(t) {
   // Materials badge ONLY when positively known. OpenAIRE rarely links code/data to a
   // paper, so 'unknown' is the norm in live search and would be noise on every row —
   // it's carried in the score breakdown tooltip, and resolved in the baked demo set.
-  const matMeta = (t.mat && t.mat.state === "rocrate") ? `<span class="badge mok" title="RO-Crate research object — code + data + provenance bundled">${ICON.check}RO-Crate</span>`
-    : (t.mat && t.mat.state === "code") ? `<span class="badge mok" title="code repository linked to this paper">${ICON.check}code</span>`
+  const matMeta = (t.mat && t.mat.state === "rocrate") ? `<span class="badge mok tagbtn" role="button" tabindex="0" onclick="filterCode()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();filterCode()}" title="RO-Crate research object — code + data + provenance bundled. Click to filter to items with code.">${ICON.check}RO-Crate</span>`
+    : (t.mat && t.mat.state === "code") ? `<span class="badge mok tagbtn" role="button" tabindex="0" onclick="filterCode()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();filterCode()}" title="code repository linked to this paper. Click to filter to items with code.">${ICON.check}code</span>`
     : "";
   const meta = `<div class="t-meta">`
     + (t.year ? `<span class="badge yr">${t.year}</span>` : "")
@@ -661,17 +702,34 @@ function targetRow(t) {
 }
 
 const FILTER_ORDER = ["reproducible", "robust", "validated", "contested", "refuted", "needs", "dormant"];
-const visibleTargets = () => (_tfilter.size ? _targets.filter((t) => _tfilter.has(t.statusKey)) : _targets);
+// "Has code" is a SEPARATE filter axis (the RSE view Saranjeet asked for): can we point to a
+// repository for this item — resolved to the paper, or a replication's own repo?
+const hasCode = (t) => !!((t.mat && t.mat.code) || t.fair || (t.mat && (t.mat.state === "code" || t.mat.state === "rocrate")));
+const visibleTargets = () => {
+  let list = _tfilter.size ? _targets.filter((t) => _tfilter.has(t.statusKey)) : _targets;
+  if (_codeOnly) list = list.filter(hasCode);
+  return list;
+};
 
 function paintFilters() {
   const counts = {};
   for (const t of _targets) counts[t.statusKey] = (counts[t.statusKey] || 0) + 1;
   const present = FILTER_ORDER.filter((k) => counts[k]);
-  if (present.length < 2) { el("tfilters").innerHTML = ""; return; }   // nothing to filter
+  const codeN = _targets.filter(hasCode).length;
+  const showStatus = present.length >= 2;
+  // Nothing worth filtering (fewer than 2 statuses AND no item has code) → hide the bar entirely.
+  if (!showStatus && !codeN) { el("tfilters").innerHTML = ""; return; }
   const chip = (on, key, label, count) =>
     `<button class="tfilter${on ? " on" : ""}" onclick="filterTargets(${key ? `'${key}'` : "null"})"${key ? ` title="${esc(STATUS[key].tip)}"` : ""}>${label} <span>${count}</span></button>`;
-  el("tfilters").innerHTML = chip(_tfilter.size === 0, null, "All", _targets.length)
-    + present.map((k) => chip(_tfilter.has(k), k, STATUS[k].label, counts[k])).join("");
+  let html = showStatus
+    ? chip(_tfilter.size === 0 && !_codeOnly, null, "All", _targets.length)
+      + present.map((k) => chip(_tfilter.has(k), k, STATUS[k].label, counts[k])).join("")
+    : "";
+  // "Has code" — a distinct, accented toggle that ANDs with the status filter.
+  if (codeN) {
+    html += `<button class="tfilter code${_codeOnly ? " on" : ""}" onclick="filterCode()" title="Show only items with code available — a repository resolved to the paper, or a replication's own repository">${ICON.reproducible}Has code <span>${codeN}</span></button>`;
+  }
+  el("tfilters").innerHTML = html;
 }
 
 function paintTargets() {
@@ -689,14 +747,15 @@ function paintTargets() {
     : "";
 }
 
-function renderTargets(targets) { _targets = targets; _tpage = 0; _tfilter.clear(); paintTargets(); }
+function renderTargets(targets) { _targets = targets; _tpage = 0; _tfilter.clear(); _codeOnly = false; paintTargets(); }
 window.pageTargets = (d) => { _tpage += d; paintTargets(); el("targets").scrollIntoView({ behavior: "smooth", block: "start" }); };
 window.filterTargets = (k) => {
-  if (k === null) _tfilter.clear();
+  if (k === null) { _tfilter.clear(); _codeOnly = false; }   // "All" / "show all" fully resets both axes
   else if (_tfilter.has(k)) _tfilter.delete(k);
   else _tfilter.add(k);
   _tpage = 0; paintTargets();
 };
+window.filterCode = () => { _codeOnly = !_codeOnly; _tpage = 0; paintTargets(); el("targets").scrollIntoView({ behavior: "smooth", block: "start" }); };
 
 
 function renderVerified(inField) {
