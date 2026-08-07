@@ -596,38 +596,46 @@ const PRACTICE = {
   contributing: ["Contributing", "a CONTRIBUTING guide tells others how to set up the project, run the tests and propose changes (NumFOCUS-style community health)"],
   conduct:      ["Code of conduct", "a CODE_OF_CONDUCT sets the standards for respectful participation — expected of sustainable open-source projects"],
 };
-function fairBlock(f, repo) {
-  const recs = Object.entries(f.recs || {}).map(([k, ok]) =>
-    `<span class="${ok ? "rok" : "rno"}">${ok ? ICON.check : ICON.x}${FAIR_REC[k] || k}</span>`).join("");
-  // Label the recommendations row so the `${f.score}/5` is unambiguously the fair-software.eu
-  // standard — the RSE-practices group below is separate and NOT part of that score.
-  const recsRow = `<div class="fairrecs"><span class="practlbl" title="The five fair-software.eu recommendations — the standard the ${f.score}/5 score reports">fair-software.eu · ${f.score}/5</span>${recs}</div>`;
-  // The pill is the expand control (the FAIR score). Stars + Software Heritage are
-  // separate metadata — Software Heritage is about archival, not the FAIR breakdown —
-  // and the SWH link stops its click from toggling the fold.
-  const swh = `<span onclick="event.stopPropagation()">${swhHtml(repo, f.swh)}</span>`;
-  // RSE good-practice group — a SEPARATE row from the fair-software.eu 5, so the standard score
-  // stays comparable while RSEs get the finer signals they asked for.
+// CI cell — tri-state: green (passing), amber (configured but latest run isn't green / unreadable), absent.
+function ciCell(f) {
   const pr = f.practices || {};
-  const prItem = (ok, k) => `<span class="${ok ? "rok" : "rno"}" title="${esc(PRACTICE[k][1])}">${ok ? ICON.check : ICON.x}${PRACTICE[k][0]}</span>`;
-  // CI is tri-state: green (passing), amber (configured but latest run isn't green / unreadable), absent.
-  const ci = f.ciPass === true
+  return f.ciPass === true
     ? `<span class="rok" title="the repository's own automated checks (CI) currently pass — the code builds &amp; its tests run green. A reproducibility signal, NOT a claim of independent reproduction (the replication verdict covers the claim, separately).">${ICON.check}CI passing</span>`
     : pr.ci
       ? `<span class="rmid" title="continuous integration is configured, but the latest run isn't passing (or couldn't be read)">${ICON.contested}CI configured</span>`
       : `<span class="rno" title="no continuous-integration configuration found in the repository">${ICON.x}CI</span>`;
-  // "what & why →" deep-links to the methodology page's explainer (definitions + external reading).
+}
+// The RSE good-practice items (documented / tests / CI / contributing / conduct) + "what & why →".
+// No leading label — the container (fold summary or the "RSE practices:" heading) provides it.
+// SHARED by both the ranked-target fold and the Verified cards, so they never drift apart.
+function practicesItems(f) {
+  const pr = f.practices || {};
+  const prItem = (ok, k) => `<span class="${ok ? "rok" : "rno"}" title="${esc(PRACTICE[k][1])}">${ok ? ICON.check : ICON.x}${PRACTICE[k][0]}</span>`;
   const practMore = `<a class="practmore" href="methodology.html#practices" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="What these practices are, why they matter, and links to go deeper (The Turing Way, goodpractice, NumFOCUS, Imperial)">what &amp; why →</a>`;
-  const practices = `<div class="fairrecs practices"><span class="practlbl" title="Good engineering practices beyond the fair-software.eu 5 — each grounded in the repository's own files. Signals, NOT counted in the FAIR score.">RSE practices <em class="lblnote">· extra, not in the score</em></span>${prItem(pr.documented, "documented")}${prItem(pr.tests, "tests")}${ci}${prItem(pr.contributing, "contributing")}${prItem(pr.conduct, "conduct")}${practMore}</div>`;
-  // At-a-glance reproducibility cue on the COLLAPSED summary (Saranjeet: "at first glance I can't
-  // tell if the code was checked for reproducibility") — shown only when the repo's CI is green.
-  const reproChip = f.ciPass === true
-    ? `<span class="reprook" title="the repository's own CI is green — the code builds and its tests pass">${ICON.reproducible}CI green</span>` : "";
+  return `${prItem(pr.documented, "documented")}${prItem(pr.tests, "tests")}${ciCell(f)}${prItem(pr.contributing, "contributing")}${prItem(pr.conduct, "conduct")}${practMore}`;
+}
+// At-a-glance reproducibility cue for a collapsed summary — only when the repo's CI is green.
+const reproCue = (f) => f.ciPass === true
+  ? `<span class="reprook" title="the repository's own CI is green — the code builds and its tests pass">${ICON.reproducible}CI green</span>` : "";
+
+// FAIR software = the fair-software.eu standard, in its OWN fold — kept separate from RSE practices
+// so the "N/5" only ever means the five recommendations.
+function fairBlock(f, repo) {
+  const recs = Object.entries(f.recs || {}).map(([k, ok]) =>
+    `<span class="${ok ? "rok" : "rno"}">${ok ? ICON.check : ICON.x}${FAIR_REC[k] || k}</span>`).join("");
+  const swh = `<span onclick="event.stopPropagation()">${swhHtml(repo, f.swh)}</span>`;
   return `<details class="tfair"><summary>` +
-    `<span class="fairtoggle">FAIR software <b>${f.score}/5</b>${ICON.chevron}<span class="fairhint">see what's checked</span></span>` +
-    reproChip +
+    `<span class="fairtoggle">FAIR software <b>${f.score}/5</b>${ICON.chevron}<span class="fairhint">fair-software.eu — see what's checked</span></span>` +
     `<span class="fairmeta">${ICON.star}${f.stars} · ${swh}</span>` +
-    `</summary>${recsRow}${practices}</details>`;
+    `</summary><div class="fairrecs">${recs}</div></details>`;
+}
+// RSE practices = engineering & community good-practice signals, a SEPARATE fold so they are not
+// mixed into (or mistaken for) the fair-software.eu score.
+function practicesBlock(f) {
+  return `<details class="tfair rse"><summary>` +
+    `<span class="fairtoggle rse">RSE practices${ICON.chevron}<span class="fairhint">engineering &amp; community good-practice signals</span></span>` +
+    reproCue(f) +
+    `</summary><div class="fairrecs practices">${practicesItems(f)}</div></details>`;
 }
 
 // Structured, readable breakdown of the priority score (replaces a run-on `title` tooltip).
@@ -708,13 +716,15 @@ function targetRow(t) {
     ? `<div class="tresolved">↳ materials resolved from ${esc(t.mat.source || "the paper")} (not in OpenAIRE): <a href="${esc(t.mat.code || "")}" target="_blank" rel="noopener">code repo</a>${(t.mat.data && t.mat.data.length) ? ` · data: ${t.mat.data.map(esc).join(", ")}` : ""}</div>`
     : "";
   const fairNote = t.fair ? fairBlock(t.fair, t.mat && t.mat.code) : "";
+  // RSE practices — a SEPARATE fold from the FAIR-software one (not mixed into the /5 score).
+  const practiceNote = t.fair ? practicesBlock(t.fair) : "";
   // OPEN targets get a next step: discovery here → the FORRT template handles the nanopub chain.
   const replicateCTA = (t.status !== "VERIFIED")
     ? `<div class="treplicate"><a href="https://github.com/ScienceLiveHub/forrt-replication-template" target="_blank" rel="noopener" title="Start a replication from the FORRT template — it scaffolds the repo and the signed nanopub chain (Claim · Study · Outcome)">▷ Replicate this with the template →</a></div>`
     : "";
   return `<div class="target ${t.status === "VERIFIED" ? "verified" : ""}">
     ${score}
-    <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${meta}${claimLine}${absLine}${verdictLink}${resolvedNote}${fairNote}${replicateCTA}</div>
+    <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${meta}${claimLine}${absLine}${verdictLink}${resolvedNote}${fairNote}${practiceNote}${replicateCTA}</div>
     <div class="t-right">${t.citations.toLocaleString()} cites<br>${link}</div>
   </div>`;
 }
@@ -798,7 +808,8 @@ function renderVerified(inField) {
       const f = v.repl.fair;
       const fairBadge = f
         ? `<div class="fairrecs"><b>FAIR software (${f.score}/5):</b> ${Object.entries(f.recs).map(([k, ok]) => `<span class="${ok ? "rok" : "rno"}">${ok ? ICON.check : ICON.x}${FAIR_REC[k] || k}</span>`).join("")}</div>
-        <div class="fairline">${ICON.star}${f.stars} stars · ${ICON.fork}${f.forks} forks · ${swhHtml(v.repl.code, f.swh)}</div>`
+        <div class="fairline">${ICON.star}${f.stars} stars · ${ICON.fork}${f.forks} forks · ${swhHtml(v.repl.code, f.swh)}</div>
+        <div class="fairrecs practices"><b class="rselbl">RSE practices:</b> ${practicesItems(f)}</div>`
         : "";
       const nodeHref = v.repl.code && v.repl.code.includes("github") ? v.repl.code : v.repl.url;
       repl = `<div class="vrepl">↳ replication is an OpenAIRE node: <a href="${nodeHref}" target="_blank" rel="noopener">${esc(v.repl.title).slice(0, 44) || v.repl.doi}</a> <span class="ochip type">${esc(v.repl.type)}</span></div>${fairBadge}`;
