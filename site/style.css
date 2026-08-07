@@ -215,6 +215,10 @@ details.tfair .fairrecs{margin-top:6px}
 .fairrecs.practices{margin-top:6px;padding-top:7px;border-top:1px dashed var(--line)}
 .fairrecs .practlbl{font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;font-size:10px}
 .fairrecs .lblnote{font-style:normal;font-weight:600;color:var(--mut);text-transform:none;letter-spacing:0;font-size:10px}
+/* click-through practice signals — keep the rok/rno colour, add underline-on-hover affordance */
+.fairrecs a.praclink{text-decoration:none;cursor:pointer}
+.fairrecs a.praclink:hover{text-decoration:underline}
+.fairrecs a.praclink:focus-visible{outline:2px solid currentColor;outline-offset:1px;border-radius:3px}
 .fairrecs .practmore{color:var(--magenta);font-weight:600;text-decoration:none}
 .fairrecs .practmore:hover{text-decoration:underline}
 /* at-a-glance "CI green" cue on the collapsed FAIR summary */

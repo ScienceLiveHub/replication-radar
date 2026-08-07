@@ -276,13 +276,28 @@ async function _assessSoftware(url) {
   // CORS-open) rather than guessing from the root listing.
   practices.contributing = false;
   practices.conduct = false;
+  let contribUrl = null, conductUrl = null;
   try {
     const prof = await (await fetch(`${base}/community/profile`)).json();
     const cf = (prof && prof.files) || {};
     practices.contributing = !!cf.contributing;
     practices.conduct = !!cf.code_of_conduct;
+    contribUrl = (cf.contributing || {}).html_url || null;   // may live in an org .github repo — still valid
+    conductUrl = (cf.code_of_conduct || {}).html_url || null;
   } catch (e) { /* leave false */ }
-  return { stars: repo.stargazers_count || 0, forks: repo.forks_count || 0, license: (repo.license || {}).spdx_id, swh, recs, score, pct: Math.round((score / 5) * 100), practices, ciPass };
+  // Click-through targets so an RSE can open the actual thing. Grounded URLs only — fall back to the
+  // repo page when we can't point more precisely (README renders there).
+  const html = repo.html_url || `https://github.com/${g.owner}/${g.repo}`;
+  const branch = repo.default_branch || "HEAD";
+  const testsPath = has("tests") ? "tests" : has("test") ? "test" : null;
+  const purls = {
+    documented: (repo.homepage && repo.homepage.trim()) || (has("docs") ? `${html}/tree/${branch}/docs` : html),
+    tests: testsPath ? `${html}/tree/${branch}/${testsPath}` : html,
+    ci: practices.ci ? `${html}/actions` : null,
+    contributing: contribUrl,
+    conduct: conductUrl,
+  };
+  return { stars: repo.stargazers_count || 0, forks: repo.forks_count || 0, license: (repo.license || {}).spdx_id, swh, recs, score, pct: Math.round((score / 5) * 100), practices, ciPass, purls };
 }
 
 // ---------- author-agnostic verdict index, live from the nanopub network ----------
@@ -596,21 +611,33 @@ const PRACTICE = {
   contributing: ["Contributing", "a CONTRIBUTING guide tells others how to set up the project, run the tests and propose changes (NumFOCUS-style community health)"],
   conduct:      ["Code of conduct", "a CODE_OF_CONDUCT sets the standards for respectful participation — expected of sustainable open-source projects"],
 };
-// CI cell — tri-state: green (passing), amber (configured but latest run isn't green / unreadable), absent.
+// CI cell — tri-state: green (passing), amber (configured but latest run isn't green / unreadable),
+// absent. When CI exists it links through to the repo's Actions runs.
 function ciCell(f) {
   const pr = f.practices || {};
+  const url = (f.purls || {}).ci;
+  const cell = (cls, icon, label, tip) => url
+    ? `<a class="${cls} praclink" href="${esc(url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="${esc(tip)} — open the Actions runs ↗">${icon}${label}</a>`
+    : `<span class="${cls}" title="${esc(tip)}">${icon}${label}</span>`;
   return f.ciPass === true
-    ? `<span class="rok" title="the repository's own automated checks (CI) currently pass — the code builds &amp; its tests run green. A reproducibility signal, NOT a claim of independent reproduction (the replication verdict covers the claim, separately).">${ICON.check}CI passing</span>`
+    ? cell("rok", ICON.check, "CI passing", "the repository's own automated checks (CI) currently pass — the code builds & its tests run green. A reproducibility signal, NOT a claim of independent reproduction (the replication verdict covers the claim, separately).")
     : pr.ci
-      ? `<span class="rmid" title="continuous integration is configured, but the latest run isn't passing (or couldn't be read)">${ICON.contested}CI configured</span>`
+      ? cell("rmid", ICON.contested, "CI configured", "continuous integration is configured, but the latest run isn't passing (or couldn't be read)")
       : `<span class="rno" title="no continuous-integration configuration found in the repository">${ICON.x}CI</span>`;
 }
 // The RSE good-practice items (documented / tests / CI / contributing / conduct) + "what & why →".
-// No leading label — the container (fold summary or the "RSE practices:" heading) provides it.
-// SHARED by both the ranked-target fold and the Verified cards, so they never drift apart.
+// Each present practice links through to the actual thing (grounded URL). No leading label — the
+// container provides it. SHARED by the ranked-target fold and the Verified cards so they stay in sync.
 function practicesItems(f) {
   const pr = f.practices || {};
-  const prItem = (ok, k) => `<span class="${ok ? "rok" : "rno"}" title="${esc(PRACTICE[k][1])}">${ok ? ICON.check : ICON.x}${PRACTICE[k][0]}</span>`;
+  const purls = f.purls || {};
+  const prItem = (ok, k) => {
+    const inner = `${ok ? ICON.check : ICON.x}${PRACTICE[k][0]}`;
+    const url = ok ? purls[k] : null;   // only link when the practice is actually present
+    return url
+      ? `<a class="${ok ? "rok" : "rno"} praclink" href="${esc(url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="${esc(PRACTICE[k][1])} — open ↗">${inner}</a>`
+      : `<span class="${ok ? "rok" : "rno"}" title="${esc(PRACTICE[k][1])}">${inner}</span>`;
+  };
   const practMore = `<a class="practmore" href="methodology.html#practices" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="What these practices are, why they matter, and links to go deeper (The Turing Way, goodpractice, NumFOCUS, Imperial)">what &amp; why →</a>`;
   return `${prItem(pr.documented, "documented")}${prItem(pr.tests, "tests")}${ciCell(f)}${prItem(pr.contributing, "contributing")}${prItem(pr.conduct, "conduct")}${practMore}`;
 }
