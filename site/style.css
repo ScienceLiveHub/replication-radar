@@ -66,6 +66,16 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .tfilter:hover{border-color:var(--magenta);color:var(--navy2)}
 .tfilter.on{border-color:var(--navy2);background:var(--navy);color:#fff}
 .tfilter.on span{background:rgba(255,255,255,.22);color:#fff}
+/* "Has code" — a distinct, green-accented axis (separate from the navy status chips) */
+.tfilter.code{border-color:var(--green);color:var(--green)}
+.tfilter.code:hover{border-color:var(--green);background:var(--green-soft)}
+.tfilter.code.on{background:var(--green);border-color:var(--green);color:#fff}
+.tfilter.code.on span{background:rgba(255,255,255,.22);color:#fff}
+.tfilter.code .ic{margin:0}
+/* clickable code / RO-Crate badge on a card → triggers the "Has code" filter */
+.badge.tagbtn{cursor:pointer;border:1px solid transparent}
+.badge.tagbtn:hover{border-color:var(--green)}
+.badge.tagbtn:focus-visible{outline:2px solid var(--green);outline-offset:1px}
 .targets{display:flex;flex-direction:column;gap:10px}
 .tpager{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:16px;font-size:13px;color:var(--mut)}
 .tpager:empty{display:none}
@@ -158,6 +168,9 @@ details.tfair > summary::-webkit-details-marker{display:none}
 /* the FAIR score IS the expand control — make it look like a button */
 .fairtoggle{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border:1px solid #cdd9ee;background:var(--green-soft);border-radius:999px;color:var(--navy2);font-weight:600}
 .fairtoggle:hover{border-color:#a9bfe0;background:#dde7f5}
+/* RSE-practices fold — a neutral tint so it reads as a SEPARATE section from the green FAIR pill */
+.fairtoggle.rse{background:#eef2f9;border-color:#cdd9ee}
+.fairtoggle.rse:hover{background:#e2e9f5;border-color:#a9bfe0}
 .fairtoggle .ic{margin:0;opacity:.85;transition:transform .15s}
 details.tfair[open] .fairtoggle .ic{transform:rotate(180deg)}
 .fairhint{font-weight:500;font-size:11px;color:var(--mut)}
@@ -197,6 +210,19 @@ details.tfair .fairrecs{margin-top:6px}
 .fairrecs b{color:var(--navy2);font-size:12px}
 .fairrecs .rok{color:var(--green)}
 .fairrecs .rno{color:#8a5804}
+.fairrecs .rmid{color:#b7791f}
+/* RSE good-practice group (documented / tests / CI) — a separate row under the fair-software.eu 5 */
+.fairrecs.practices{margin-top:6px;padding-top:7px;border-top:1px dashed var(--line)}
+.fairrecs .practlbl{font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;font-size:10px}
+.fairrecs .lblnote{font-style:normal;font-weight:600;color:var(--mut);text-transform:none;letter-spacing:0;font-size:10px}
+/* click-through practice signals — keep the rok/rno colour, add underline-on-hover affordance */
+.fairrecs a.praclink{text-decoration:none;cursor:pointer}
+.fairrecs a.praclink:hover{text-decoration:underline}
+.fairrecs a.praclink:focus-visible{outline:2px solid currentColor;outline-offset:1px;border-radius:3px}
+.fairrecs .practmore{color:var(--magenta);font-weight:600;text-decoration:none}
+.fairrecs .practmore:hover{text-decoration:underline}
+/* at-a-glance "CI green" cue on the collapsed FAIR summary */
+.reprook{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border:1px solid #bfe3c8;background:var(--green-soft);border-radius:999px;color:var(--green);font-weight:600;font-size:11px}
 .fairbar{display:inline-block;width:64px;height:7px;border-radius:4px;background:#e4e9f2;overflow:hidden}
 .fairbar i{display:block;height:100%;background:var(--green)}
 .swhok{color:var(--green);font-weight:600}

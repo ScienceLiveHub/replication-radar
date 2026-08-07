@@ -251,7 +251,53 @@ async function _assessSoftware(url) {
     quality: has("codemeta.json") || has("environment.yml") || has("dockerfile") || has("pixi.toml") || has(".github"), // reproducibility/quality artefacts
   };
   const score = Object.values(recs).filter(Boolean).length;
-  return { stars: repo.stargazers_count || 0, forks: repo.forks_count || 0, license: (repo.license || {}).spdx_id, swh, recs, score, pct: Math.round((score / 5) * 100) };
+  // RSE good practices, BEYOND the fair-software.eu 5 (Saranjeet's feedback): documented / tested /
+  // CI. Grounded in the repo's OWN root entries — the GitHub contents listing already includes
+  // directory names (docs, tests, .github), so no extra call is needed to detect these.
+  const practices = {
+    documented: has("readme.md") || has("readme.rst") || has("readme") || has("docs") || repo.has_pages || !!(repo.homepage && repo.homepage.trim()) || repo.has_wiki,
+    tests: has("tests") || has("test") || has("conftest.py") || has("pytest.ini") || has("tox.ini") || has("testthat"),
+    ci: has(".github") || has(".gitlab-ci.yml") || has(".circleci") || has(".travis.yml") || has("azure-pipelines.yml") || has("jenkinsfile"),
+  };
+  // Item 3 (reproducibility): the honest, grounded proxy for "was the linked code checked" is whether
+  // the repo's OWN automated checks pass. Only look when CI exists; leave `null` (unknown) if there's
+  // no CI or the call fails — never guess. A green run means the code builds & its tests pass; it is
+  // NOT a claim of independent reproduction (the replication VERDICT covers the claim, separately).
+  let ciPass = null;
+  if (practices.ci) {
+    try {
+      const runs = await (await fetch(`${base}/actions/runs?per_page=1`)).json();
+      const r = ((runs && runs.workflow_runs) || [])[0];
+      if (r && r.status === "completed") ciPass = r.conclusion === "success";
+    } catch (e) { /* leave unknown */ }
+  }
+  // Community-health files (NumFOCUS-style): CONTRIBUTING + CODE_OF_CONDUCT. They often live in
+  // .github/ or docs/, not the root, so ask GitHub's community-profile endpoint (authoritative,
+  // CORS-open) rather than guessing from the root listing.
+  practices.contributing = false;
+  practices.conduct = false;
+  let contribUrl = null, conductUrl = null;
+  try {
+    const prof = await (await fetch(`${base}/community/profile`)).json();
+    const cf = (prof && prof.files) || {};
+    practices.contributing = !!cf.contributing;
+    practices.conduct = !!cf.code_of_conduct;
+    contribUrl = (cf.contributing || {}).html_url || null;   // may live in an org .github repo — still valid
+    conductUrl = (cf.code_of_conduct || {}).html_url || null;
+  } catch (e) { /* leave false */ }
+  // Click-through targets so an RSE can open the actual thing. Grounded URLs only — fall back to the
+  // repo page when we can't point more precisely (README renders there).
+  const html = repo.html_url || `https://github.com/${g.owner}/${g.repo}`;
+  const branch = repo.default_branch || "HEAD";
+  const testsPath = has("tests") ? "tests" : has("test") ? "test" : null;
+  const purls = {
+    documented: (repo.homepage && repo.homepage.trim()) || (has("docs") ? `${html}/tree/${branch}/docs` : html),
+    tests: testsPath ? `${html}/tree/${branch}/${testsPath}` : html,
+    ci: practices.ci ? `${html}/actions` : null,
+    contributing: contribUrl,
+    conduct: conductUrl,
+  };
+  return { stars: repo.stargazers_count || 0, forks: repo.forks_count || 0, license: (repo.license || {}).spdx_id, swh, recs, score, pct: Math.round((score / 5) * 100), practices, ciPass, purls };
 }
 
 // ---------- author-agnostic verdict index, live from the nanopub network ----------
@@ -534,7 +580,7 @@ const el = (id) => document.getElementById(id);
 const esc = (s) => (s || "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 
 const PER_PAGE = 10;
-let _targets = [], _tpage = 0, _tfilter = new Set();
+let _targets = [], _tpage = 0, _tfilter = new Set(), _codeOnly = false;
 
 // FAIR-software block: a fold that expands to the 5 fair-software.eu recommendations (met/missing),
 // with a live Software Heritage link (browse the archived snapshot, or Save Code Now if not yet).
@@ -558,17 +604,65 @@ window.swhSave = async (btn) => {
   catch (e) { /* clipboard blocked — the form still opens */ }
   window.open("https://archive.softwareheritage.org/save/", "_blank", "noopener");
 };
+// RSE good-practice labels + tooltips (beyond the fair-software.eu 5 — Saranjeet's feedback).
+const PRACTICE = {
+  documented:   ["Documented", "a README, docs/ folder, docs site (GitHub Pages) or wiki is present"],
+  tests:        ["Tests", "an automated-test directory or config (tests/, pytest, tox, testthat…) is present in the repo"],
+  contributing: ["Contributing", "a CONTRIBUTING guide tells others how to set up the project, run the tests and propose changes (NumFOCUS-style community health)"],
+  conduct:      ["Code of conduct", "a CODE_OF_CONDUCT sets the standards for respectful participation — expected of sustainable open-source projects"],
+};
+// CI cell — tri-state: green (passing), amber (configured but latest run isn't green / unreadable),
+// absent. When CI exists it links through to the repo's Actions runs.
+function ciCell(f) {
+  const pr = f.practices || {};
+  const url = (f.purls || {}).ci;
+  const cell = (cls, icon, label, tip) => url
+    ? `<a class="${cls} praclink" href="${esc(url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="${esc(tip)} — open the Actions runs ↗">${icon}${label}</a>`
+    : `<span class="${cls}" title="${esc(tip)}">${icon}${label}</span>`;
+  return f.ciPass === true
+    ? cell("rok", ICON.check, "CI passing", "the repository's own automated checks (CI) currently pass — the code builds & its tests run green. A reproducibility signal, NOT a claim of independent reproduction (the replication verdict covers the claim, separately).")
+    : pr.ci
+      ? cell("rmid", ICON.contested, "CI configured", "continuous integration is configured, but the latest run isn't passing (or couldn't be read)")
+      : `<span class="rno" title="no continuous-integration configuration found in the repository">${ICON.x}CI</span>`;
+}
+// The RSE good-practice items (documented / tests / CI / contributing / conduct) + "what & why →".
+// Each present practice links through to the actual thing (grounded URL). No leading label — the
+// container provides it. SHARED by the ranked-target fold and the Verified cards so they stay in sync.
+function practicesItems(f) {
+  const pr = f.practices || {};
+  const purls = f.purls || {};
+  const prItem = (ok, k) => {
+    const inner = `${ok ? ICON.check : ICON.x}${PRACTICE[k][0]}`;
+    const url = ok ? purls[k] : null;   // only link when the practice is actually present
+    return url
+      ? `<a class="${ok ? "rok" : "rno"} praclink" href="${esc(url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="${esc(PRACTICE[k][1])} — open ↗">${inner}</a>`
+      : `<span class="${ok ? "rok" : "rno"}" title="${esc(PRACTICE[k][1])}">${inner}</span>`;
+  };
+  const practMore = `<a class="practmore" href="methodology.html#practices" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="What these practices are, why they matter, and links to go deeper (The Turing Way, goodpractice, NumFOCUS, Imperial)">what &amp; why →</a>`;
+  return `${prItem(pr.documented, "documented")}${prItem(pr.tests, "tests")}${ciCell(f)}${prItem(pr.contributing, "contributing")}${prItem(pr.conduct, "conduct")}${practMore}`;
+}
+// At-a-glance reproducibility cue for a collapsed summary — only when the repo's CI is green.
+const reproCue = (f) => f.ciPass === true
+  ? `<span class="reprook" title="the repository's own CI is green — the code builds and its tests pass">${ICON.reproducible}CI green</span>` : "";
+
+// FAIR software = the fair-software.eu standard, in its OWN fold — kept separate from RSE practices
+// so the "N/5" only ever means the five recommendations.
 function fairBlock(f, repo) {
   const recs = Object.entries(f.recs || {}).map(([k, ok]) =>
     `<span class="${ok ? "rok" : "rno"}">${ok ? ICON.check : ICON.x}${FAIR_REC[k] || k}</span>`).join("");
-  // The pill is the expand control (the FAIR score). Stars + Software Heritage are
-  // separate metadata — Software Heritage is about archival, not the FAIR breakdown —
-  // and the SWH link stops its click from toggling the fold.
   const swh = `<span onclick="event.stopPropagation()">${swhHtml(repo, f.swh)}</span>`;
   return `<details class="tfair"><summary>` +
-    `<span class="fairtoggle">FAIR software <b>${f.score}/5</b>${ICON.chevron}<span class="fairhint">see what's checked</span></span>` +
+    `<span class="fairtoggle">FAIR software <b>${f.score}/5</b>${ICON.chevron}<span class="fairhint">fair-software.eu — see what's checked</span></span>` +
     `<span class="fairmeta">${ICON.star}${f.stars} · ${swh}</span>` +
     `</summary><div class="fairrecs">${recs}</div></details>`;
+}
+// RSE practices = engineering & community good-practice signals, a SEPARATE fold so they are not
+// mixed into (or mistaken for) the fair-software.eu score.
+function practicesBlock(f) {
+  return `<details class="tfair rse"><summary>` +
+    `<span class="fairtoggle rse">RSE practices${ICON.chevron}<span class="fairhint">engineering &amp; community good-practice signals</span></span>` +
+    reproCue(f) +
+    `</summary><div class="fairrecs practices">${practicesItems(f)}</div></details>`;
 }
 
 // Structured, readable breakdown of the priority score (replaces a run-on `title` tooltip).
@@ -623,8 +717,8 @@ function targetRow(t) {
   // Materials badge ONLY when positively known. OpenAIRE rarely links code/data to a
   // paper, so 'unknown' is the norm in live search and would be noise on every row —
   // it's carried in the score breakdown tooltip, and resolved in the baked demo set.
-  const matMeta = (t.mat && t.mat.state === "rocrate") ? `<span class="badge mok" title="RO-Crate research object — code + data + provenance bundled">${ICON.check}RO-Crate</span>`
-    : (t.mat && t.mat.state === "code") ? `<span class="badge mok" title="code repository linked to this paper">${ICON.check}code</span>`
+  const matMeta = (t.mat && t.mat.state === "rocrate") ? `<span class="badge mok tagbtn" role="button" tabindex="0" onclick="filterCode()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();filterCode()}" title="RO-Crate research object — code + data + provenance bundled. Click to filter to items with code.">${ICON.check}RO-Crate</span>`
+    : (t.mat && t.mat.state === "code") ? `<span class="badge mok tagbtn" role="button" tabindex="0" onclick="filterCode()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();filterCode()}" title="code repository linked to this paper. Click to filter to items with code.">${ICON.check}code</span>`
     : "";
   const meta = `<div class="t-meta">`
     + (t.year ? `<span class="badge yr">${t.year}</span>` : "")
@@ -649,29 +743,48 @@ function targetRow(t) {
     ? `<div class="tresolved">↳ materials resolved from ${esc(t.mat.source || "the paper")} (not in OpenAIRE): <a href="${esc(t.mat.code || "")}" target="_blank" rel="noopener">code repo</a>${(t.mat.data && t.mat.data.length) ? ` · data: ${t.mat.data.map(esc).join(", ")}` : ""}</div>`
     : "";
   const fairNote = t.fair ? fairBlock(t.fair, t.mat && t.mat.code) : "";
+  // RSE practices — a SEPARATE fold from the FAIR-software one (not mixed into the /5 score).
+  const practiceNote = t.fair ? practicesBlock(t.fair) : "";
   // OPEN targets get a next step: discovery here → the FORRT template handles the nanopub chain.
   const replicateCTA = (t.status !== "VERIFIED")
     ? `<div class="treplicate"><a href="https://github.com/ScienceLiveHub/forrt-replication-template" target="_blank" rel="noopener" title="Start a replication from the FORRT template — it scaffolds the repo and the signed nanopub chain (Claim · Study · Outcome)">▷ Replicate this with the template →</a></div>`
     : "";
   return `<div class="target ${t.status === "VERIFIED" ? "verified" : ""}">
     ${score}
-    <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${meta}${claimLine}${absLine}${verdictLink}${resolvedNote}${fairNote}${replicateCTA}</div>
+    <div class="t-main">${badge}<br><b>${esc(t.title)}</b>${meta}${claimLine}${absLine}${verdictLink}${resolvedNote}${fairNote}${practiceNote}${replicateCTA}</div>
     <div class="t-right">${t.citations.toLocaleString()} cites<br>${link}</div>
   </div>`;
 }
 
 const FILTER_ORDER = ["reproducible", "robust", "validated", "contested", "refuted", "needs", "dormant"];
-const visibleTargets = () => (_tfilter.size ? _targets.filter((t) => _tfilter.has(t.statusKey)) : _targets);
+// "Has code" is a SEPARATE filter axis (the RSE view Saranjeet asked for): can we point to a
+// repository for this item — resolved to the paper, or a replication's own repo?
+const hasCode = (t) => !!((t.mat && t.mat.code) || t.fair || (t.mat && (t.mat.state === "code" || t.mat.state === "rocrate")));
+const visibleTargets = () => {
+  let list = _tfilter.size ? _targets.filter((t) => _tfilter.has(t.statusKey)) : _targets;
+  if (_codeOnly) list = list.filter(hasCode);
+  return list;
+};
 
 function paintFilters() {
   const counts = {};
   for (const t of _targets) counts[t.statusKey] = (counts[t.statusKey] || 0) + 1;
   const present = FILTER_ORDER.filter((k) => counts[k]);
-  if (present.length < 2) { el("tfilters").innerHTML = ""; return; }   // nothing to filter
+  const codeN = _targets.filter(hasCode).length;
+  const showStatus = present.length >= 2;
+  // Nothing worth filtering (fewer than 2 statuses AND no item has code) → hide the bar entirely.
+  if (!showStatus && !codeN) { el("tfilters").innerHTML = ""; return; }
   const chip = (on, key, label, count) =>
     `<button class="tfilter${on ? " on" : ""}" onclick="filterTargets(${key ? `'${key}'` : "null"})"${key ? ` title="${esc(STATUS[key].tip)}"` : ""}>${label} <span>${count}</span></button>`;
-  el("tfilters").innerHTML = chip(_tfilter.size === 0, null, "All", _targets.length)
-    + present.map((k) => chip(_tfilter.has(k), k, STATUS[k].label, counts[k])).join("");
+  let html = showStatus
+    ? chip(_tfilter.size === 0 && !_codeOnly, null, "All", _targets.length)
+      + present.map((k) => chip(_tfilter.has(k), k, STATUS[k].label, counts[k])).join("")
+    : "";
+  // "Has code" — a distinct, accented toggle that ANDs with the status filter.
+  if (codeN) {
+    html += `<button class="tfilter code${_codeOnly ? " on" : ""}" onclick="filterCode()" title="Show only items with code available — a repository resolved to the paper, or a replication's own repository">${ICON.reproducible}Has code <span>${codeN}</span></button>`;
+  }
+  el("tfilters").innerHTML = html;
 }
 
 function paintTargets() {
@@ -689,14 +802,15 @@ function paintTargets() {
     : "";
 }
 
-function renderTargets(targets) { _targets = targets; _tpage = 0; _tfilter.clear(); paintTargets(); }
+function renderTargets(targets) { _targets = targets; _tpage = 0; _tfilter.clear(); _codeOnly = false; paintTargets(); }
 window.pageTargets = (d) => { _tpage += d; paintTargets(); el("targets").scrollIntoView({ behavior: "smooth", block: "start" }); };
 window.filterTargets = (k) => {
-  if (k === null) _tfilter.clear();
+  if (k === null) { _tfilter.clear(); _codeOnly = false; }   // "All" / "show all" fully resets both axes
   else if (_tfilter.has(k)) _tfilter.delete(k);
   else _tfilter.add(k);
   _tpage = 0; paintTargets();
 };
+window.filterCode = () => { _codeOnly = !_codeOnly; _tpage = 0; paintTargets(); el("targets").scrollIntoView({ behavior: "smooth", block: "start" }); };
 
 
 function renderVerified(inField) {
@@ -721,7 +835,8 @@ function renderVerified(inField) {
       const f = v.repl.fair;
       const fairBadge = f
         ? `<div class="fairrecs"><b>FAIR software (${f.score}/5):</b> ${Object.entries(f.recs).map(([k, ok]) => `<span class="${ok ? "rok" : "rno"}">${ok ? ICON.check : ICON.x}${FAIR_REC[k] || k}</span>`).join("")}</div>
-        <div class="fairline">${ICON.star}${f.stars} stars · ${ICON.fork}${f.forks} forks · ${swhHtml(v.repl.code, f.swh)}</div>`
+        <div class="fairline">${ICON.star}${f.stars} stars · ${ICON.fork}${f.forks} forks · ${swhHtml(v.repl.code, f.swh)}</div>
+        <div class="fairrecs practices"><b class="rselbl">RSE practices:</b> ${practicesItems(f)}</div>`
         : "";
       const nodeHref = v.repl.code && v.repl.code.includes("github") ? v.repl.code : v.repl.url;
       repl = `<div class="vrepl">↳ replication is an OpenAIRE node: <a href="${nodeHref}" target="_blank" rel="noopener">${esc(v.repl.title).slice(0, 44) || v.repl.doi}</a> <span class="ochip type">${esc(v.repl.type)}</span></div>${fairBadge}`;

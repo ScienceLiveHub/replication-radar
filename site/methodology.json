@@ -11,7 +11,12 @@
     { "id": "fairsoftware", "name": "fair-software.eu recommendations", "url": "https://fair-software.eu/", "role": "The five FAIR-for-research-software recommendations we score a replication's code against." },
     { "id": "github", "name": "GitHub REST API", "url": "https://docs.github.com/rest", "role": "Repository existence, licence, citation file, release/quality signals, stars and forks for the FAIR-software check (unauthenticated, 60 requests/hour)." },
     { "id": "swh", "name": "Software Heritage API", "url": "https://archive.softwareheritage.org/api/", "role": "Whether the replication's code is archived in Software Heritage (long-term preservation), for the FAIR-software check." },
-    { "id": "zenodo", "name": "Zenodo API", "url": "https://developers.zenodo.org/", "role": "Resolving a Zenodo deposit to its source GitHub repository and DOI when OpenAIRE lacks a direct code link." }
+    { "id": "zenodo", "name": "Zenodo API", "url": "https://developers.zenodo.org/", "role": "Resolving a Zenodo deposit to its source GitHub repository and DOI when OpenAIRE lacks a direct code link." },
+    { "id": "turingway", "name": "The Turing Way", "url": "https://the-turing-way.netlify.app/", "role": "A community handbook for reproducible, ethical and collaborative research — the language-agnostic reference behind the 'RSE practices' explanations (documentation, testing, continuous integration)." },
+    { "id": "goodpractice", "name": "goodpractice (rOpenSci)", "url": "https://docs.ropensci.org/goodpractice/", "role": "An R package that codifies good software-engineering practice (tests, coverage, CI, style) — a concrete checklist that inspired the RSE-practices signals." },
+    { "id": "numfocus", "name": "NumFOCUS project standards", "url": "https://numfocus.org/projects-overview", "role": "Standards and recommendations for sustainable open-source scientific projects (documentation, testing, CI, community health)." },
+    { "id": "imperialese", "name": "Imperial — Essential Software Engineering for Researchers", "url": "https://imperialcollegelondon.github.io/grad_school_software_engineering_course/", "role": "Openly-licensed course materials from Imperial College London's RSE team covering version control, testing, documentation and CI for researchers." },
+    { "id": "covenant", "name": "Contributor Covenant", "url": "https://www.contributor-covenant.org/", "role": "The widely-adopted code-of-conduct standard for open-source communities — referenced by the 'Code of conduct' practice." }
   ],
   "signals": [
     { "id": "targets", "name": "Replication targets (the ranked list)", "shownAs": "the list of candidate papers", "source": "openaire",
@@ -49,6 +54,48 @@
     { "id": "fair", "name": "FAIR-software score",
       "formula": "1 point for each met recommendation, out of 5: public repository · open licence · in a registry · citable (CITATION.cff or DOI) · quality artefacts.",
       "explanation": "fair-software.eu's five recommendations, evaluated from live GitHub / Software Heritage / Zenodo signals." }
+  ],
+  "practices": [
+    { "id": "documented", "name": "Documented",
+      "what": "There is documentation someone new can use to understand, install and run the software — at minimum a README, and ideally a docs/ folder, a published documentation site or a wiki.",
+      "why": "Code that technically runs but has no documentation still can't be reused or reproduced by anyone else. Documentation is usually the first barrier an RSE hits, and the cheapest to fix.",
+      "checked": "The repository has a README, a docs/ directory, a published docs site (GitHub Pages) or a wiki — read from the GitHub API. Presence, not quality.",
+      "links": [
+        { "label": "The Turing Way — Code documentation", "url": "https://the-turing-way.netlify.app/reproducible-research/code-documentation" },
+        { "label": "Imperial — Essential Software Engineering for Researchers", "url": "https://imperialcollegelondon.github.io/grad_school_software_engineering_course/" }
+      ] },
+    { "id": "tests", "name": "Tests",
+      "what": "Automated tests that check the code does what it claims — unit tests, integration tests, or a recognised testing configuration.",
+      "why": "Tests are how you know a change didn't silently break a result. They are the backbone of trustworthy, reproducible software and the practice most directly tied to 'can I rely on this output'.",
+      "checked": "The repository contains a tests/ or test/ directory, or a known test configuration (pytest, tox, testthat…). We report presence, not coverage.",
+      "links": [
+        { "label": "The Turing Way — Testing", "url": "https://the-turing-way.netlify.app/reproducible-research/testing" },
+        { "label": "goodpractice (R) — tests & coverage checks", "url": "https://docs.ropensci.org/goodpractice/" }
+      ] },
+    { "id": "ci", "name": "Continuous integration (CI)",
+      "what": "An automated pipeline that builds the software and runs its tests on every change (GitHub Actions, GitLab CI, …). Where CI exists, we also read whether the latest run is green.",
+      "why": "A green CI run is the closest grounded signal that the code actually builds and its own tests pass right now — a reproducibility signal. It is NOT a claim of independent reproduction: that is what the replication verdict records, separately.",
+      "checked": "The repository has a CI configuration; when it does, we read the latest run's conclusion from the GitHub Actions API and show passing / configured / absent.",
+      "links": [
+        { "label": "The Turing Way — Continuous integration", "url": "https://the-turing-way.netlify.app/reproducible-research/ci" },
+        { "label": "NumFOCUS — project standards", "url": "https://numfocus.org/projects-overview" }
+      ] },
+    { "id": "contributing", "name": "Contributing guide",
+      "what": "A CONTRIBUTING file that tells a newcomer how to set up the project, run the tests, and propose a change (issues, pull requests, review).",
+      "why": "It lowers the barrier to outside contributions — a core NumFOCUS sustainability signal. Software others can safely extend outlives its original author.",
+      "checked": "GitHub's community-profile API reports a CONTRIBUTING file (in the repo root, .github/ or docs/).",
+      "links": [
+        { "label": "The Turing Way — Building a contributor community", "url": "https://the-turing-way.netlify.app/collaboration/new-community" },
+        { "label": "GitHub — Healthy contributions", "url": "https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions" }
+      ] },
+    { "id": "conduct", "name": "Code of conduct",
+      "what": "A CODE_OF_CONDUCT that sets the standards for respectful participation and how concerns are handled.",
+      "why": "A clear, enforced code of conduct is what makes a scientific community safe to join, and is expected of sustainable open-source projects (NumFOCUS, Contributor Covenant).",
+      "checked": "GitHub's community-profile API reports a CODE_OF_CONDUCT file.",
+      "links": [
+        { "label": "Contributor Covenant", "url": "https://www.contributor-covenant.org/" },
+        { "label": "GitHub — Healthy contributions", "url": "https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions" }
+      ] }
   ],
   "guardrails": [
     "Grounded sources only — every signal comes from a real, named source (above); no relevance-by-keyword-guessing.",
