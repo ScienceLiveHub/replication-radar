@@ -586,6 +586,9 @@ const PRACTICE = {
 function fairBlock(f, repo) {
   const recs = Object.entries(f.recs || {}).map(([k, ok]) =>
     `<span class="${ok ? "rok" : "rno"}">${ok ? ICON.check : ICON.x}${FAIR_REC[k] || k}</span>`).join("");
+  // Label the recommendations row so the `${f.score}/5` is unambiguously the fair-software.eu
+  // standard — the RSE-practices group below is separate and NOT part of that score.
+  const recsRow = `<div class="fairrecs"><span class="practlbl" title="The five fair-software.eu recommendations — the standard the ${f.score}/5 score reports">fair-software.eu · ${f.score}/5</span>${recs}</div>`;
   // The pill is the expand control (the FAIR score). Stars + Software Heritage are
   // separate metadata — Software Heritage is about archival, not the FAIR breakdown —
   // and the SWH link stops its click from toggling the fold.
@@ -602,7 +605,7 @@ function fairBlock(f, repo) {
       : `<span class="rno" title="no continuous-integration configuration found in the repository">${ICON.x}CI</span>`;
   // "what & why →" deep-links to the methodology page's explainer (definitions + external reading).
   const practMore = `<a class="practmore" href="methodology.html#practices" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="What these practices are, why they matter, and links to go deeper (The Turing Way, goodpractice, NumFOCUS, Imperial)">what &amp; why →</a>`;
-  const practices = `<div class="fairrecs practices"><span class="practlbl" title="Good engineering practices beyond the FAIR-software basics — each grounded in the repository's own files">RSE practices</span>${prItem(pr.documented, "documented")}${prItem(pr.tests, "tests")}${ci}${practMore}</div>`;
+  const practices = `<div class="fairrecs practices"><span class="practlbl" title="Good engineering practices beyond the fair-software.eu 5 — each grounded in the repository's own files. Signals, NOT counted in the FAIR score.">RSE practices <em class="lblnote">· extra, not in the score</em></span>${prItem(pr.documented, "documented")}${prItem(pr.tests, "tests")}${ci}${practMore}</div>`;
   // At-a-glance reproducibility cue on the COLLAPSED summary (Saranjeet: "at first glance I can't
   // tell if the code was checked for reproducibility") — shown only when the repo's CI is green.
   const reproChip = f.ciPass === true
@@ -611,7 +614,7 @@ function fairBlock(f, repo) {
     `<span class="fairtoggle">FAIR software <b>${f.score}/5</b>${ICON.chevron}<span class="fairhint">see what's checked</span></span>` +
     reproChip +
     `<span class="fairmeta">${ICON.star}${f.stars} · ${swh}</span>` +
-    `</summary><div class="fairrecs">${recs}</div>${practices}</details>`;
+    `</summary>${recsRow}${practices}</details>`;
 }
 
 // Structured, readable breakdown of the priority score (replaces a run-on `title` tooltip).

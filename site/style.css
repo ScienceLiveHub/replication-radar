@@ -211,6 +211,7 @@ details.tfair .fairrecs{margin-top:6px}
 /* RSE good-practice group (documented / tests / CI) — a separate row under the fair-software.eu 5 */
 .fairrecs.practices{margin-top:6px;padding-top:7px;border-top:1px dashed var(--line)}
 .fairrecs .practlbl{font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;font-size:10px}
+.fairrecs .lblnote{font-style:normal;font-weight:600;color:var(--mut);text-transform:none;letter-spacing:0;font-size:10px}
 .fairrecs .practmore{color:var(--magenta);font-weight:600;text-decoration:none}
 .fairrecs .practmore:hover{text-decoration:underline}
 /* at-a-glance "CI green" cue on the collapsed FAIR summary */
