@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+title: Replication Radar
+message: >-
+  If you use Replication Radar, please cite it using the metadata in this file.
+type: software
+authors:
+  - family-names: Fouilloux
+    given-names: Anne
+    orcid: https://orcid.org/0000-0002-1784-2920
+    affiliation: LifeWatch ERIC
+  - family-names: Iaquinta
+    given-names: Jean
+    orcid: https://orcid.org/0000-0002-8763-1643
+    affiliation: VitenHub AS
+repository-code: https://github.com/ScienceLiveHub/replication-radar
+url: https://openaire-hackathon.netlify.app
+abstract: >-
+  Replication Radar turns the OpenAIRE Graph into a ranked replication queue and
+  adds the signals the Graph cannot hold: whether a claim has been independently
+  checked (with the verdict, read live from the Science Live nanopublication
+  network) and whether the software behind it is reusable (the fair-software.eu
+  recommendations plus RSE good-practice signals, computed live from GitHub,
+  Software Heritage and Zenodo). It is a static web app and an MCP server for AI
+  agents, designed to run alongside the OpenAIRE MCP.
+keywords:
+  - replication
+  - reproducibility
+  - OpenAIRE
+  - nanopublications
+  - FAIR software
+  - research software engineering
+  - MCP
+license: MIT
+version: 0.4.0
+date-released: "2026-08-08"
