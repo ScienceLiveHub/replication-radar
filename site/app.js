@@ -238,9 +238,10 @@ async function _assessSoftware(url) {
   let repo;
   try { repo = await (await fetch(base)).json(); } catch (e) { return null; }
   if (!repo || repo.message) return null;                 // not found / GitHub rate-limited
-  let files = [];
-  try { const c = await (await fetch(`${base}/contents`)).json(); if (Array.isArray(c)) files = c.map((f) => (f.name || "").toLowerCase()); } catch (e) { /* ignore */ }
+  let files = [], names = [];
+  try { const c = await (await fetch(`${base}/contents`)).json(); if (Array.isArray(c)) { names = c.map((f) => f.name || ""); files = names.map((n) => n.toLowerCase()); } } catch (e) { /* ignore */ }
   const has = (n) => files.includes(n.toLowerCase());
+  const actual = (n) => names.find((x) => x.toLowerCase() === n.toLowerCase()) || n;   // original-case filename (GitHub blob URLs are case-sensitive)
   let swh = false;
   try { const s = await (await fetch(`https://archive.softwareheritage.org/api/1/origin/https://github.com/${g.owner}/${g.repo}/get/`)).json(); swh = !!s.origin_visits_url; } catch (e) { /* ignore */ }
   const recs = {
@@ -276,7 +277,7 @@ async function _assessSoftware(url) {
   // CORS-open) rather than guessing from the root listing.
   practices.contributing = false;
   practices.conduct = false;
-  let contribUrl = null, conductUrl = null;
+  let contribUrl = null, conductUrl = null, licenseUrl = null;
   try {
     const prof = await (await fetch(`${base}/community/profile`)).json();
     const cf = (prof && prof.files) || {};
@@ -284,6 +285,7 @@ async function _assessSoftware(url) {
     practices.conduct = !!cf.code_of_conduct;
     contribUrl = (cf.contributing || {}).html_url || null;   // may live in an org .github repo — still valid
     conductUrl = (cf.code_of_conduct || {}).html_url || null;
+    licenseUrl = (cf.license || {}).html_url || null;
   } catch (e) { /* leave false */ }
   // Click-through targets so an RSE can open the actual thing. Grounded URLs only — fall back to the
   // repo page when we can't point more precisely (README renders there).
@@ -297,7 +299,19 @@ async function _assessSoftware(url) {
     contributing: contribUrl,
     conduct: conductUrl,
   };
-  return { stars: repo.stargazers_count || 0, forks: repo.forks_count || 0, license: (repo.license || {}).spdx_id, swh, recs, score, pct: Math.round((score / 5) * 100), practices, ciPass, purls };
+  // Click-through for the fair-software.eu 5 too — each to the actual artefact (original-case
+  // filenames; a directory for the quality artefact when it's .github). Grounded only.
+  const citName = has("citation.cff") ? actual("citation.cff") : has("codemeta.json") ? actual("codemeta.json") : null;
+  const qualKey = ["codemeta.json", "environment.yml", "dockerfile", "pixi.toml", ".github"].find((n) => has(n));
+  const qualName = qualKey ? actual(qualKey) : null;
+  const furls = {
+    repository: html,                                                       // the repo itself
+    license: licenseUrl,                                                    // the licence file (community-profile)
+    registry: swh ? `https://archive.softwareheritage.org/browse/origin/directory/?origin_url=${encodeURIComponent(html)}` : null,
+    citation: citName ? `${html}/blob/${branch}/${citName}` : null,
+    quality: qualName ? (qualName === ".github" ? `${html}/tree/${branch}/.github` : `${html}/blob/${branch}/${qualName}`) : null,
+  };
+  return { stars: repo.stargazers_count || 0, forks: repo.forks_count || 0, license: (repo.license || {}).spdx_id, swh, recs, score, pct: Math.round((score / 5) * 100), practices, ciPass, purls, furls };
 }
 
 // ---------- author-agnostic verdict index, live from the nanopub network ----------
@@ -645,11 +659,30 @@ function practicesItems(f) {
 const reproCue = (f) => f.ciPass === true
   ? `<span class="reprook" title="the repository's own CI is green — the code builds and its tests pass">${ICON.reproducible}CI green</span>` : "";
 
+// Where each fair-software.eu recommendation links to when met.
+const FAIR_TIP = {
+  repository: "Open the repository",
+  license: "Open the licence file",
+  registry: "Browse the archived snapshot in Software Heritage",
+  citation: "Open the citation metadata file",
+  quality: "Open the quality / reproducibility artefact",
+};
+// The five fair-software.eu recommendation chips. Each met rec links to the actual artefact when we
+// have a grounded URL for it (f.furls). SHARED by the fold and the Verified cards.
+function fairRecs(f) {
+  const furls = f.furls || {};
+  return Object.entries(f.recs || {}).map(([k, ok]) => {
+    const inner = `${ok ? ICON.check : ICON.x}${FAIR_REC[k] || k}`;
+    const url = ok ? furls[k] : null;
+    return url
+      ? `<a class="${ok ? "rok" : "rno"} praclink" href="${esc(url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="${esc(FAIR_TIP[k] || FAIR_REC[k] || k)} ↗">${inner}</a>`
+      : `<span class="${ok ? "rok" : "rno"}">${inner}</span>`;
+  }).join("");
+}
 // FAIR software = the fair-software.eu standard, in its OWN fold — kept separate from RSE practices
 // so the "N/5" only ever means the five recommendations.
 function fairBlock(f, repo) {
-  const recs = Object.entries(f.recs || {}).map(([k, ok]) =>
-    `<span class="${ok ? "rok" : "rno"}">${ok ? ICON.check : ICON.x}${FAIR_REC[k] || k}</span>`).join("");
+  const recs = fairRecs(f);
   const swh = `<span onclick="event.stopPropagation()">${swhHtml(repo, f.swh)}</span>`;
   return `<details class="tfair"><summary>` +
     `<span class="fairtoggle">FAIR software <b>${f.score}/5</b>${ICON.chevron}<span class="fairhint">fair-software.eu — see what's checked</span></span>` +
@@ -747,7 +780,7 @@ function targetRow(t) {
   const practiceNote = t.fair ? practicesBlock(t.fair) : "";
   // OPEN targets get a next step: discovery here → the FORRT template handles the nanopub chain.
   const replicateCTA = (t.status !== "VERIFIED")
-    ? `<div class="treplicate"><a href="https://github.com/ScienceLiveHub/forrt-replication-template" target="_blank" rel="noopener" title="Start a replication from the FORRT template — it scaffolds the repo and the signed nanopub chain (Claim · Study · Outcome)">▷ Replicate this with the template →</a></div>`
+    ? `<div class="treplicate"><a href="replicate.html?doi=${encodeURIComponent(t.doi || "")}" target="_blank" rel="noopener" title="How to run this replication — the end-to-end loop, the FORRT template, and the replication-radar MCP">▷ Replicate this →</a></div>`
     : "";
   return `<div class="target ${t.status === "VERIFIED" ? "verified" : ""}">
     ${score}
@@ -834,7 +867,7 @@ function renderVerified(inField) {
     if (v.repl) {
       const f = v.repl.fair;
       const fairBadge = f
-        ? `<div class="fairrecs"><b>FAIR software (${f.score}/5):</b> ${Object.entries(f.recs).map(([k, ok]) => `<span class="${ok ? "rok" : "rno"}">${ok ? ICON.check : ICON.x}${FAIR_REC[k] || k}</span>`).join("")}</div>
+        ? `<div class="fairrecs"><b>FAIR software (${f.score}/5):</b> ${fairRecs(f)}</div>
         <div class="fairline">${ICON.star}${f.stars} stars · ${ICON.fork}${f.forks} forks · ${swhHtml(v.repl.code, f.swh)}</div>
         <div class="fairrecs practices"><b class="rselbl">RSE practices:</b> ${practicesItems(f)}</div>`
         : "";
