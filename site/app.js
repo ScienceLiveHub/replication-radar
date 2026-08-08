@@ -780,7 +780,7 @@ function targetRow(t) {
   const practiceNote = t.fair ? practicesBlock(t.fair) : "";
   // OPEN targets get a next step: discovery here → the FORRT template handles the nanopub chain.
   const replicateCTA = (t.status !== "VERIFIED")
-    ? `<div class="treplicate"><a href="https://github.com/ScienceLiveHub/forrt-replication-template" target="_blank" rel="noopener" title="Start a replication from the FORRT template — it scaffolds the repo and the signed nanopub chain (Claim · Study · Outcome)">▷ Replicate this with the template →</a></div>`
+    ? `<div class="treplicate"><a href="replicate.html?doi=${encodeURIComponent(t.doi || "")}" target="_blank" rel="noopener" title="How to run this replication — the end-to-end loop, the FORRT template, and the replication-radar MCP">▷ Replicate this →</a></div>`
     : "";
   return `<div class="target ${t.status === "VERIFIED" ? "verified" : ""}">
     ${score}

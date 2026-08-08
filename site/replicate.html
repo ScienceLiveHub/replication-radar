@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Replication Radar — how to run a replication</title>
+  <meta name="description" content="From a target on the Radar to a signed, citable replication: the end-to-end loop with the FORRT replication template, and how to drive it with the replication-radar MCP from an AI agent." />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .mwrap{max-width:880px}
+    .lead{font-size:16px;color:var(--ink);line-height:1.6;margin:0 0 8px}
+    .backbar{margin:6px 0 18px;font-size:13.5px}
+    .msection{margin:30px 0}
+    .msection > h2{font-size:20px;color:var(--navy);margin:0 0 6px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+    .msection > .secintro{font-size:14px;color:var(--mut);line-height:1.6;margin:0 0 16px}
+    .target-note{display:flex;align-items:center;gap:8px;background:var(--magenta-soft);color:#a32a6a;border-radius:10px;padding:10px 14px;font-size:13.5px;margin:0 0 8px}
+    .target-note b{color:#7d1f52}
+    /* the loop — numbered steps */
+    .steps{list-style:none;counter-reset:step;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
+    .steps > li{counter-increment:step;position:relative;border:1px solid var(--line);border-radius:12px;padding:16px 18px 16px 58px;background:var(--card)}
+    .steps > li::before{content:counter(step);position:absolute;left:14px;top:16px;width:30px;height:30px;border-radius:8px;background:var(--navy);color:#fff;font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center}
+    .steps h3{margin:0 0 4px;font-size:15px;color:var(--navy)}
+    .steps p{margin:0;font-size:13.5px;color:var(--ink);line-height:1.55}
+    .steps .who{display:inline-block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--navy2);background:#eef2f9;border-radius:20px;padding:2px 9px;margin-left:6px;vertical-align:middle}
+    .steps a{color:var(--magenta);font-weight:600}
+    /* MCP */
+    .mcpgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+    @media(max-width:640px){.mcpgrid{grid-template-columns:1fr}}
+    .toolcard{border:1px solid var(--line);border-radius:12px;padding:13px 15px;background:var(--card)}
+    .toolcard code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--navy);font-weight:700}
+    .toolcard p{margin:5px 0 0;font-size:12.5px;color:var(--mut);line-height:1.5}
+    pre.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:#f3f5f9;border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--ink);line-height:1.55;overflow-x:auto;margin:10px 0}
+    pre.code .c{color:var(--mut)}
+    .prompts{margin:8px 0 0;padding-left:20px}
+    .prompts li{font-size:13.5px;color:var(--ink);line-height:1.7;margin:3px 0}
+    .prompts em{color:var(--navy2);font-style:normal;background:#eef2f9;border-radius:6px;padding:1px 6px}
+    .ctarow{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+    .ctabtn{display:inline-flex;align-items:center;gap:6px;border-radius:10px;padding:9px 15px;font-weight:700;font-size:13.5px;text-decoration:none}
+    .ctabtn.primary{background:var(--magenta);color:#fff}
+    .ctabtn.primary:hover{filter:brightness(1.05)}
+    .ctabtn.ghost{border:1px solid var(--line);color:var(--navy2);background:var(--card)}
+    .ctabtn.ghost:hover{border-color:var(--magenta);color:var(--magenta)}
+    .note{font-size:13px;color:var(--mut);line-height:1.55;margin-top:8px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>How to run a replication</h1>
+      <p class="tag">From a target on the Radar to a signed, citable replication — and how to drive it with an AI agent.</p>
+      <p class="sub">Replication Radar · <a href="index.html" style="color:#fff;text-decoration:underline">back to the Radar</a> · <a href="methodology.html" style="color:#fff;text-decoration:underline">methodology</a></p>
+    </div>
+  </header>
+  <main class="wrap mwrap">
+    <p class="backbar">← <a href="index.html">Back to the Radar</a></p>
+    <div id="targetNote"></div>
+    <p class="lead">The Radar tells you <b>what</b> is worth replicating. This page is the <b>how</b>: the end-to-end loop that turns a target into an independent, signed, citable replication — and how a research software engineer can run it with an AI agent using the open <b>replication-radar</b> MCP together with the FORRT replication template.</p>
+
+    <section class="msection">
+      <h2>The replication loop</h2>
+      <p class="secintro">Five steps. Each replication you publish becomes a public, author-attributed nanopublication — and shows back up here as an independently-checked result, so the next person sees it.</p>
+      <ol class="steps">
+        <li>
+          <h3>Find a target <span class="who">Radar</span></h3>
+          <p>Search a topic and pick a high-<b>priority</b> paper that is still <b>OPEN</b> (not yet checked). The priority score and the claim tell you what would be worth re-testing.</p>
+        </li>
+        <li>
+          <h3>Scaffold with the FORRT replication template <span class="who">template</span></h3>
+          <p>Start from the <a href="https://github.com/ScienceLiveHub/forrt-replication-template" target="_blank" rel="noopener">FORRT replication template</a>. It scaffolds the repository <em>and</em> the signed nanopublication chain — <b>Claim · Study · Outcome</b> — so your work is structured and verifiable from the start.</p>
+        </li>
+        <li>
+          <h3>Run the replication <span class="who">you</span></h3>
+          <p>Re-test the same claim with <b>different</b> data or methods (replication, not just re-running the original code). Record your materials, code and — where relevant — the geographic coverage, following the good-practice checks the Radar looks for.</p>
+        </li>
+        <li>
+          <h3>Publish the signed chain <span class="who">Science Live</span></h3>
+          <p>Publish the nanopublication chain to the <a href="https://sciencelive4all.org" target="_blank" rel="noopener">Science Live</a> network. It is cryptographically signed, attributed to you, and citable — your replication counts as a first-class research output.</p>
+        </li>
+        <li>
+          <h3>It reappears on the Radar <span class="who">Radar</span></h3>
+          <p>Because verdicts are read <b>live</b> from the network, your replication now surfaces here as <b>independently checked</b>, with its verdict — and its code gets a FAIR-software score plus the RSE good-practice signals. The gap you filled is visible to everyone.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="msection" id="mcp">
+      <h2>Do it with an AI agent — the MCP</h2>
+      <p class="secintro">The same engine behind this site is an <b>MCP server</b>, so an agent (Claude Desktop, Claude Code, or any MCP client) can discover targets and check verdicts for you — the first half of the loop, hands-free. It uses only public, grounded sources; no keys.</p>
+
+      <pre class="code"><span class="c"># install the open-source MCP server</span>
+pip install replication-radar</pre>
+
+      <p class="note">Then register it with your MCP client. For Claude Desktop, add to <code>claude_desktop_config.json</code>:</p>
+      <pre class="code">{
+  <span class="c">"mcpServers"</span>: {
+    <span class="c">"replication-radar"</span>: { <span class="c">"command"</span>: "replication-radar" }
+  }
+}</pre>
+
+      <p class="secintro" style="margin-top:16px">It exposes four tools, all grounded in the OpenAIRE Graph and the nanopublication network:</p>
+      <div class="mcpgrid">
+        <div class="toolcard"><code>radar(topic)</code><p>Impact-ranked replication targets for a research topic — the ranked queue you see here.</p></div>
+        <div class="toolcard"><code>replication_status(doi)</code><p>Whether a specific paper has been independently replicated, and with what verdict.</p></div>
+        <div class="toolcard"><code>find_independent_software(topic / doi)</code><p>Independent software implementations related to a paper or topic.</p></div>
+        <div class="toolcard"><code>verified_claims()</code><p>The set of claims that have been independently checked on the network.</p></div>
+      </div>
+
+      <p class="secintro" style="margin-top:8px">Example prompts once it's connected:</p>
+      <ul class="prompts">
+        <li><em>"What high-impact work on species distribution models is worth replicating and hasn't been checked yet?"</em></li>
+        <li><em>"Has 10.xxxx/... been independently replicated? What was the verdict?"</em></li>
+        <li><em>"Find independent software implementations I could reuse for this replication."</em></li>
+      </ul>
+      <p class="note">The agent handles discovery and status; the actual replication and signing stay with you and the FORRT template — which is itself agent-ready (it ships an <code>.mcp.json</code> and agent instructions), so you can drive the second half of the loop with an agent too.</p>
+    </section>
+
+    <section class="msection">
+      <h2>For research software engineers</h2>
+      <p class="secintro">Replication is software work. For every replication with a repository, the Radar assesses — live from GitHub, Software Heritage and Zenodo — both the recognised <b>FAIR-software</b> recommendations and a set of <b>RSE good-practice</b> signals:</p>
+      <p class="lead">FAIR software (public repository · open licence · in a registry · citable · quality artefacts), and — separately — <b>documented · tests · CI · contributing · code of conduct</b>, with the repository's own CI status as a grounded reproducibility signal. Each check links to the actual artefact so you can inspect it, and every check is explained with links to go deeper (The Turing Way, goodpractice, NumFOCUS, Imperial's Essential Software Engineering course) on the <a href="methodology.html#practices">methodology page</a>.</p>
+      <p class="note">These are signals, not grades — presence read from the repository, never guessed. The aim is to make the software behind a replication as visible and reusable as the result itself.</p>
+    </section>
+
+    <div class="ctarow">
+      <a class="ctabtn primary" href="https://github.com/ScienceLiveHub/forrt-replication-template" target="_blank" rel="noopener">Start from the FORRT template →</a>
+      <a class="ctabtn ghost" href="index.html">Find a target on the Radar</a>
+      <a class="ctabtn ghost" href="https://pypi.org/project/replication-radar/" target="_blank" rel="noopener">replication-radar on PyPI</a>
+    </div>
+  </main>
+  <footer>
+    <div class="wrap">
+      <span class="svc">Want a claim replicated but can't run it yourself? <a href="https://vitenhub.no/replication-services" target="_blank" rel="noopener">Science Live offers replication as a service →</a></span>
+      <div class="foot-links">
+        <span>Live against <a href="https://graph.openaire.eu/">OpenAIRE Graph</a> · verdicts from <a href="https://sciencelive4all.org">Science Live</a> nanopublications</span>
+        <span><a href="index.html">Replication Radar</a> · <a href="methodology.html">methodology</a> · <a href="team.html">team</a> · <a href="https://github.com/ScienceLiveHub/replication-radar">code (MIT)</a> · <a href="https://pypi.org/project/replication-radar/">PyPI</a></span>
+      </div>
+    </div>
+  </footer>
+  <script>
+    // Optional contextual note when arrived from a specific target ("Replicate this →").
+    (function () {
+      const doi = new URLSearchParams(location.search).get("doi");
+      if (!doi) return;
+      const safe = String(doi).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+      document.getElementById("targetNote").innerHTML =
+        `<div class="target-note">▷ You're starting a replication of <b>${safe}</b> — the steps below take it from here. <a href="https://doi.org/${encodeURIComponent(doi)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">open the paper ↗</a></div>`;
+    })();
+  </script>
+</body>
+</html>
