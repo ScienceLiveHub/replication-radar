@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Replication Radar — surfacing the work of research software engineers</title>
+  <meta name="description" content="The Replication Radar story: surfacing the reusable software and engineering practices behind published science that the OpenAIRE Graph leaves invisible — grounded, live, and RSE-first. CC-BY 4.0." />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .mwrap{max-width:820px}
+    .backbar{margin:6px 0 18px;font-size:13.5px}
+    .md-content > h1:first-child{font-size:clamp(24px,4vw,34px);color:var(--navy);line-height:1.15;margin:6px 0 10px}
+    .md-content > p:first-of-type,.md-content > h1:first-child + p{color:var(--mut);font-size:14px}
+    .md-content h2{font-size:20px;color:var(--navy);margin:30px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+    .md-content p{font-size:15px;line-height:1.7;color:var(--ink);margin:12px 0}
+    .md-content a{color:var(--magenta);font-weight:600;text-decoration:none}
+    .md-content a:hover{text-decoration:underline}
+    .md-content em{color:var(--navy2);font-style:normal}
+    .md-content strong{color:var(--navy)}
+    .md-content hr{border:0;border-top:1px solid var(--line);margin:26px 0}
+    .md-content ul{font-size:15px;line-height:1.75;color:var(--ink);padding-left:20px;margin:12px 0}
+    .md-content li{margin:6px 0}
+    .md-content :not(pre) > code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:#eef2f9;border-radius:5px;padding:1px 5px;color:var(--navy)}
+    .md-err{font-size:14px;color:var(--mut)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>The Replication Radar story</h1>
+      <p class="tag">Surfacing the work of research software engineers.</p>
+      <p class="sub">Replication Radar · <a href="index.html" style="color:#fff;text-decoration:underline">back to the Radar</a> · <a href="methodology.html" style="color:#fff;text-decoration:underline">methodology</a> · <a href="replicate.html" style="color:#fff;text-decoration:underline">how to replicate</a></p>
+    </div>
+  </header>
+  <main class="wrap mwrap">
+    <p class="backbar">← <a href="index.html">Back to the Radar</a></p>
+    <article id="content" class="md-content"><p class="md-err">Loading…</p></article>
+  </main>
+  <footer>
+    <div class="wrap">
+      <div class="foot-links">
+        <span>Live against <a href="https://graph.openaire.eu/">OpenAIRE Graph</a> · verdicts from <a href="https://sciencelive4all.org">Science Live</a> nanopublications</span>
+        <span><a href="index.html">Replication Radar</a> · <a href="methodology.html">methodology</a> · <a href="replicate.html">how to replicate</a> · <a href="team.html">team</a> · <a href="https://github.com/ScienceLiveHub/replication-radar">code (MIT)</a> · <a href="https://pypi.org/project/replication-radar/">PyPI</a></span>
+      </div>
+    </div>
+  </footer>
+  <!-- content authored in story.md, rendered client-side (same no-build-step approach as the team + guide pages) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    fetch("story.md")
+      .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
+      .then((md) => {
+        document.getElementById("content").innerHTML =
+          window.marked ? marked.parse(md) : `<pre>${esc(md)}</pre>`;
+      })
+      .catch((e) => {
+        document.getElementById("content").innerHTML =
+          `<p class="md-err">Could not load the story (${esc(e.message)}). Read it on <a href="https://github.com/ScienceLiveHub/replication-radar/blob/main/site/story.md">GitHub</a>.</p>`;
+      });
+  </script>
+</body>
+</html>
