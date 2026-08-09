@@ -1,8 +1,13 @@
-# Netlify deploy config — the Replication Radar web app is pure static files
-# (no build step). It calls the OpenAIRE Graph API directly from the browser
-# (CORS-enabled) and ships the verdict index as a static asset.
+# Netlify deploy config — the Replication Radar web app is static files (no build step). It calls
+# the OpenAIRE Graph API directly from the browser (CORS-enabled) and ships the verdict index as a
+# static asset. One serverless function (netlify/functions/gh) proxies the GitHub API with a
+# server-side token so the FAIR/RSE software assessment isn't capped at the keyless 60 req/hr —
+# the token lives in the GITHUB_TOKEN env var, never in the client.
 [build]
   publish = "site"
+
+[functions]
+  directory = "netlify/functions"
 
 [[headers]]
   for = "/*"

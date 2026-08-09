@@ -210,6 +210,22 @@ const abstractOf = (rec) => {
 // (no third-party scorer needed — F-UJI/OSTrails have no usable API for this). Only
 // ever run on a software record we ACTUALLY have a repo URL for — never guessed.
 const parseGitHub = (url) => { const m = (url || "").match(/github\.com\/([^\/]+)\/([^\/#?]+)/i); return m ? { owner: m[1], repo: m[2].replace(/\.git$/, "") } : null; };
+// GitHub API requests go through the Netlify function proxy when it's deployed (token stored
+// server-side → 5000 req/hr, and the token never reaches the browser); we fall back to direct
+// unauthenticated GitHub (60/hr) for local dev or a non-Netlify host. Pass a GitHub API path such
+// as `repos/owner/repo` (with an optional query string).
+let _ghProxy = true;
+async function ghGet(path) {
+  if (_ghProxy) {
+    try {
+      const r = await fetch(`/.netlify/functions/gh?path=${encodeURIComponent(path)}`);
+      // A missing function returns Netlify's own non-JSON 404 → disable the proxy and fall back.
+      if (r.status === 404 && !((r.headers.get("content-type") || "").includes("json"))) _ghProxy = false;
+      else return r;
+    } catch (e) { _ghProxy = false; }
+  }
+  return fetch(`https://api.github.com/${path}`);
+}
 // human labels for the fair-software.eu recommendations (shown on hover)
 const RECLABEL = { repository: "public repository", license: "open license", registry: "in a registry", citation: "citable (CITATION.cff / DOI)", quality: "quality artefacts (env / Docker / CI)" };
 
@@ -225,6 +241,8 @@ async function githubFromZenodo(doi) {
   } catch (e) { return null; }
 }
 
+// Languages whose runtime is proprietary / paid — public code in one of these still isn't free to RUN.
+const PROPRIETARY_LANGS = new Set(["matlab", "stata", "sas", "idl", "mathematica", "wolfram language", "labview", "maple", "gauss", "ampl"]);
 async function assessSoftware(url) {
   if (_FAIR.has(url)) return _FAIR.get(url);   // cached success → stable across scans, saves rate limit
   const res = await _assessSoftware(url);
@@ -234,12 +252,12 @@ async function assessSoftware(url) {
 async function _assessSoftware(url) {
   const g = parseGitHub(url);
   if (!g) return null;
-  const base = `https://api.github.com/repos/${g.owner}/${g.repo}`;
+  const base = `repos/${g.owner}/${g.repo}`;   // GitHub API path — routed through ghGet (proxy or direct)
   let repo;
-  try { repo = await (await fetch(base)).json(); } catch (e) { return null; }
+  try { repo = await (await ghGet(base)).json(); } catch (e) { return null; }
   if (!repo || repo.message) return null;                 // not found / GitHub rate-limited
   let files = [], names = [];
-  try { const c = await (await fetch(`${base}/contents`)).json(); if (Array.isArray(c)) { names = c.map((f) => f.name || ""); files = names.map((n) => n.toLowerCase()); } } catch (e) { /* ignore */ }
+  try { const c = await (await ghGet(`${base}/contents`)).json(); if (Array.isArray(c)) { names = c.map((f) => f.name || ""); files = names.map((n) => n.toLowerCase()); } } catch (e) { /* ignore */ }
   const has = (n) => files.includes(n.toLowerCase());
   const actual = (n) => names.find((x) => x.toLowerCase() === n.toLowerCase()) || n;   // original-case filename (GitHub blob URLs are case-sensitive)
   let swh = false;
@@ -267,7 +285,7 @@ async function _assessSoftware(url) {
   let ciPass = null;
   if (practices.ci) {
     try {
-      const runs = await (await fetch(`${base}/actions/runs?per_page=1`)).json();
+      const runs = await (await ghGet(`${base}/actions/runs?per_page=1`)).json();
       const r = ((runs && runs.workflow_runs) || [])[0];
       if (r && r.status === "completed") ciPass = r.conclusion === "success";
     } catch (e) { /* leave unknown */ }
@@ -279,7 +297,7 @@ async function _assessSoftware(url) {
   practices.conduct = false;
   let contribUrl = null, conductUrl = null, licenseUrl = null;
   try {
-    const prof = await (await fetch(`${base}/community/profile`)).json();
+    const prof = await (await ghGet(`${base}/community/profile`)).json();
     const cf = (prof && prof.files) || {};
     practices.contributing = !!cf.contributing;
     practices.conduct = !!cf.code_of_conduct;
@@ -311,7 +329,19 @@ async function _assessSoftware(url) {
     citation: citName ? `${html}/blob/${branch}/${citName}` : null,
     quality: qualName ? (qualName === ".github" ? `${html}/tree/${branch}/.github` : `${html}/blob/${branch}/${qualName}`) : null,
   };
-  return { stars: repo.stargazers_count || 0, forks: repo.forks_count || 0, license: (repo.license || {}).spdx_id, swh, recs, score, pct: Math.round((score / 5) * 100), practices, ciPass, purls, furls };
+  // Languages: repo.language alone is unreliable (a single most-bytes guess). The /languages
+  // breakdown is the real mix; from it we flag any proprietary/paid runtime (MATLAB, Stata, …) —
+  // public code in such a language still isn't free to RUN.
+  let languages = null, proprietary = [];
+  try {
+    const langs = await (await ghGet(`${base}/languages`)).json();
+    if (langs && typeof langs === "object" && !langs.message) {
+      const entries = Object.entries(langs).sort((a, b) => b[1] - a[1]);   // [name, bytes] desc
+      languages = entries.map(([n]) => n);
+      proprietary = entries.filter(([n]) => PROPRIETARY_LANGS.has(n.toLowerCase())).map(([n]) => n);
+    }
+  } catch (e) { /* ignore */ }
+  return { stars: repo.stargazers_count || 0, forks: repo.forks_count || 0, license: (repo.license || {}).spdx_id, languages, proprietary, swh, recs, score, pct: Math.round((score / 5) * 100), practices, ciPass, purls, furls };
 }
 
 // ---------- author-agnostic verdict index, live from the nanopub network ----------
@@ -925,6 +955,111 @@ function renderChart() {
   el("gap").innerHTML = `<div class="gaphead">${head}</div><div class="gapbar">${seg}</div><div class="gapkey">${key}</div>`;
 }
 
+// ---------- reusable-software lens (a SECOND view on the same topic) ----------
+// Surface the genuinely reusable software OpenAIRE holds for a field, cutting through the many
+// one-off study deposits by ranking on signals a junk deposit can't fake: a resolvable code
+// repository, GitHub stars, the RSE good-practice signals, and reuse. Grounded — OpenAIRE's own
+// software index + GitHub / Software Heritage / Zenodo, no keyword-guessing.
+const _software = new Map();   // topic -> ranked software (lazy cache; only on the Software tab)
+const practiceCount = (f) => {
+  const p = (f && f.practices) || {};
+  return ["documented", "tests", "ci", "contributing", "conduct"].filter((k) => p[k]).length + ((f && f.ciPass === true) ? 1 : 0);
+};
+// Language badge (from the /languages byte-breakdown). Warns when a proprietary/paid runtime is
+// present — public code you still need to buy MATLAB/Stata/… to run isn't fully reusable.
+const langBadge = (f) => {
+  const langs = (f && f.languages) || [], prop = (f && f.proprietary) || [];
+  if (!langs.length) return "";
+  const primary = langs[0];
+  const title = `languages by share (GitHub): ${esc(langs.slice(0, 4).join(", "))}`;
+  return (prop.length || PROPRIETARY_LANGS.has((primary || "").toLowerCase()))
+    ? `<span class="badge lang prop" title="uses ${esc(prop[0] || primary)} — a proprietary, paid runtime; the code is public but running it is not free or open. ${title}">${esc(primary)} · paid runtime ⚠</span>`
+    : `<span class="badge lang" title="${title}">${esc(primary)}</span>`;
+};
+async function findReusableSoftware(topic) {
+  if (_software.has(topic)) return _software.get(topic);
+  const pool = await search(topic, "software", 50);
+  // Cheap grounded pre-rank (no GitHub calls yet): OpenAIRE reuse signal + downloads.
+  const cand = pool.map((r) => ({
+    title: r.mainTitle || "", doi: doiOf(r), repo: codeUrlOf(r), swh: swh(r),
+    reuse: reuse(r), downloads: (r.indicators && r.indicators.usageCounts && +r.indicators.usageCounts.downloads) || 0, year: yearOf(r),
+  }));
+  cand.sort((a, b) => (b.reuse - a.reuse) || (b.downloads - a.downloads));
+  // Resolve a GitHub repo (direct, or via the Zenodo record) for the strongest candidates.
+  const top = cand.slice(0, 12);
+  await Promise.all(top.map(async (c) => { if (!c.repo && /zenodo/i.test(c.doi || "")) c.repo = await githubFromZenodo(c.doi); }));
+  // Keep those with a real repo, deduped by owner/repo (the same tool often has several Zenodo versions).
+  const seen = new Set();
+  const withRepo = top.filter((c) => {
+    const g = c.repo && parseGitHub(c.repo);
+    if (!g) return false;
+    const key = `${g.owner}/${g.repo}`.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+  // Show the top few by the cheap pre-rank, and assess EACH for FAIR + RSE practices — so every
+  // card carries the software assessment. Bounded to protect GitHub's 60/hr unauthenticated limit.
+  const shown = withRepo.slice(0, 6);
+  await Promise.all(shown.map(async (c) => { c.fair = await assessSoftware(c.repo); }));
+  // Re-rank the shown set by a quality composite a one-off deposit can't fake — falling back to
+  // OpenAIRE reuse if an assessment was throttled, so the card still appears (with an honest note).
+  const q = (c) => (c.fair
+      ? (c.fair.score || 0) + practiceCount(c.fair) + Math.min(3, Math.log10((c.fair.stars || 0) + 1) * 1.6)
+        - ((c.fair.proprietary && c.fair.proprietary.length) ? 1.5 : 0)   // paid runtime → less reusable
+      : 0) + c.reuse * 0.4 + (c.swh ? 0.5 : 0);
+  const ranked = shown.sort((a, b) => q(b) - q(a));
+  _software.set(topic, ranked);
+  return ranked;
+}
+function softwareRow(c) {
+  const f = c.fair;
+  const slug = (c.repo || "").replace(/^https?:\/\/(www\.)?github\.com\//, "");
+  const link = c.repo ? `<a href="${esc(c.repo)}" target="_blank" rel="noopener">${esc(slug)}</a>` : "";
+  const doiLink = c.doi ? `<a href="https://doi.org/${esc(c.doi)}" target="_blank" rel="noopener">${esc(c.doi)}</a>` : "";
+  const meta = `<div class="t-meta">`
+    + (c.year ? `<span class="badge yr">${c.year}</span>` : "")
+    + (f && f.stars ? `<span class="badge imp" title="GitHub stars">${ICON.star}${f.stars.toLocaleString()}</span>` : "")
+    + langBadge(f)
+    + (c.downloads ? `<span class="badge imp" title="OpenAIRE usage downloads">${c.downloads.toLocaleString()} downloads</span>` : "")
+    + (c.swh ? `<span class="badge mok" title="archived in Software Heritage">${ICON.check}archived</span>` : "")
+    + `</div>`;
+  const assessment = f
+    ? `${fairBlock(f, c.repo)}${practicesBlock(f)}`
+    : `<div class="swnoassess">Public repository found — the live FAIR / RSE assessment wasn't available just now (GitHub rate limit, or the repo moved). Ranked on OpenAIRE reuse signals; open the repo to inspect.</div>`;
+  return `<div class="swcard">
+    <div class="swhead"><b>${esc(c.title)}</b>${meta}</div>
+    ${assessment}
+    <div class="swlinks">↳ repo: ${link}${doiLink ? ` · ${doiLink}` : ""}</div>
+  </div>`;
+}
+async function renderSoftware(topic) {
+  const box = el("softwarelist");
+  if (!topic) { box.innerHTML = `<p class="hint" style="padding:10px 2px">Search a topic and this tab lists the reusable software OpenAIRE holds for it.</p>`; return; }
+  box.innerHTML = `<p class="hint swloading">Assessing reusable software for “${esc(topic)}” live from GitHub, Software Heritage and Zenodo — a few seconds…</p>`;
+  try {
+    const list = await findReusableSoftware(topic);
+    el("swcount").textContent = list.length || "";
+    box.innerHTML = list.length
+      ? list.map(softwareRow).join("")
+      : `<p class="hint" style="padding:10px 2px">No software with a resolvable, assessable public repository surfaced for “${esc(topic)}” — OpenAIRE's software index for this topic is mostly one-off study deposits without a code repo. Try a broader 2–3 word topic.</p>`;
+  } catch (e) {
+    box.innerHTML = `<p class="hint" style="padding:10px 2px">Couldn't load software (${esc(e.message)}).</p>`;
+  }
+}
+// Lens toggle (Papers | Reusable software). Software is lazy — assessed only when its tab is opened.
+let _lens = "papers", _lastTopic = "";
+function setLens(which) {
+  _lens = which;
+  const papers = which === "papers";
+  el("lens-papers").classList.toggle("on", papers);
+  el("lens-software").classList.toggle("on", !papers);
+  el("lens-papers").setAttribute("aria-selected", String(papers));
+  el("lens-software").setAttribute("aria-selected", String(!papers));
+  el("paperlens").hidden = !papers;
+  el("softwarelens").hidden = papers;
+  if (!papers) renderSoftware(_lastTopic || (el("topic").value || "").trim());
+}
+
 async function run(topic, isExample) {
   topic = (topic || "").trim();
   if (!topic) return;
@@ -936,6 +1071,9 @@ async function run(topic, isExample) {
     renderTargets(r.targets);
     renderVerified(r.inField);
     renderChart();
+    _lastTopic = topic;
+    _software.delete(topic);                 // fresh scan → recompute software if that lens is open
+    if (_lens === "software") renderSoftware(topic);
     const note = isExample ? ` <i>— showing an example; search your own field above.</i>` : "";
     el("status").innerHTML = (r.inField.size
       ? `“${topic}”: ${r.targets.length} candidates · ${r.inField.size} already checked, matching your search (green) — the rest are open.`
@@ -952,6 +1090,8 @@ el("chips").innerHTML = EXAMPLES.map((e) => `<button type="button" class="chip">
 el("chips").addEventListener("click", (e) => { if (e.target.classList.contains("chip")) { el("topic").value = e.target.textContent; run(e.target.textContent); } });
 el("go").addEventListener("click", () => run(el("topic").value));
 el("topic").addEventListener("keydown", (e) => { if (e.key === "Enter") run(el("topic").value); });
+el("lens-papers").addEventListener("click", () => setLens("papers"));
+el("lens-software").addEventListener("click", () => setLens("software"));
 
 el("status").textContent = "Loading the Science Live verdict layer live from the nanopub network …";
 Promise.all([loadVerdicts(), loadCurated()]).then(() => {
