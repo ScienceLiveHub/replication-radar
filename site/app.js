@@ -981,16 +981,17 @@ async function findReusableSoftware(topic) {
     if (seen.has(key)) return false;
     seen.add(key); return true;
   });
-  // Assess quality for the top few (bounded — GitHub's unauthenticated limit is 60/hr).
-  await Promise.all(withRepo.slice(0, 6).map(async (c) => { c.fair = await assessSoftware(c.repo); }));
-  // Rank: assessed quality first (a composite a one-off deposit can't fake), then OpenAIRE reuse
-  // for any we couldn't assess (rate limit / moved repo). KEEP the software either way — the tab
-  // must not go blank just because GitHub throttled the live assessment.
+  // Show the top few by the cheap pre-rank, and assess EACH for FAIR + RSE practices — so every
+  // card carries the software assessment. Bounded to protect GitHub's 60/hr unauthenticated limit.
+  const shown = withRepo.slice(0, 6);
+  await Promise.all(shown.map(async (c) => { c.fair = await assessSoftware(c.repo); }));
+  // Re-rank the shown set by a quality composite a one-off deposit can't fake — falling back to
+  // OpenAIRE reuse if an assessment was throttled, so the card still appears (with an honest note).
   const q = (c) => (c.fair
       ? (c.fair.score || 0) + practiceCount(c.fair) + Math.min(3, Math.log10((c.fair.stars || 0) + 1) * 1.6)
         - ((c.fair.proprietary && c.fair.proprietary.length) ? 1.5 : 0)   // paid runtime → less reusable
       : 0) + c.reuse * 0.4 + (c.swh ? 0.5 : 0);
-  const ranked = withRepo.sort((a, b) => q(b) - q(a)).slice(0, 10);
+  const ranked = shown.sort((a, b) => q(b) - q(a));
   _software.set(topic, ranked);
   return ranked;
 }
