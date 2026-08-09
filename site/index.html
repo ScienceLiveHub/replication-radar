@@ -26,6 +26,12 @@
     <p id="status" class="status" role="status" aria-live="polite"></p>
 
     <section id="results" hidden>
+      <div class="lenstoggle" role="tablist" aria-label="View">
+        <button type="button" id="lens-papers" class="lensbtn on" role="tab" aria-selected="true">Papers to replicate</button>
+        <button type="button" id="lens-software" class="lensbtn" role="tab" aria-selected="false">Reusable software</button>
+      </div>
+
+      <div id="paperlens">
       <div class="card chartcard">
         <h2>The replication-gap map</h2>
         <p class="hint">How much of the high-impact work matching your search has actually been <b class="verified">independently checked</b> — the field at a glance. Everything <b class="open">not yet checked</b> is the replication gap.</p>
@@ -42,6 +48,15 @@
         <div id="tfilters" class="tfilters"></div>
         <div id="targets" class="targets"></div>
         <div id="tpager" class="tpager"></div>
+      </div>
+      </div><!-- /#paperlens -->
+
+      <div id="softwarelens" hidden>
+        <div class="card">
+          <h2>Reusable software <span class="pill" id="swcount"></span></h2>
+          <p class="hint">The software OpenAIRE holds for your topic, <b>ranked by reusability signals</b> — a resolvable code repository, GitHub stars, the FAIR + RSE good-practice checks (documented · tests · CI), and Software&nbsp;Heritage archival — to cut through the one-off study deposits. Recall is keyword-bound; we assess the top few that have a public repo (GitHub's rate limit caps how many).</p>
+          <div id="softwarelist"></div>
+        </div>
       </div>
     </section>
   </main>

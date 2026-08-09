@@ -925,6 +925,89 @@ function renderChart() {
   el("gap").innerHTML = `<div class="gaphead">${head}</div><div class="gapbar">${seg}</div><div class="gapkey">${key}</div>`;
 }
 
+// ---------- reusable-software lens (a SECOND view on the same topic) ----------
+// Surface the genuinely reusable software OpenAIRE holds for a field, cutting through the many
+// one-off study deposits by ranking on signals a junk deposit can't fake: a resolvable code
+// repository, GitHub stars, the RSE good-practice signals, and reuse. Grounded — OpenAIRE's own
+// software index + GitHub / Software Heritage / Zenodo, no keyword-guessing.
+const _software = new Map();   // topic -> ranked software (lazy cache; only on the Software tab)
+const practiceCount = (f) => {
+  const p = (f && f.practices) || {};
+  return ["documented", "tests", "ci", "contributing", "conduct"].filter((k) => p[k]).length + ((f && f.ciPass === true) ? 1 : 0);
+};
+async function findReusableSoftware(topic) {
+  if (_software.has(topic)) return _software.get(topic);
+  const pool = await search(topic, "software", 50);
+  // Cheap grounded pre-rank (no GitHub calls yet): OpenAIRE reuse signal + downloads.
+  const cand = pool.map((r) => ({
+    title: r.mainTitle || "", doi: doiOf(r), repo: codeUrlOf(r), swh: swh(r),
+    reuse: reuse(r), downloads: (r.indicators && r.indicators.usageCounts && +r.indicators.usageCounts.downloads) || 0, year: yearOf(r),
+  }));
+  cand.sort((a, b) => (b.reuse - a.reuse) || (b.downloads - a.downloads));
+  // Resolve a GitHub repo (direct, or via the Zenodo record) for the strongest candidates.
+  const top = cand.slice(0, 12);
+  await Promise.all(top.map(async (c) => { if (!c.repo && /zenodo/i.test(c.doi || "")) c.repo = await githubFromZenodo(c.doi); }));
+  // Keep those with a real repo, deduped by owner/repo (the same tool often has several Zenodo versions).
+  const seen = new Set();
+  const withRepo = top.filter((c) => {
+    const g = c.repo && parseGitHub(c.repo);
+    if (!g) return false;
+    const key = `${g.owner}/${g.repo}`.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+  // Assess quality for the top few (bounded — GitHub's unauthenticated limit is 60/hr).
+  await Promise.all(withRepo.slice(0, 6).map(async (c) => { c.fair = await assessSoftware(c.repo); }));
+  // Final rank: a composite a one-off deposit can't fake (FAIR + RSE practices + stars + reuse).
+  const q = (c) => (c.fair ? (c.fair.score || 0) + practiceCount(c.fair) + Math.min(3, Math.log10((c.fair.stars || 0) + 1) * 1.6) : -1) + c.reuse * 0.4;
+  const ranked = withRepo.filter((c) => c.fair).sort((a, b) => q(b) - q(a));
+  _software.set(topic, ranked);
+  return ranked;
+}
+function softwareRow(c) {
+  const f = c.fair;
+  const slug = (c.repo || "").replace(/^https?:\/\/(www\.)?github\.com\//, "");
+  const link = c.repo ? `<a href="${esc(c.repo)}" target="_blank" rel="noopener">${esc(slug)}</a>` : "";
+  const doiLink = c.doi ? `<a href="https://doi.org/${esc(c.doi)}" target="_blank" rel="noopener">${esc(c.doi)}</a>` : "";
+  const meta = `<div class="t-meta">`
+    + (c.year ? `<span class="badge yr">${c.year}</span>` : "")
+    + (f && f.stars ? `<span class="badge imp" title="GitHub stars">${ICON.star}${f.stars.toLocaleString()}</span>` : "")
+    + (c.downloads ? `<span class="badge imp" title="OpenAIRE usage downloads">${c.downloads.toLocaleString()} downloads</span>` : "")
+    + (c.swh ? `<span class="badge mok" title="archived in Software Heritage">${ICON.check}archived</span>` : "")
+    + `</div>`;
+  return `<div class="swcard">
+    <div class="swhead"><b>${esc(c.title)}</b>${meta}</div>
+    ${f ? fairBlock(f, c.repo) : ""}${f ? practicesBlock(f) : ""}
+    <div class="swlinks">↳ repo: ${link}${doiLink ? ` · ${doiLink}` : ""}</div>
+  </div>`;
+}
+async function renderSoftware(topic) {
+  const box = el("softwarelist");
+  box.innerHTML = `<p class="hint swloading">Assessing reusable software for “${esc(topic)}” live from GitHub, Software Heritage and Zenodo — a few seconds…</p>`;
+  try {
+    const list = await findReusableSoftware(topic);
+    el("swcount").textContent = list.length || "";
+    box.innerHTML = list.length
+      ? list.map(softwareRow).join("")
+      : `<p class="hint" style="padding:10px 2px">No software with a resolvable, assessable public repository surfaced for “${esc(topic)}” — OpenAIRE's software index for this topic is mostly one-off study deposits without a code repo. Try a broader 2–3 word topic.</p>`;
+  } catch (e) {
+    box.innerHTML = `<p class="hint" style="padding:10px 2px">Couldn't load software (${esc(e.message)}).</p>`;
+  }
+}
+// Lens toggle (Papers | Reusable software). Software is lazy — assessed only when its tab is opened.
+let _lens = "papers", _lastTopic = "";
+function setLens(which) {
+  _lens = which;
+  const papers = which === "papers";
+  el("lens-papers").classList.toggle("on", papers);
+  el("lens-software").classList.toggle("on", !papers);
+  el("lens-papers").setAttribute("aria-selected", String(papers));
+  el("lens-software").setAttribute("aria-selected", String(!papers));
+  el("paperlens").hidden = !papers;
+  el("softwarelens").hidden = papers;
+  if (!papers && _lastTopic) renderSoftware(_lastTopic);
+}
+
 async function run(topic, isExample) {
   topic = (topic || "").trim();
   if (!topic) return;
@@ -936,6 +1019,9 @@ async function run(topic, isExample) {
     renderTargets(r.targets);
     renderVerified(r.inField);
     renderChart();
+    _lastTopic = topic;
+    _software.delete(topic);                 // fresh scan → recompute software if that lens is open
+    if (_lens === "software") renderSoftware(topic);
     const note = isExample ? ` <i>— showing an example; search your own field above.</i>` : "";
     el("status").innerHTML = (r.inField.size
       ? `“${topic}”: ${r.targets.length} candidates · ${r.inField.size} already checked, matching your search (green) — the rest are open.`
@@ -952,6 +1038,8 @@ el("chips").innerHTML = EXAMPLES.map((e) => `<button type="button" class="chip">
 el("chips").addEventListener("click", (e) => { if (e.target.classList.contains("chip")) { el("topic").value = e.target.textContent; run(e.target.textContent); } });
 el("go").addEventListener("click", () => run(el("topic").value));
 el("topic").addEventListener("keydown", (e) => { if (e.key === "Enter") run(el("topic").value); });
+el("lens-papers").addEventListener("click", () => setLens("papers"));
+el("lens-software").addEventListener("click", () => setLens("software"));
 
 el("status").textContent = "Loading the Science Live verdict layer live from the nanopub network …";
 Promise.all([loadVerdicts(), loadCurated()]).then(() => {
