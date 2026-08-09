@@ -12,56 +12,51 @@ Five steps. Each replication you publish becomes a public, author-attributed nan
 
 ## Getting started — step by step
 
-The FORRT template **bundles the `replication-radar` MCP**, so an AI agent (Claude Code) can help you pick a paper and run the whole replication from inside your repo. Here's the path from nothing to a published replication.
+The workflow runs on the **`replication-radar` MCP** — connect it to your AI coding agent and it exposes the discovery tools right inside your repo, so you can pick a paper and drive the whole replication without leaving the agent. The FORRT template already ships the MCP in its `.mcp.json`, so it's there the moment you open your cloned repo.
 
-**You'll need:** [Git](https://git-scm.com), [`uv`](https://docs.astral.sh/uv/) (runs the MCP), [`pixi`](https://pixi.sh) (the analysis environment), and [Claude Code](https://claude.com/claude-code) — or another MCP-capable AI tool (see the template's `docs/ai-portability.md`).
+**You'll need:** [Git](https://git-scm.com), [`uv`](https://docs.astral.sh/uv/) (runs the MCP), [`pixi`](https://pixi.sh) (the analysis environment), and any **MCP-capable AI coding agent** — [Claude Code](https://claude.com/claude-code), [OpenAI Codex CLI](https://developers.openai.com/codex/mcp), [Google Gemini CLI](https://github.com/google-gemini/gemini-cli), Cursor, Aider, and others (full list at [modelcontextprotocol.io/clients](https://modelcontextprotocol.io/clients)).
 
 ### 1. Create your repository from the template
-On GitHub, open [`ScienceLiveHub/forrt-replication-template`](https://github.com/ScienceLiveHub/forrt-replication-template) and click **"Use this template" → Create a new repository**. Or with the GitHub CLI:
+On GitHub, open [`ScienceLiveHub/forrt-replication-template`](https://github.com/ScienceLiveHub/forrt-replication-template) → **"Use this template" → Create a new repository**. Or with the GitHub CLI:
 
 ```bash
 gh repo create my-replication --template ScienceLiveHub/forrt-replication-template --public
 ```
 
-### 2. Clone it and open it in Claude Code
+### 2. Clone it and open it in your agent
 
 ```bash
 git clone https://github.com/<you>/my-replication.git
 cd my-replication
-claude            # start Claude Code inside the repo
 ```
 
-The template ships a `.mcp.json` that wires the **`replication-radar`** MCP (`uvx replication-radar`). Claude Code asks you to **approve the MCP server** the first time — say yes — then check it's connected with **`/mcp`**. You don't install it separately; `uvx` fetches it from PyPI on first use (so `uv` must be on your PATH).
+Open the repo in your AI coding agent. The template's `.mcp.json` declares the **`replication-radar`** MCP (`uvx replication-radar`), so any MCP-capable agent picks it up — approve the server when asked and confirm the tools are available. You don't install it separately; `uvx` fetches it from PyPI on first use (so `uv` must be on your PATH). *(Adding the MCP to a specific agent — or using it outside the template — is in the per-client table in the next section.)*
 
-> **The OpenAIRE MCP is optional.** The `radar` tool already queries the public OpenAIRE Graph, so you need nothing else to pick a paper. The OpenAIRE MCP (Alien gateway, OAuth) adds richer *citation-graph* exploration — add it only if you want that, following the hackathon's OpenAIRE-MCP instructions.
+> **The OpenAIRE MCP is optional.** The `radar` tool already queries the public OpenAIRE Graph, so you need nothing else to pick a paper. The OpenAIRE MCP (Alien gateway, OAuth) adds richer *citation-graph* exploration — add it if you want that.
 
-### 3. Pick a paper to replicate
-Run the template's **`/radar`** skill — it drives the MCP for you:
+### 3. Pick a paper — with the MCP tools
+Ask your agent, in plain language, to use the **`replication-radar`** MCP. Three tools do the work:
 
-```
-/radar
-```
+| Ask your agent… | It calls | You get |
+|---|---|---|
+| "What bumble-bee decline work is worth replicating?" | `radar("bumble bee decline")` | impact-ranked **OPEN** targets (+ any already **VERIFIED**) |
+| "Has this paper been replicated, and did it hold?" | `replication_status(doi)` | the verdict(s), or `open` |
+| "Is there independent software I could reuse?" | `find_independent_software(doi)` | reusable tooling **not by the original team** |
 
-Give it a **field** (2–3 words, e.g. *bumble bee decline*). It calls `radar(topic)` to list impact-ranked **OPEN** targets, flags any already **VERIFIED** (skip, or *extend* them), checks a specific paper with `replication_status(doi)`, and finds reusable, **independent** software with `find_independent_software(doi)`. Pick a target that's high-impact, not already done, and has independent tooling (that's what makes it a *replication*, not a from-scratch reproduction).
+Pick a target that's high-impact, not already done, and has independent tooling — that's what makes it a *replication*, not a from-scratch reproduction. *(Claude Code offers a `/radar` shortcut that runs this for you, but the tools are identical in any agent.)*
 
 ### 4. Bootstrap the repo for that paper
-Drop the paper's PDF into `paper/`, then run:
+Drop the paper's PDF into `paper/`, then ask your agent to set the repo up for this study — substitute the template's placeholder tokens with your identity (name, ORCID) and the paper's DOI, following the template's `AGENTS.md` operating manual. *(Claude Code: `/init-template`; other agents: see [`docs/ai-portability.md`](https://github.com/ScienceLiveHub/forrt-replication-template/blob/main/docs/ai-portability.md).)* One-time after this: enable GitHub Pages at *Settings → Pages → Source: GitHub Actions*.
 
-```
-/init-template
-```
-
-It asks for your identity (name, ORCID) and the paper's DOI, substitutes the template's placeholder tokens, and makes the first commit. One-time after this: enable GitHub Pages at *Settings → Pages → Source: GitHub Actions*.
-
-### 5. Run the replication (guided)
-From here Claude Code follows the template's operating manual (`CLAUDE.md`) through its phases — read the paper's headline claim, port the code with `pixi`, reproduce the result, cut a **Zenodo-archived release** (a citable DOI), and publish the signed **FORRT nanopublication chain** on Science Live. The **`/replication-study`** skill orchestrates the analysis; **`/verify-chain`** checks the published chain at the end.
+### 5. Run the replication (agent-guided)
+Your agent now follows the template's operating manual (`AGENTS.md` / `CLAUDE.md`) through its phases — read the paper's headline claim, port the code with `pixi`, reproduce the result, cut a **Zenodo-archived release** (a citable DOI), and publish the signed **FORRT nanopublication chain** on Science Live. *(Claude Code adds `/replication-study` to orchestrate and `/verify-chain` to check the chain; any agent can do the same steps from the manual.)*
 
 ### 6. It reappears on the Radar
 Because the Radar reads verdicts live from the nanopublication network, your finished replication now shows up here as **independently checked** — closing the loop for the next person.
 
 ## Do it with an AI agent — the MCP
 
-The same engine behind this site is an **MCP server**, so an AI agent can discover targets and check verdicts for you — the first half of the loop, hands-free. It works with any MCP-capable client (Claude Desktop, Claude Code, Cursor, VS Code …).
+The same engine behind this site is an **MCP server**, so an AI agent can discover targets and check verdicts for you — the first half of the loop, hands-free. It works with any MCP-capable client (Claude Code, Claude Desktop, OpenAI Codex CLI, Google Gemini CLI, Cursor, VS Code …).
 
 **No login and no API key for the server** — it queries only public sources. You just need to be signed in to *your own* AI client (your Claude / Cursor / … account); adding the server gives that client the four tools below.
 
@@ -93,7 +88,9 @@ Where it goes, per client:
 | **Claude Desktop** | Settings → Developer → **Edit Config** opens `claude_desktop_config.json` — macOS `~/Library/Application Support/Claude/`, Windows `%APPDATA%\Claude\`, Linux `~/.config/Claude/`. Paste the snippet, then restart the app. |
 | **Cursor** | Settings → **MCP** → Add, or create `.cursor/mcp.json` (this project) or `~/.cursor/mcp.json` (all projects). [Cursor MCP docs](https://docs.cursor.com/context/model-context-protocol). |
 | **VS Code** | Add a `.vscode/mcp.json` — note its top-level key is `servers`, not `mcpServers`. [VS Code MCP docs](https://code.visualstudio.com/docs/copilot/chat/mcp-servers). |
-| Any other client | See the official list at [modelcontextprotocol.io](https://modelcontextprotocol.io). |
+| **OpenAI Codex CLI** | Add the server to Codex's MCP config (`~/.codex/config.toml`, a `[mcp_servers.replication-radar]` table — TOML, not the JSON above). [Codex MCP docs](https://developers.openai.com/codex/mcp). |
+| **Google Gemini CLI** | Add an `mcpServers` entry to `~/.gemini/settings.json` (or `.gemini/settings.json` in your project). [Gemini CLI docs](https://github.com/google-gemini/gemini-cli). |
+| Any other client | See the official list at [modelcontextprotocol.io/clients](https://modelcontextprotocol.io/clients). |
 
 **3 · Restart the client** and confirm the four tools appear in its tool list.
 
