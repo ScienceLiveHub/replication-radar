@@ -91,6 +91,8 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .swlinks a{color:var(--navy2);font-weight:600;text-decoration:none}
 .swlinks a:hover{text-decoration:underline}
 .swloading{padding:10px 2px;color:var(--mut)}
+.badge.lang{background:#eef2f9;color:var(--navy2)}
+.badge.lang.prop{background:#fdecc8;color:#8a5804}
 .targets{display:flex;flex-direction:column;gap:10px}
 .tpager{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:16px;font-size:13px;color:var(--mut)}
 .tpager:empty{display:none}

@@ -225,6 +225,8 @@ async function githubFromZenodo(doi) {
   } catch (e) { return null; }
 }
 
+// Languages whose runtime is proprietary / paid — public code in one of these still isn't free to RUN.
+const PROPRIETARY_LANGS = new Set(["matlab", "stata", "sas", "idl", "mathematica", "wolfram language", "labview", "maple", "gauss", "ampl"]);
 async function assessSoftware(url) {
   if (_FAIR.has(url)) return _FAIR.get(url);   // cached success → stable across scans, saves rate limit
   const res = await _assessSoftware(url);
@@ -311,7 +313,19 @@ async function _assessSoftware(url) {
     citation: citName ? `${html}/blob/${branch}/${citName}` : null,
     quality: qualName ? (qualName === ".github" ? `${html}/tree/${branch}/.github` : `${html}/blob/${branch}/${qualName}`) : null,
   };
-  return { stars: repo.stargazers_count || 0, forks: repo.forks_count || 0, license: (repo.license || {}).spdx_id, swh, recs, score, pct: Math.round((score / 5) * 100), practices, ciPass, purls, furls };
+  // Languages: repo.language alone is unreliable (a single most-bytes guess). The /languages
+  // breakdown is the real mix; from it we flag any proprietary/paid runtime (MATLAB, Stata, …) —
+  // public code in such a language still isn't free to RUN.
+  let languages = null, proprietary = [];
+  try {
+    const langs = await (await fetch(`${base}/languages`)).json();
+    if (langs && typeof langs === "object" && !langs.message) {
+      const entries = Object.entries(langs).sort((a, b) => b[1] - a[1]);   // [name, bytes] desc
+      languages = entries.map(([n]) => n);
+      proprietary = entries.filter(([n]) => PROPRIETARY_LANGS.has(n.toLowerCase())).map(([n]) => n);
+    }
+  } catch (e) { /* ignore */ }
+  return { stars: repo.stargazers_count || 0, forks: repo.forks_count || 0, license: (repo.license || {}).spdx_id, languages, proprietary, swh, recs, score, pct: Math.round((score / 5) * 100), practices, ciPass, purls, furls };
 }
 
 // ---------- author-agnostic verdict index, live from the nanopub network ----------
@@ -935,6 +949,17 @@ const practiceCount = (f) => {
   const p = (f && f.practices) || {};
   return ["documented", "tests", "ci", "contributing", "conduct"].filter((k) => p[k]).length + ((f && f.ciPass === true) ? 1 : 0);
 };
+// Language badge (from the /languages byte-breakdown). Warns when a proprietary/paid runtime is
+// present — public code you still need to buy MATLAB/Stata/… to run isn't fully reusable.
+const langBadge = (f) => {
+  const langs = (f && f.languages) || [], prop = (f && f.proprietary) || [];
+  if (!langs.length) return "";
+  const primary = langs[0];
+  const title = `languages by share (GitHub): ${esc(langs.slice(0, 4).join(", "))}`;
+  return (prop.length || PROPRIETARY_LANGS.has((primary || "").toLowerCase()))
+    ? `<span class="badge lang prop" title="uses ${esc(prop[0] || primary)} — a proprietary, paid runtime; the code is public but running it is not free or open. ${title}">${esc(primary)} · paid runtime ⚠</span>`
+    : `<span class="badge lang" title="${title}">${esc(primary)}</span>`;
+};
 async function findReusableSoftware(topic) {
   if (_software.has(topic)) return _software.get(topic);
   const pool = await search(topic, "software", 50);
@@ -959,7 +984,8 @@ async function findReusableSoftware(topic) {
   // Assess quality for the top few (bounded — GitHub's unauthenticated limit is 60/hr).
   await Promise.all(withRepo.slice(0, 6).map(async (c) => { c.fair = await assessSoftware(c.repo); }));
   // Final rank: a composite a one-off deposit can't fake (FAIR + RSE practices + stars + reuse).
-  const q = (c) => (c.fair ? (c.fair.score || 0) + practiceCount(c.fair) + Math.min(3, Math.log10((c.fair.stars || 0) + 1) * 1.6) : -1) + c.reuse * 0.4;
+  const q = (c) => (c.fair ? (c.fair.score || 0) + practiceCount(c.fair) + Math.min(3, Math.log10((c.fair.stars || 0) + 1) * 1.6) : -1) + c.reuse * 0.4
+    - ((c.fair && c.fair.proprietary && c.fair.proprietary.length) ? 1.5 : 0);   // paid runtime → less reusable
   const ranked = withRepo.filter((c) => c.fair).sort((a, b) => q(b) - q(a));
   _software.set(topic, ranked);
   return ranked;
@@ -972,6 +998,7 @@ function softwareRow(c) {
   const meta = `<div class="t-meta">`
     + (c.year ? `<span class="badge yr">${c.year}</span>` : "")
     + (f && f.stars ? `<span class="badge imp" title="GitHub stars">${ICON.star}${f.stars.toLocaleString()}</span>` : "")
+    + langBadge(f)
     + (c.downloads ? `<span class="badge imp" title="OpenAIRE usage downloads">${c.downloads.toLocaleString()} downloads</span>` : "")
     + (c.swh ? `<span class="badge mok" title="archived in Software Heritage">${ICON.check}archived</span>` : "")
     + `</div>`;
