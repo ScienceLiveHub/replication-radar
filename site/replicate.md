@@ -10,6 +10,55 @@ Five steps. Each replication you publish becomes a public, author-attributed nan
 4. **Publish the signed chain** *(Science Live)* — Publish the nanopublication chain to the [Science Live](https://sciencelive4all.org) network. It is cryptographically signed, attributed to you, and citable — your replication counts as a first-class research output.
 5. **It reappears on the Radar** *(Radar)* — Because verdicts are read **live** from the network, your replication now surfaces here as **independently checked**, with its verdict — and its code gets a FAIR-software score plus the RSE good-practice signals.
 
+## Getting started — step by step
+
+The FORRT template **bundles the `replication-radar` MCP**, so an AI agent (Claude Code) can help you pick a paper and run the whole replication from inside your repo. Here's the path from nothing to a published replication.
+
+**You'll need:** [Git](https://git-scm.com), [`uv`](https://docs.astral.sh/uv/) (runs the MCP), [`pixi`](https://pixi.sh) (the analysis environment), and [Claude Code](https://claude.com/claude-code) — or another MCP-capable AI tool (see the template's `docs/ai-portability.md`).
+
+### 1. Create your repository from the template
+On GitHub, open [`ScienceLiveHub/forrt-replication-template`](https://github.com/ScienceLiveHub/forrt-replication-template) and click **"Use this template" → Create a new repository**. Or with the GitHub CLI:
+
+```bash
+gh repo create my-replication --template ScienceLiveHub/forrt-replication-template --public
+```
+
+### 2. Clone it and open it in Claude Code
+
+```bash
+git clone https://github.com/<you>/my-replication.git
+cd my-replication
+claude            # start Claude Code inside the repo
+```
+
+The template ships a `.mcp.json` that wires the **`replication-radar`** MCP (`uvx replication-radar`). Claude Code asks you to **approve the MCP server** the first time — say yes — then check it's connected with **`/mcp`**. You don't install it separately; `uvx` fetches it from PyPI on first use (so `uv` must be on your PATH).
+
+> **The OpenAIRE MCP is optional.** The `radar` tool already queries the public OpenAIRE Graph, so you need nothing else to pick a paper. The OpenAIRE MCP (Alien gateway, OAuth) adds richer *citation-graph* exploration — add it only if you want that, following the hackathon's OpenAIRE-MCP instructions.
+
+### 3. Pick a paper to replicate
+Run the template's **`/radar`** skill — it drives the MCP for you:
+
+```
+/radar
+```
+
+Give it a **field** (2–3 words, e.g. *bumble bee decline*). It calls `radar(topic)` to list impact-ranked **OPEN** targets, flags any already **VERIFIED** (skip, or *extend* them), checks a specific paper with `replication_status(doi)`, and finds reusable, **independent** software with `find_independent_software(doi)`. Pick a target that's high-impact, not already done, and has independent tooling (that's what makes it a *replication*, not a from-scratch reproduction).
+
+### 4. Bootstrap the repo for that paper
+Drop the paper's PDF into `paper/`, then run:
+
+```
+/init-template
+```
+
+It asks for your identity (name, ORCID) and the paper's DOI, substitutes the template's placeholder tokens, and makes the first commit. One-time after this: enable GitHub Pages at *Settings → Pages → Source: GitHub Actions*.
+
+### 5. Run the replication (guided)
+From here Claude Code follows the template's operating manual (`CLAUDE.md`) through its phases — read the paper's headline claim, port the code with `pixi`, reproduce the result, cut a **Zenodo-archived release** (a citable DOI), and publish the signed **FORRT nanopublication chain** on Science Live. The **`/replication-study`** skill orchestrates the analysis; **`/verify-chain`** checks the published chain at the end.
+
+### 6. It reappears on the Radar
+Because the Radar reads verdicts live from the nanopublication network, your finished replication now shows up here as **independently checked** — closing the loop for the next person.
+
 ## Do it with an AI agent — the MCP
 
 The same engine behind this site is an **MCP server**, so an AI agent can discover targets and check verdicts for you — the first half of the loop, hands-free. It works with any MCP-capable client (Claude Desktop, Claude Code, Cursor, VS Code …).
