@@ -210,6 +210,22 @@ const abstractOf = (rec) => {
 // (no third-party scorer needed — F-UJI/OSTrails have no usable API for this). Only
 // ever run on a software record we ACTUALLY have a repo URL for — never guessed.
 const parseGitHub = (url) => { const m = (url || "").match(/github\.com\/([^\/]+)\/([^\/#?]+)/i); return m ? { owner: m[1], repo: m[2].replace(/\.git$/, "") } : null; };
+// GitHub API requests go through the Netlify function proxy when it's deployed (token stored
+// server-side → 5000 req/hr, and the token never reaches the browser); we fall back to direct
+// unauthenticated GitHub (60/hr) for local dev or a non-Netlify host. Pass a GitHub API path such
+// as `repos/owner/repo` (with an optional query string).
+let _ghProxy = true;
+async function ghGet(path) {
+  if (_ghProxy) {
+    try {
+      const r = await fetch(`/.netlify/functions/gh?path=${encodeURIComponent(path)}`);
+      // A missing function returns Netlify's own non-JSON 404 → disable the proxy and fall back.
+      if (r.status === 404 && !((r.headers.get("content-type") || "").includes("json"))) _ghProxy = false;
+      else return r;
+    } catch (e) { _ghProxy = false; }
+  }
+  return fetch(`https://api.github.com/${path}`);
+}
 // human labels for the fair-software.eu recommendations (shown on hover)
 const RECLABEL = { repository: "public repository", license: "open license", registry: "in a registry", citation: "citable (CITATION.cff / DOI)", quality: "quality artefacts (env / Docker / CI)" };
 
@@ -236,12 +252,12 @@ async function assessSoftware(url) {
 async function _assessSoftware(url) {
   const g = parseGitHub(url);
   if (!g) return null;
-  const base = `https://api.github.com/repos/${g.owner}/${g.repo}`;
+  const base = `repos/${g.owner}/${g.repo}`;   // GitHub API path — routed through ghGet (proxy or direct)
   let repo;
-  try { repo = await (await fetch(base)).json(); } catch (e) { return null; }
+  try { repo = await (await ghGet(base)).json(); } catch (e) { return null; }
   if (!repo || repo.message) return null;                 // not found / GitHub rate-limited
   let files = [], names = [];
-  try { const c = await (await fetch(`${base}/contents`)).json(); if (Array.isArray(c)) { names = c.map((f) => f.name || ""); files = names.map((n) => n.toLowerCase()); } } catch (e) { /* ignore */ }
+  try { const c = await (await ghGet(`${base}/contents`)).json(); if (Array.isArray(c)) { names = c.map((f) => f.name || ""); files = names.map((n) => n.toLowerCase()); } } catch (e) { /* ignore */ }
   const has = (n) => files.includes(n.toLowerCase());
   const actual = (n) => names.find((x) => x.toLowerCase() === n.toLowerCase()) || n;   // original-case filename (GitHub blob URLs are case-sensitive)
   let swh = false;
@@ -269,7 +285,7 @@ async function _assessSoftware(url) {
   let ciPass = null;
   if (practices.ci) {
     try {
-      const runs = await (await fetch(`${base}/actions/runs?per_page=1`)).json();
+      const runs = await (await ghGet(`${base}/actions/runs?per_page=1`)).json();
       const r = ((runs && runs.workflow_runs) || [])[0];
       if (r && r.status === "completed") ciPass = r.conclusion === "success";
     } catch (e) { /* leave unknown */ }
@@ -281,7 +297,7 @@ async function _assessSoftware(url) {
   practices.conduct = false;
   let contribUrl = null, conductUrl = null, licenseUrl = null;
   try {
-    const prof = await (await fetch(`${base}/community/profile`)).json();
+    const prof = await (await ghGet(`${base}/community/profile`)).json();
     const cf = (prof && prof.files) || {};
     practices.contributing = !!cf.contributing;
     practices.conduct = !!cf.code_of_conduct;
@@ -318,7 +334,7 @@ async function _assessSoftware(url) {
   // public code in such a language still isn't free to RUN.
   let languages = null, proprietary = [];
   try {
-    const langs = await (await fetch(`${base}/languages`)).json();
+    const langs = await (await ghGet(`${base}/languages`)).json();
     if (langs && typeof langs === "object" && !langs.message) {
       const entries = Object.entries(langs).sort((a, b) => b[1] - a[1]);   // [name, bytes] desc
       languages = entries.map(([n]) => n);
