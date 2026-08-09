@@ -16,6 +16,8 @@ The workflow runs on the **`replication-radar` MCP** — connect it to your AI c
 
 **You'll need:** [Git](https://git-scm.com), [`uv`](https://docs.astral.sh/uv/) (runs the MCP), [`pixi`](https://pixi.sh) (the analysis environment), and any **MCP-capable AI coding agent** — [Claude Code](https://claude.com/claude-code), [OpenAI Codex CLI](https://developers.openai.com/codex/mcp), [Google Gemini CLI](https://github.com/google-gemini/gemini-cli), Cursor, Aider, and others (full list at [modelcontextprotocol.io/clients](https://modelcontextprotocol.io/clients)).
 
+**In practice you mostly just talk to your agent.** Open the repo, describe what you're interested in, answer its questions — it orchestrates discovery, setup, and the replication for you. The numbered steps below are what's happening under the hood. Nothing to install for the MCP: the template already declares it, so your agent runs it automatically (via `uvx`) the first time it's needed.
+
 ### 1. Create your repository from the template
 On GitHub, open [`ScienceLiveHub/forrt-replication-template`](https://github.com/ScienceLiveHub/forrt-replication-template) → **"Use this template" → Create a new repository**. Or with the GitHub CLI:
 
@@ -46,7 +48,7 @@ Ask your agent, in plain language, to use the **`replication-radar`** MCP. Three
 Pick a target that's high-impact, not already done, and has independent tooling — that's what makes it a *replication*, not a from-scratch reproduction. *(Claude Code offers a `/radar` shortcut that runs this for you, but the tools are identical in any agent.)*
 
 ### 4. Bootstrap the repo for that paper
-Drop the paper's PDF into `paper/`, then ask your agent to set the repo up for this study — substitute the template's placeholder tokens with your identity (name, ORCID) and the paper's DOI, following the template's `AGENTS.md` operating manual. *(Claude Code: `/init-template`; other agents: see [`docs/ai-portability.md`](https://github.com/ScienceLiveHub/forrt-replication-template/blob/main/docs/ai-portability.md).)* One-time after this: enable GitHub Pages at *Settings → Pages → Source: GitHub Actions*.
+Now that you've chosen a paper, set the repo up **for that paper** — this is why discovery comes first. Drop the paper's PDF into `paper/`, then ask your agent to substitute the template's placeholder tokens with your identity (name, ORCID) and the paper's DOI, following the template's `AGENTS.md` operating manual. *(Claude Code: `/init-template`; other agents: see [`docs/ai-portability.md`](https://github.com/ScienceLiveHub/forrt-replication-template/blob/main/docs/ai-portability.md).)* One-time after this: enable GitHub Pages at *Settings → Pages → Source: GitHub Actions*.
 
 ### 5. Run the replication (agent-guided)
 Your agent now follows the template's operating manual (`AGENTS.md` / `CLAUDE.md`) through its phases — read the paper's headline claim, port the code with `pixi`, reproduce the result, cut a **Zenodo-archived release** (a citable DOI), and publish the signed **FORRT nanopublication chain** on Science Live. *(Claude Code adds `/replication-study` to orchestrate and `/verify-chain` to check the chain; any agent can do the same steps from the manual.)*
