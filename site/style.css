@@ -93,6 +93,7 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .swloading{padding:10px 2px;color:var(--mut)}
 .badge.lang{background:#eef2f9;color:var(--navy2)}
 .badge.lang.prop{background:#fdecc8;color:#8a5804}
+.swnoassess{font-size:12px;color:var(--mut);margin:6px 0;line-height:1.5}
 .targets{display:flex;flex-direction:column;gap:10px}
 .tpager{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:16px;font-size:13px;color:var(--mut)}
 .tpager:empty{display:none}

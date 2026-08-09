@@ -983,10 +983,14 @@ async function findReusableSoftware(topic) {
   });
   // Assess quality for the top few (bounded — GitHub's unauthenticated limit is 60/hr).
   await Promise.all(withRepo.slice(0, 6).map(async (c) => { c.fair = await assessSoftware(c.repo); }));
-  // Final rank: a composite a one-off deposit can't fake (FAIR + RSE practices + stars + reuse).
-  const q = (c) => (c.fair ? (c.fair.score || 0) + practiceCount(c.fair) + Math.min(3, Math.log10((c.fair.stars || 0) + 1) * 1.6) : -1) + c.reuse * 0.4
-    - ((c.fair && c.fair.proprietary && c.fair.proprietary.length) ? 1.5 : 0);   // paid runtime → less reusable
-  const ranked = withRepo.filter((c) => c.fair).sort((a, b) => q(b) - q(a));
+  // Rank: assessed quality first (a composite a one-off deposit can't fake), then OpenAIRE reuse
+  // for any we couldn't assess (rate limit / moved repo). KEEP the software either way — the tab
+  // must not go blank just because GitHub throttled the live assessment.
+  const q = (c) => (c.fair
+      ? (c.fair.score || 0) + practiceCount(c.fair) + Math.min(3, Math.log10((c.fair.stars || 0) + 1) * 1.6)
+        - ((c.fair.proprietary && c.fair.proprietary.length) ? 1.5 : 0)   // paid runtime → less reusable
+      : 0) + c.reuse * 0.4 + (c.swh ? 0.5 : 0);
+  const ranked = withRepo.sort((a, b) => q(b) - q(a)).slice(0, 10);
   _software.set(topic, ranked);
   return ranked;
 }
@@ -1002,14 +1006,18 @@ function softwareRow(c) {
     + (c.downloads ? `<span class="badge imp" title="OpenAIRE usage downloads">${c.downloads.toLocaleString()} downloads</span>` : "")
     + (c.swh ? `<span class="badge mok" title="archived in Software Heritage">${ICON.check}archived</span>` : "")
     + `</div>`;
+  const assessment = f
+    ? `${fairBlock(f, c.repo)}${practicesBlock(f)}`
+    : `<div class="swnoassess">Public repository found — the live FAIR / RSE assessment wasn't available just now (GitHub rate limit, or the repo moved). Ranked on OpenAIRE reuse signals; open the repo to inspect.</div>`;
   return `<div class="swcard">
     <div class="swhead"><b>${esc(c.title)}</b>${meta}</div>
-    ${f ? fairBlock(f, c.repo) : ""}${f ? practicesBlock(f) : ""}
+    ${assessment}
     <div class="swlinks">↳ repo: ${link}${doiLink ? ` · ${doiLink}` : ""}</div>
   </div>`;
 }
 async function renderSoftware(topic) {
   const box = el("softwarelist");
+  if (!topic) { box.innerHTML = `<p class="hint" style="padding:10px 2px">Search a topic and this tab lists the reusable software OpenAIRE holds for it.</p>`; return; }
   box.innerHTML = `<p class="hint swloading">Assessing reusable software for “${esc(topic)}” live from GitHub, Software Heritage and Zenodo — a few seconds…</p>`;
   try {
     const list = await findReusableSoftware(topic);
@@ -1032,7 +1040,7 @@ function setLens(which) {
   el("lens-software").setAttribute("aria-selected", String(!papers));
   el("paperlens").hidden = !papers;
   el("softwarelens").hidden = papers;
-  if (!papers && _lastTopic) renderSoftware(_lastTopic);
+  if (!papers) renderSoftware(_lastTopic || (el("topic").value || "").trim());
 }
 
 async function run(topic, isExample) {
