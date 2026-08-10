@@ -1,6 +1,6 @@
 [project]
 name = "replication-radar"
-version = "0.4.0"
+version = "0.4.1"
 description = "MCP server that turns the OpenAIRE Graph into a ranked replication queue — impact-ranked targets and the Science Live verification overlay (retraction/supersession-aware)."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -16,7 +16,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 dependencies = [
-    "mcp>=1.2.0",
+    "mcp>=1.2.0,<2",   # 2.0 dropped mcp.server.fastmcp; the server wrapper needs the 1.x SDK
 ]
 
 [project.urls]
