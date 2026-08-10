@@ -611,9 +611,21 @@ async function radar(topic) {
   // robustly-validated sinks). No status-rank override.
   targets.sort((a, b) => (b.priority || 0) - (a.priority || 0) || (b.citations || 0) - (a.citations || 0));
 
-  // FAIR computed LIVE (same assessSoftware the verified path uses) for paper-resolved repos
+  // FAIR + RSE practices, computed LIVE (same assessSoftware the verified panel uses), for every
+  // target we have a real GitHub repo for. Two grounded sources of that repo:
+  //   1. the target's OWN materials — curated, or a codeRepositoryUrl on the OpenAIRE record;
+  //   2. for a VERIFIED paper with no own repo — the REPLICATION's repo (v.repl), so the paper
+  //      shows the SAME software signals here as in the "verified" panel (they were mismatched
+  //      before: only curated papers passed the old `resolved` gate).
+  // assessSoftware() is cached by URL, so a repo already scored in the verified path costs nothing.
+  const replByDoi = new Map(fieldVerified.filter((v) => v.doi && v.repl && v.repl.code).map((v) => [v.doi, v.repl]));
   await Promise.all(targets.map(async (t) => {
-    if (t.mat && t.mat.resolved && t.mat.code && parseGitHub(t.mat.code)) t.fair = await assessSoftware(t.mat.code);
+    if (t.mat && t.mat.code && parseGitHub(t.mat.code)) { t.fair = await assessSoftware(t.mat.code); return; }
+    const rep = t.doi && replByDoi.get(t.doi);   // verified paper → assess the replication's repo
+    if (rep && parseGitHub(rep.code)) {
+      t.fair = rep.fair || await assessSoftware(rep.code);
+      if (!t.mat || !t.mat.code) t.mat = { ...(t.mat || { score: null, state: "unknown" }), code: rep.code };
+    }
   }));
 
   return { topic, targets, inField, chartItems };
