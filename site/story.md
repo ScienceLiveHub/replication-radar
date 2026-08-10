@@ -17,6 +17,8 @@ The turn came from a research software engineer. **Saranjeet Kaur Bhogal**, an R
 
 We kept the other signal the Graph structurally can't hold, too: whether a claim has been independently **replicated**, read live from the Science Live **nanopublication** network (author-agnostic, retraction-aware). So a field's *reusable software* and its *checked results* surface together.
 
+**We put it to the test.** We took a paper the Radar flags as high-impact but never replicated — Oliver et al. 2018, *"Longer and more frequent marine heatwaves"* — and actually replicated it: ERA5 pulled straight from the cloud, marine heatwaves detected with **XMHW** (an independent RSE tool), and cross-checked against the paper author's own **marineHeatWaves** — both software the Radar surfaces. The two agree to the digit, and the finding half-holds: marine-heatwave *days* have risen steeply, *frequency* only borderline — an honest **PartiallySupported** verdict. A code-independent replication, built entirely from software the Graph already holds. The loop, closed.
+
 Two disciplines run through all of it. **Everything is grounded** — every signal comes from a named, verifiable source, documented signal-by-signal in a machine- and human-readable methodology page (`methodology.json` + `/methodology.html`). And everything runs **client-side** against public, CORS-enabled APIs — no backend, no keys — so the artifact is a static site anyone can fork. We even deleted the one feature we had built on a guess (keyword-matched "relevant tooling"): surfacing RSE work has to be grounded, or it is just noise.
 
 ## The insight
