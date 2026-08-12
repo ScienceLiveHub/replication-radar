@@ -43,11 +43,11 @@ Ask your agent, in plain language, to use the **`replication-radar`** MCP — yo
 
 > Use the replication-radar MCP: what bumble-bee decline work is worth replicating?
 
-The agent calls **`radar`** and replies with a ranked list of papers worth replicating. Then, to check a specific paper and find tooling you could reuse:
+The agent calls **`radar`** and replies with a ranked list — each paper flagged **OPEN** or already **VERIFIED** with its verdict, so you see what's worth replicating *and* what's been checked in one call. Then, to surface the reusable tooling for that kind of study:
 
-> Use the replication-radar MCP: has the Soroye 2020 bumble bee paper (10.1126/science.aax8591) been independently replicated, and is there independent software I could reuse?
+> Use the replication-radar MCP: find independent software I could reuse to replicate this kind of study — bumble-bee decline.
 
-It calls **`replication_status`** and **`find_independent_software`** and answers from live data.
+It calls **`find_independent_software`** and lists reusable, author-disjoint tooling — the RSE work behind the field. *(To drill into one paper's full verdict and its signed nanopublications, add `replication_status(doi)`.)*
 
 **Naming a specific MCP in your question — "use the replication-radar MCP…" — is your guarantee the agent will use it**, answering from that tool's live, grounded data rather than from its own memory. You don't *have* to every time: once it's connected, the agent usually reaches for the right tool on its own when your question matches. But naming it removes the guesswork — worth doing on your first question, when a request is ambiguous, and whenever you want the tool call to visibly fire (e.g. on camera). The same applies to the OpenAIRE MCP.
 
