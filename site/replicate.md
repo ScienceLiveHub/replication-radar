@@ -47,7 +47,7 @@ The agent calls **`radar`** and replies with a ranked list of papers worth repli
 
 It calls **`replication_status`** and **`find_independent_software`** and answers from live data.
 
-**You don't have to say "use the replication-radar MCP" every time.** Once it's connected, the agent will usually reach for these tools on its own when your question matches. Naming it is just a nudge that *guarantees* the agent uses the Radar's grounded data instead of answering from its own memory — handy on your first question, when a request is ambiguous, and when you want the tool call to visibly fire (e.g. on camera). The same applies to the OpenAIRE MCP.
+**Naming a specific MCP in your question — "use the replication-radar MCP…" — is your guarantee the agent will use it**, answering from that tool's live, grounded data rather than from its own memory. You don't *have* to every time: once it's connected, the agent usually reaches for the right tool on its own when your question matches. But naming it removes the guesswork — worth doing on your first question, when a request is ambiguous, and whenever you want the tool call to visibly fire (e.g. on camera). The same applies to the OpenAIRE MCP.
 
 The three tools behind these questions:
 
