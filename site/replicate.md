@@ -37,7 +37,19 @@ Open the repo in your AI coding agent. The template's `.mcp.json` declares the *
 > **The OpenAIRE MCP is optional.** The `radar` tool already queries the public OpenAIRE Graph, so you need nothing else to pick a paper. The OpenAIRE MCP (Alien gateway, OAuth) adds richer *citation-graph* exploration — add it if you want that.
 
 ### 3. Pick a paper — with the MCP tools
-Ask your agent, in plain language, to use the **`replication-radar`** MCP. Three tools do the work:
+Ask your agent, in plain language, to use the **`replication-radar`** MCP — you just chat with it, exactly as you'd message a colleague. You don't name the tools; the agent picks them. **For example, type this to your agent:**
+
+> Use the replication-radar MCP: what bumble-bee decline work is worth replicating?
+
+The agent calls **`radar`** and replies with a ranked list of papers worth replicating. Then, to check a specific paper and find tooling you could reuse:
+
+> Use the replication-radar MCP: has the Soroye 2020 bumble bee paper (10.1126/science.aax8591) been independently replicated, and is there independent software I could reuse?
+
+It calls **`replication_status`** and **`find_independent_software`** and answers from live data.
+
+**Naming a specific MCP in your question — "use the replication-radar MCP…" — is your guarantee the agent will use it**, answering from that tool's live, grounded data rather than from its own memory. You don't *have* to every time: once it's connected, the agent usually reaches for the right tool on its own when your question matches. But naming it removes the guesswork — worth doing on your first question, when a request is ambiguous, and whenever you want the tool call to visibly fire (e.g. on camera). The same applies to the OpenAIRE MCP.
+
+The three tools behind these questions:
 
 | Ask your agent… | It calls | You get |
 |---|---|---|
