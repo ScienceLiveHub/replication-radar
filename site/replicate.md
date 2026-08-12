@@ -25,6 +25,8 @@ On GitHub, open [`ScienceLiveHub/forrt-replication-template`](https://github.com
 gh repo create my-replication --template ScienceLiveHub/forrt-replication-template --public
 ```
 
+> **Naming tip:** you choose the exact paper in step 3, so you're naming the repo before you know it. Either start generic (`my-replication`) and **rename it on GitHub** once you've picked the paper, or — if you already have a topic in mind — name it self-describingly with a convention like **`<firstauthor><year>-replication`** (e.g. `soroye2020-replication`) or **`replication-<topic>`** (e.g. `replication-bumblebee-decline`). A consistent, descriptive name keeps a shelf of replications easy to scan and makes each repo's purpose obvious to others.
+
 ### 2. Clone it and open it in your agent
 
 ```bash
@@ -34,7 +36,7 @@ cd my-replication
 
 Open the repo in your AI coding agent. The template's `.mcp.json` declares the **`replication-radar`** MCP (`uvx replication-radar`), so any MCP-capable agent picks it up — approve the server when asked and confirm the tools are available. You don't install it separately; `uvx` fetches it from PyPI on first use (so `uv` must be on your PATH). *(Adding the MCP to a specific agent — or using it outside the template — is in the per-client table in the next section.)*
 
-> **The OpenAIRE MCP is optional.** The `radar` tool already queries the public OpenAIRE Graph, so you need nothing else to pick a paper. The OpenAIRE MCP (Alien gateway, OAuth) adds richer *citation-graph* exploration — add it if you want that.
+> **On the two MCPs.** The `replication-radar` MCP is itself **built on the OpenAIRE Graph** — so picking a paper already queries OpenAIRE, with nothing else to set up. The separate **OpenAIRE MCP** (Alien gateway, OAuth) is *optional*: it adds deeper citation-graph exploration, and running the two side by side gives an agent both the structural graph *and* the "has this been checked?" verification layer.
 
 ### 3. Pick a paper — with the MCP tools
 Ask your agent, in plain language, to use the **`replication-radar`** MCP — you just chat with it, exactly as you'd message a colleague. You don't name the tools; the agent picks them. **For example, type this to your agent:**
