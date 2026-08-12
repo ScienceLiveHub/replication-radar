@@ -13,6 +13,7 @@ const EXAMPLES = ["species distribution", "marine heatwave", "bumble bee climate
 let VERDICTS = {};      // doi -> [verifications]
 let CLAIMS = {};        // outcome-hash -> { label, aida, type } (what exactly was replicated)
 let VERIFIED = [];      // enriched: {doi, title, citations, verifications}
+let VERDICTS_READY = null;  // resolves when the verdict layer has loaded; run() awaits it before scanning
 let CURATED = {};       // doi -> paper-resolved materials (the links OpenAIRE lacks; from the paper)
 
 // ---------- OpenAIRE helpers (same shape as openaire.py) ----------
@@ -1093,6 +1094,13 @@ async function run(topic, isExample) {
   topic = (topic || "").trim();
   if (!topic) return;
   el("go").disabled = true;
+  // The verdict layer loads asynchronously on page load; the first scan must WAIT for it, or the
+  // "already checked" replications are missing until you scan again (the bug this fixes). Once it's
+  // resolved, awaiting is instant, so later scans aren't slowed.
+  if (VERDICTS_READY) {
+    el("status").textContent = "Loading the Science Live verdict layer …";
+    try { await VERDICTS_READY; } catch (e) { /* loadVerdicts already falls back to bundled verdicts */ }
+  }
   el("status").textContent = `Scanning the OpenAIRE Graph for “${topic}” …`;
   try {
     const r = await radar(topic);
@@ -1123,7 +1131,8 @@ el("lens-papers").addEventListener("click", () => setLens("papers"));
 el("lens-software").addEventListener("click", () => setLens("software"));
 
 el("status").textContent = "Loading the Science Live verdict layer live from the nanopub network …";
-Promise.all([loadVerdicts(), loadCurated()]).then(() => {
+VERDICTS_READY = Promise.all([loadVerdicts(), loadCurated()]);
+VERDICTS_READY.then(() => {
   // Default landing state: populate the radar with a sample field so first-time visitors see the
   // value immediately, not a blank page — but never clobber a user who has already started.
   if (!el("topic").value.trim() && el("results").hidden) {
