@@ -649,16 +649,33 @@ const swhHtml = (repo, archived) => {
     return b ? `<a class="swhok" href="${b}" target="_blank" rel="noopener" title="Browse the archived snapshot in Software Heritage">in Software Heritage</a>` : `<span class="swhok">in Software Heritage</span>`;
   }
   if (!repo) return `<a class="swhno" href="https://archive.softwareheritage.org/save/" target="_blank" rel="noopener">not yet archived</a>`;
-  return `<button type="button" class="swhsave" data-repo="${esc(repo)}" onclick="swhSave(this)" title="Open Software Heritage Save Code Now and copy this repo's URL ready to paste">not yet archived — archive it →</button>`;
+  return `<button type="button" class="swhsave" data-repo="${esc(repo)}" onclick="swhSave(this)" title="Request this repository be archived in Software Heritage (Save Code Now) — one click, no account">not yet archived — archive it →</button>`;
 };
-// SWH's save API can't be called cross-origin from a static page (the repo URL sits in the request
-// path and the form can't be pre-filled), so do the reliable thing: copy the repo URL to the
-// clipboard and open the Save Code Now form — one click, then paste (Cmd/Ctrl-V) and submit.
+// Trigger a Software Heritage "Save Code Now" request directly via the SWH API. Anonymous POST is
+// accepted for git/github origins and CORS is open (verified), so a static page archives in one
+// click — no clipboard, no manual paste. Falls back to the form if the request is refused/offline.
 window.swhSave = async (btn) => {
   const repo = btn.dataset.repo || "";
-  try { if (repo && navigator.clipboard) { await navigator.clipboard.writeText(repo); btn.classList.add("done"); btn.innerHTML = `${ICON.check}repo URL copied — paste it into the form`; } }
-  catch (e) { /* clipboard blocked — the form still opens */ }
-  window.open("https://archive.softwareheritage.org/save/", "_blank", "noopener");
+  if (!repo) { window.open("https://archive.softwareheritage.org/save/", "_blank", "noopener"); return; }
+  const g = parseGitHub(repo);
+  const origin = g ? `https://github.com/${g.owner}/${g.repo}` : repo.replace(/\.git$/, "");
+  const orig = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = "requesting…";
+  try {
+    const r = await fetch(`https://archive.softwareheritage.org/api/1/origin/save/git/url/${origin}/`,
+                          { method: "POST", headers: { Accept: "application/json" } });
+    if (!r.ok) throw new Error("save " + r.status);
+    const d = await r.json().catch(() => ({}));
+    const st = d.save_request_status === "accepted" ? "queued" : (d.save_request_status || "requested");
+    btn.classList.add("done");
+    btn.innerHTML = `${ICON.check}archival ${esc(st)} in Software Heritage`;
+    btn.title = "A Save Code Now request was submitted; the snapshot appears once the crawl completes.";
+  } catch (e) {
+    // refused (e.g. rate-limited) or offline → open the manual form with the URL on the clipboard
+    try { if (navigator.clipboard) await navigator.clipboard.writeText(origin); } catch (_) { /* blocked */ }
+    btn.disabled = false; btn.innerHTML = orig;
+    window.open("https://archive.softwareheritage.org/save/", "_blank", "noopener");
+  }
 };
 // RSE good-practice labels + tooltips (beyond the fair-software.eu 5 — Saranjeet's feedback).
 const PRACTICE = {
