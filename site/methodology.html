@@ -106,6 +106,9 @@
         m.guardrails.map((g) => `<li>${esc(g)}</li>`).join("") + `</ul></section>`);
 
       document.getElementById("content").innerHTML = out.join("");
+      // Content is injected after load, so a URL #hash (e.g. …/methodology.html#practices) wouldn't
+      // have scrolled to its section yet — do it now that the sections exist.
+      if (location.hash) { try { const t = document.querySelector(location.hash); if (t) t.scrollIntoView(); } catch (_) {} }
     }).catch((e) => {
       document.getElementById("content").innerHTML = `<p class="lead">Could not load methodology.json (${esc(e.message)}).</p>`;
     });
