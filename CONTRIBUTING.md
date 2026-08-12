@@ -42,6 +42,26 @@ These are the principles that keep the tool trustworthy — please follow them
 - **The static site holds no keys.** Any token stays server-side (the Netlify function proxy).
 - **Keep `site/app.js` `node --check`-clean.**
 
+## AI-assisted contributions
+
+AI agents and AI-assisted contributions are **welcome** — this project is itself
+built with AI assistance, and helping agents contribute *well* is part of what we
+explore. Two conditions keep it trustworthy, and they mirror what the tool itself
+stands for:
+
+- **A human is accountable.** An AI can draft code, docs, or analysis, but a
+  *person* must understand, verify, and stand behind every contribution before
+  opening it — and a human reviews it before it is merged. AI does not get
+  autonomous merge rights.
+- **Grounded, never hallucinated.** Any AI-generated signal, number, citation, or
+  claim must trace to a real, named source — the exact rule the Radar enforces on
+  screen. No invented references, counts, or "relevance." If it can't be verified,
+  it doesn't ship.
+
+Please **note substantial AI assistance in your PR description** (honest
+provenance), and respect the licences and attribution of any sources an agent
+draws on. In short: **use AI freely, verify like a scientist.**
+
 ## Opening a pull request
 
 1. Fork the repo (or branch from `main` if you have write access).
