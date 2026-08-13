@@ -25,6 +25,8 @@ On GitHub, open [`ScienceLiveHub/forrt-replication-template`](https://github.com
 gh repo create my-replication --template ScienceLiveHub/forrt-replication-template --public
 ```
 
+> **Discovery-first? Let the agent create it.** If you started from a discovery session (picked the paper with the Radar), ask the agent to set you up: **`replication_template(doi, topic, owner)`** returns a ready **`quickstart.create_repo`** command — `gh repo create <name> --template … --clone` with an available `<topic>-replication` name pre-filled — which the agent runs to **create + clone in one step**. Then **open a fresh agent session inside the new repo** (`cd <repo> && claude`) to run the replication: a project's operating manual (`AGENTS.md`/`CLAUDE.md`), slash commands and `.mcp.json` load only when the session *starts* there — not on a mid-session `cd`. So discovery ends at repo creation, and the replication runs in the repo.
+
 > **Naming tip:** you choose the exact paper in step 3, so you're naming the repo before you know it. Either start generic (`my-replication`) and **rename it on GitHub** once you've picked the paper, or — if you already have a topic in mind — name it self-describingly with a convention like **`<firstauthor><year>-replication`** (e.g. `soroye2020-replication`) or **`<topic>-replication`** (e.g. `bumblebee-decline-replication`). A consistent, descriptive name keeps a shelf of replications easy to scan and makes each repo's purpose obvious to others. Or let the agent name it — **`replication_template(doi, topic, owner)`** suggests a `<topic>-replication` name and, given your GitHub `owner`, checks it's free (skipping any that already exist).
 
 ### 2. Clone it and open it in your agent
