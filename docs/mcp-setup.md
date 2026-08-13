@@ -2,7 +2,7 @@
 
 A quickstart for connecting the two MCP servers the Replication Radar demo uses, **user-scoped** so they show up in *any* Claude Code session (any folder):
 
-1. **`replication-radar`** — our own MCP (the FORRT verdict tools: `radar`, `replication_status`, `find_independent_software`, `verified_claims`). *There is no separate "FORRT MCP" — this is it.* A pip install, no login.
+1. **`replication-radar`** — our own MCP. Discovery tools (`radar`, `replication_status`, `find_independent_software`, `verified_claims`) **plus the produce-half**: `replication_template` (the FORRT template + workflow + a suggested, availability-checked `<topic>-replication` repo name) and `find_dataset` (hands off to the OpenAIRE MCP for datasets). *There is no separate "FORRT MCP" — this is it.* A pip install, no login.
 2. **`openaire`** — the hackathon's OpenAIRE MCP behind the Alien gateway. Adds citation/relationship tools. One-time browser login (OAuth).
 
 > For the video you **must** have `replication-radar`; `openaire` is the optional "two MCPs side by side" bonus. Do #1 first.
