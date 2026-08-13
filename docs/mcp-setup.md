@@ -52,10 +52,12 @@ python3 -c "from replication_radar.radar import replication_status; print(replic
 
 ```bash
 claude mcp remove replication-radar
-claude mcp add -s user -e GITHUB_TOKEN=ghp_YOURTOKEN replication-radar -- replication-radar
+claude mcp add replication-radar -s user -e GITHUB_TOKEN=ghp_YOURTOKEN -- replication-radar
 ```
 
-Use a **classic PAT with no scopes ticked** (or a fine-grained token with public read only): star counts are public data, so it needs **no permissions** — it only raises the rate limit. It is stored in `~/.claude.json`, so a no-scope token keeps that safe. (The server also accepts `RADAR_GITHUB_TOKEN`.)
+> **Put the server name _before_ `-e`.** `-e` is variadic — if it comes first it swallows the name too, and you get `error: missing required argument 'commandOrUrl'`. The order is `add <name> -e KEY=val -- <command>` (see `claude mcp add --help`).
+
+Use a **classic PAT with no scopes ticked** (or a fine-grained token with public read only): star counts are public data, so it needs **no permissions** — it only raises the rate limit. It is stored in `~/.claude.json`, so a no-scope token keeps that safe. (The server also accepts `RADAR_GITHUB_TOKEN`.) Verify with `claude mcp get replication-radar`, restart `claude`, and the star counts will resolve.
 
 ---
 
