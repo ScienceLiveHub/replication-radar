@@ -308,14 +308,20 @@ def radar(topic: str, limit: int = 8, pool: int = 30) -> dict:
     }
 
 
-def replication_template(doi: str = "", topic: str = "", owner: str = "") -> dict:
+def replication_template(doi: str = "", topic: str = "", owner: str = "",
+                         dataset: str = "", software: str = "") -> dict:
     """The FORRT replication template — the scaffold to actually DO a replication and
     publish its signed Science Live nanopublication chain (the 'produce' half of the loop
     that radar / replication_status / find_independent_software only discover).
 
     Pass the target `doi` and/or a short `topic` and it suggests a GitHub repo name from the
     paper (`<topic>-replication`). Pass `owner` (a GitHub user/org) to check the candidates
-    for availability and pick a free one — so you can rename if the name already exists."""
+    for availability and pick a free one — so you can rename if the name already exists.
+
+    Pass the `dataset` (its DOI/name, from the OpenAIRE MCP) and `software` (the author-disjoint
+    tool from find_independent_software) you settled on, and it returns a `handoff` DISCOVERY.md
+    to write into the new repo — because `gh repo create --template` copies a BLANK template and
+    does not carry over what you decided, so the fresh in-repo session would otherwise lose it."""
     paper = openaire.get_by_doi(doi) if doi else None
     workflow = [
         f"Create your own repo from the template — 'Use this template' at {FORRT_TEMPLATE}/generate "
@@ -372,12 +378,39 @@ def replication_template(doi: str = "", topic: str = "", owner: str = "") -> dic
             "create_repo": f"gh repo create {name} --template {FORRT_TEMPLATE_SLUG} --public --clone && cd {name}",
             "private_variant": f"gh repo create {name} --template {FORRT_TEMPLATE_SLUG} --private --clone && cd {name}",
             "then": (
-                "The agent can run `create_repo` from the discovery session to create + clone the repo. THEN "
-                f"open a FRESH agent session INSIDE it (`cd {name} && claude`) to run the replication: Claude "
-                "Code loads a project's CLAUDE.md/AGENTS.md, slash commands and .mcp.json only at session START, "
-                "not on a mid-session cd — so discovery ends at repo creation, and the replication runs in a "
-                "session rooted in the new repo (where the template's manual + /init-template are available)."
+                "The agent can run `create_repo` from the discovery session to create + clone the repo, then "
+                "WRITE the `handoff` file (DISCOVERY.md) into it and commit — so the paper/dataset/software you "
+                f"chose aren't lost. THEN open a FRESH agent session INSIDE it (`cd {name} && claude`) to run the "
+                "replication: Claude Code loads a project's CLAUDE.md/AGENTS.md, slash commands and .mcp.json only "
+                "at session START, not on a mid-session cd — so discovery ends at repo creation, and the "
+                "replication runs in a session rooted in the new repo (where the template's manual + /init-template "
+                "are available)."
             ),
+        }
+        title = out.get("target_title") or (paper.title if paper else "") or topic or "the target paper"
+        hlines = [
+            "# Discovery decisions",
+            "",
+            "_Carried over from the replication-radar discovery session. `gh repo create --template` copies a",
+            "BLANK template and does not record these — this file bridges the gap so the fresh in-repo session",
+            "(and `/init-template`) has what you settled on._",
+            "",
+            f"- **Paper to replicate:** {title}" + (f" — DOI `{doi}`" if doi else ""),
+            f"- **Independent dataset:** {dataset or '(fill in — found via the OpenAIRE MCP, cite by DOI)'}",
+            f"- **Reusable software:** {software or '(fill in — the author-disjoint tool from find_independent_software)'}",
+            f"- **Repo:** {name}",
+            "",
+            "## Next (in this repo, in a fresh agent session)",
+            "1. `/init-template` — bootstrap (author identity + the paper DOI above).",
+            "2. Put the paper PDF in `paper/`.",
+            "3. Phase 1: record the dataset DOI + methodology in `nanopubs/drafts/`; use the software above as the independent engine.",
+        ]
+        out["handoff"] = {
+            "file": "DISCOVERY.md",
+            "content": "\n".join(hlines) + "\n",
+            "instruction": "After running quickstart.create_repo, WRITE this content to DISCOVERY.md in the new "
+                           "repo and commit it (git add DISCOVERY.md && git commit && git push) BEFORE opening the "
+                           "fresh in-repo session — otherwise the paper/dataset/software you chose are lost.",
         }
     if doi:
         out["target_doi"] = doi

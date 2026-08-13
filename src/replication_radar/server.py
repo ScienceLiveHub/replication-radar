@@ -79,7 +79,8 @@ def verified_claims() -> dict:
 
 
 @mcp.tool()
-def replication_template(doi: str = "", topic: str = "", owner: str = "") -> dict:
+def replication_template(doi: str = "", topic: str = "", owner: str = "",
+                         dataset: str = "", software: str = "") -> dict:
     """The FORRT replication template — how to actually DO a replication and publish its
     signed Science Live nanopublication chain (the 'produce' half of the loop; radar /
     replication_status / find_independent_software only DISCOVER). Call this whenever the
@@ -93,9 +94,13 @@ def replication_template(doi: str = "", topic: str = "", owner: str = "") -> dic
     `topic` and it suggests a GitHub repo name (`<topic>-replication`); pass `owner` (your
     GitHub user/org) to check the candidates for availability and pick a free name. It also
     returns a `quickstart.create_repo` command (`gh repo create … --template … --clone`) the
-    agent can run to create+clone the repo straight from the discovery session — then the user
-    opens a fresh agent session inside the repo to run the replication."""
-    return _replication_template(doi=doi or "", topic=topic or "", owner=owner or "")
+    agent can run to create+clone the repo straight from the discovery session. Pass the
+    `dataset` and `software` you settled on and it also returns a `handoff` (DISCOVERY.md) to
+    write into the new repo — `gh repo create` copies a BLANK template, so without this the
+    fresh in-repo session loses the paper/dataset/software you chose. Then the user opens a
+    fresh agent session inside the repo to run the replication."""
+    return _replication_template(doi=doi or "", topic=topic or "", owner=owner or "",
+                                 dataset=dataset or "", software=software or "")
 
 
 @mcp.tool()
