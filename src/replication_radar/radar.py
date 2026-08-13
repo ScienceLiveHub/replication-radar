@@ -39,15 +39,22 @@ def _dedup_by_doi(products: list) -> list:
     return out
 
 
+_IMPACT_SORT = "influence DESC"  # fetch publications impact-first, not by OpenAIRE relevance
+
+
 def _publication_pool(topic: str, size: int) -> list:
     """Robust pool: OpenAIRE free-text terms are AND-ed, so a long topic can return
     little. Query the full topic and (if thin) the most distinctive single term,
-    then union and de-duplicate by DOI."""
-    pool = openaire.search_products(topic, "publication", size=size)
+    then union and de-duplicate by DOI.
+
+    Fetched impact-first (`_IMPACT_SORT`) so the pool is the field's high-impact papers —
+    relevance order buries a field's most-cited paper past the fetch window (see
+    `openaire.search_products`), which is what hid Oliver 2018 for "marine heatwave"."""
+    pool = openaire.search_products(topic, "publication", size=size, sort_by=_IMPACT_SORT)
     terms = [t for t in topic.split() if len(t) > 3]
     if len(pool) < 5 and len(terms) > 1:
         longest = max(terms, key=len)
-        pool += openaire.search_products(longest, "publication", size=size)
+        pool += openaire.search_products(longest, "publication", size=size, sort_by=_IMPACT_SORT)
     return _dedup_by_doi(pool)
 
 
