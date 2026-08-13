@@ -25,7 +25,7 @@ On GitHub, open [`ScienceLiveHub/forrt-replication-template`](https://github.com
 gh repo create my-replication --template ScienceLiveHub/forrt-replication-template --public
 ```
 
-> **Naming tip:** you choose the exact paper in step 3, so you're naming the repo before you know it. Either start generic (`my-replication`) and **rename it on GitHub** once you've picked the paper, or — if you already have a topic in mind — name it self-describingly with a convention like **`<firstauthor><year>-replication`** (e.g. `soroye2020-replication`) or **`replication-<topic>`** (e.g. `replication-bumblebee-decline`). A consistent, descriptive name keeps a shelf of replications easy to scan and makes each repo's purpose obvious to others.
+> **Naming tip:** you choose the exact paper in step 3, so you're naming the repo before you know it. Either start generic (`my-replication`) and **rename it on GitHub** once you've picked the paper, or — if you already have a topic in mind — name it self-describingly with a convention like **`<firstauthor><year>-replication`** (e.g. `soroye2020-replication`) or **`<topic>-replication`** (e.g. `bumblebee-decline-replication`). A consistent, descriptive name keeps a shelf of replications easy to scan and makes each repo's purpose obvious to others. Or let the agent name it — **`replication_template(doi, topic, owner)`** suggests a `<topic>-replication` name and, given your GitHub `owner`, checks it's free (skipping any that already exist).
 
 ### 2. Clone it and open it in your agent
 
@@ -51,13 +51,15 @@ It calls **`find_independent_software`** and lists reusable, author-disjoint too
 
 **Naming a specific MCP in your question — "use the replication-radar MCP…" — is your guarantee the agent will use it**, answering from that tool's live, grounded data rather than from its own memory. You don't *have* to every time: once it's connected, the agent usually reaches for the right tool on its own when your question matches. But naming it removes the guesswork — worth doing on your first question, when a request is ambiguous, and whenever you want the tool call to visibly fire (e.g. on camera). The same applies to the OpenAIRE MCP.
 
-The three tools behind these questions:
+The tools behind these questions:
 
 | Ask your agent… | It calls | You get |
 |---|---|---|
 | "What bumble-bee decline work is worth replicating?" | `radar("bumble bee decline")` | impact-ranked **OPEN** targets (+ any already **VERIFIED**) |
 | "Has this paper been replicated, and did it hold?" | `replication_status(doi)` | the verdict(s), or `open` |
 | "Is there independent software I could reuse?" | `find_independent_software(doi)` | reusable tooling **not by the original team** |
+| "Set me up to replicate this — and suggest a repo name" | `replication_template(doi, topic, owner)` | the FORRT template + workflow + a free `<topic>-replication` repo name (availability-checked) |
+| "Find a dataset I can replicate with" | `find_dataset(topic)` | a hand-off to the **OpenAIRE MCP** dataset search (citable DOI) |
 
 Pick a target that's high-impact, not already done, and has independent tooling — that's what makes it a *replication*, not a from-scratch reproduction. *(Claude Code offers a `/radar` shortcut that runs this for you, but the tools are identical in any agent.)*
 
@@ -110,7 +112,7 @@ Where it goes, per client:
 
 **3 · Restart the client** and confirm the four tools appear in its tool list.
 
-The four tools, all grounded in the OpenAIRE Graph and the nanopublication network:
+The tools, all grounded in the OpenAIRE Graph and the nanopublication network:
 
 | Tool | What it does |
 |---|---|
@@ -118,12 +120,18 @@ The four tools, all grounded in the OpenAIRE Graph and the nanopublication netwo
 | `replication_status(doi)` | Whether a specific paper has been independently replicated, and with what verdict. |
 | `find_independent_software(topic / doi)` | Independent software implementations related to a paper or topic. |
 | `verified_claims()` | The set of claims that have been independently checked on the network. |
+| `replication_template(doi, topic, owner)` | The **produce** half: the FORRT template + the end-to-end workflow, and a suggested `<topic>-replication` repo name — pass your GitHub `owner` and it checks availability so a taken name is skipped. |
+| `find_dataset(topic)` | Datasets aren't searched here — this hands off to the **OpenAIRE MCP** (`search_research_products type=dataset`) and how to cite the result by DOI. |
+
+The first four **discover**; `replication_template` moves you into **producing** the replication, and `find_dataset` points at the OpenAIRE MCP for the data.
 
 Example prompts once it's connected:
 
 - *"What high-impact work on species distribution models is worth replicating and hasn't been checked yet?"*
 - *"Has `<doi>` been independently replicated? What was the verdict?"*
 - *"Find independent software implementations I could reuse for this replication."*
+- *"Set me up to replicate this paper and suggest an available repo name under my GitHub account."*
+- *"Find me a dataset (with a citable DOI) to replicate this with."*
 
 The agent handles discovery and status; the actual replication and signing stay with you and the FORRT template — which is itself agent-ready (it ships an `.mcp.json` and agent instructions), so you can drive the second half of the loop with an agent too.
 
