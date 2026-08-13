@@ -1,15 +1,15 @@
 {
   "title": "Replication Radar — methodology & data provenance",
   "summary": "Replication Radar joins three public, grounded sources into one view of a research field: the OpenAIRE Graph (what exists and how cited it is), the Science Live nanopublication network (whether a claim has been independently replicated and with what verdict), and FAIR-software signals (whether the replication's code is reusable). This document states, for every label and score in the interface, exactly where it comes from and how it is computed. It is served as JSON (this file) and rendered as a page at /methodology.html.",
-  "version": "0.3.2",
-  "updated": "2026-06-16",
+  "version": "0.4.3",
+  "updated": "2026-08-13",
   "license": "CC-BY-4.0",
   "sources": [
     { "id": "openaire", "name": "OpenAIRE Graph", "url": "https://graph.openaire.eu/", "api": "https://api.openaire.eu/graph/v1", "role": "Research products (papers, software, datasets), citation-impact indicators, open-access status, subject classification (FOS, SDG), and code/data links. Queried live from the browser; no key required." },
     { "id": "bip", "name": "BIP! citation indicators (via OpenAIRE)", "url": "https://bip.imsi.athenarc.gr/", "role": "The C1–C5 impact and impulse classes are BIP! indicators carried in the OpenAIRE record." },
     { "id": "sciencelive", "name": "Science Live nanopublication network", "url": "https://sciencelive4all.org", "api": "https://query.knowledgepixels.com/repo/full", "role": "FORRT replication chains as signed nanopublications: the Outcome (verdict), the Study (method), the Claim (what was tested) and CiTO citations to the original paper. Queried live via SPARQL; author-agnostic (any signer)." },
     { "id": "fairsoftware", "name": "fair-software.eu recommendations", "url": "https://fair-software.eu/", "role": "The five FAIR-for-research-software recommendations we score a replication's code against." },
-    { "id": "github", "name": "GitHub REST API", "url": "https://docs.github.com/rest", "role": "Repository existence, licence, citation file, release/quality signals, stars and forks for the FAIR-software check (unauthenticated, 60 requests/hour)." },
+    { "id": "github", "name": "GitHub REST API", "url": "https://docs.github.com/rest", "role": "Repository existence, licence, citation file, release/quality signals, and stars/forks — used both for the FAIR-software check and as the GitHub-star reuse signal in the reusable-software ranking (unauthenticated, 60 requests/hour; set GITHUB_TOKEN to raise the limit)." },
     { "id": "swh", "name": "Software Heritage API", "url": "https://archive.softwareheritage.org/api/", "role": "Whether the replication's code is archived in Software Heritage (long-term preservation), for the FAIR-software check." },
     { "id": "zenodo", "name": "Zenodo API", "url": "https://developers.zenodo.org/", "role": "Resolving a Zenodo deposit to its source GitHub repository and DOI when OpenAIRE lacks a direct code link." },
     { "id": "turingway", "name": "The Turing Way", "url": "https://the-turing-way.netlify.app/", "role": "A community handbook for reproducible, ethical and collaborative research — the language-agnostic reference behind the 'RSE practices' explanations (documentation, testing, continuous integration)." },
@@ -41,6 +41,8 @@
       "means": "Whether independent replications agree. Many-agree differs from disagree.", "computed": "From the verdict counts across all of a paper's outcomes — see the 'agreement' score below.", "limits": "Depends on how many replications exist; one confirmation is weaker evidence than several." },
     { "id": "fair", "name": "FAIR-software score (N/5)", "shownAs": "FAIR software N/5 + per-recommendation checks", "source": "fairsoftware",
       "means": "How reusable the replication's code is, on the five fair-software.eu recommendations: public repository, open licence, in a registry, citable (CITATION.cff / DOI), and quality artefacts.", "computed": "Computed live from the GitHub API (repository, licence, citation file, quality), Software Heritage (archival/registry) and Zenodo (DOI). One point per met recommendation. Only ever run on a replication we have a real repository URL for.", "limits": "GitHub unauthenticated rate limit is 60/hour; a check can be skipped if the limit is hit." },
+    { "id": "reusablesoftware", "name": "Reusable software for a field", "shownAs": "the reusable-software list (and the MCP find_independent_software tool)", "source": "openaire",
+      "means": "Software an RSE could pick up to replicate work in this field, restricted to engines NOT authored by the paper's own team (author-disjoint = replication, not reproduction).", "computed": "OpenAIRE type=software matching the field, filtered to author-disjoint records, ranked by the reusable-software score below (resolvable repository · Software Heritage · downloads · citations · GitHub stars), with the repository resolved via Zenodo when OpenAIRE omits it.", "limits": "Keyword recall is OpenAIRE's — a tool whose record doesn't contain the search terms won't appear (e.g. a narrow topic can miss an established tool); the field's software may be thin or dominated by one-off study deposits." },
     { "id": "gap", "name": "The replication-gap map", "shownAs": "the composition bar at the top", "source": "sciencelive",
       "means": "How much of the matched high-impact work has actually been independently checked — the rest is the replication gap.", "computed": "A composition of the ranked list by status (reproducible / validated / contested / needs check / dormant).", "limits": "Reflects the current search and the current network coverage." }
   ],
@@ -53,7 +55,10 @@
       "explanation": "Each outcome is one signed nanopublication; records without a signed outcome are not counted." },
     { "id": "fair", "name": "FAIR-software score",
       "formula": "1 point for each met recommendation, out of 5: public repository · open licence · in a registry · citable (CITATION.cff or DOI) · quality artefacts.",
-      "explanation": "fair-software.eu's five recommendations, evaluated from live GitHub / Software Heritage / Zenodo signals." }
+      "explanation": "fair-software.eu's five recommendations, evaluated from live GitHub / Software Heritage / Zenodo signals." },
+    { "id": "softwarereuse", "name": "Reusable-software ranking",
+      "formula": "In the web app: a quality composite a one-off deposit can't fake — the FAIR-software score (0–5) + the count of RSE good-practice signals (0–5) + a GitHub-star bonus = min(3, log10(stars+1)·1.6) − 1.5 if the software needs a proprietary/paid runtime, plus 0.4×the OpenAIRE reuse signal and +0.5 if Software Heritage archived. In the MCP find_independent_software tool (no per-repo FAIR assessment): a resolvable code repository (+2) + Software Heritage (+2) + has downloads (+1) + has citations (+1) + the same GitHub-star bonus. Both rank author-disjoint software only.",
+      "explanation": "Citation class is useless for research software (nearly everything is C5 / 0-citation), so software is ranked by grounded REUSE signals instead. GitHub stars are the signal that separates an established, widely-used tool from a one-off study deposit — read from the repo, falling back to the Zenodo→GitHub link when OpenAIRE omits the repo URL, and capped on a log scale so a handful of very-starred repos can't dominate. A star lookup that is rate-limited or unreachable falls back to the other signals, never a guess. GitHub's unauthenticated rate limit is 60/hour; set GITHUB_TOKEN to raise it." }
   ],
   "practices": [
     { "id": "documented", "name": "Documented",
