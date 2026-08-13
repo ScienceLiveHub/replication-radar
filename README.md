@@ -34,6 +34,8 @@ The Radar joins three sources to add a **replication layer** on top:
 | `find_independent_software(doi, topic)` | Reusable engines **not authored by the original team** (author-disjoint = *replication*, not *reproduction*), ranked by reuse signal — repo · Software Heritage · downloads · **GitHub stars** — not citations (returns `stars` + `rank_score`) |
 | `replication_status(doi)` | Has this DOI been replicated, did it hold? Verdict(s) — **live from the nanopub network, any signer** — with status, CiTO relation, repo, and signed Outcome/CiTO nanopub links; `open` if not |
 | `verified_claims()` | The whole **verified-knowledge corpus** — every claim the network holds a verdict for (author-agnostic) |
+| `replication_template(doi, topic, owner)` | The **FORRT replication template** (the *produce* half) — the [scaffold repo](https://github.com/ScienceLiveHub/forrt-replication-template), the workflow, and a suggested `<topic>-replication` repo name (checks availability under `owner`) |
+| `find_dataset(topic)` | **Hand-off to the OpenAIRE MCP** for datasets — replication-radar doesn't search datasets; this says how to find a citable dataset DOI there |
 
 The verdict tools pull **live** from the nanopub network (the FORRT Outcome/CiTO templates on
 `query.knowledgepixels.com`); the bundled `verdicts.json` is an offline fallback. So the MCP is the

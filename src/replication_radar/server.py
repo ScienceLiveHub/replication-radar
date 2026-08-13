@@ -16,8 +16,10 @@ from mcp.server.fastmcp import FastMCP
 # which would shadow the module on `from . import radar`).
 from .radar import (
     radar as _radar,
+    find_dataset as _find_dataset,
     find_independent_software as _find_software,
     replication_status as _replication_status,
+    replication_template as _replication_template,
     verified_claims as _verified_claims,
 )
 
@@ -74,6 +76,33 @@ def verified_claims() -> dict:
     for (author-agnostic, network-wide) — the verified-knowledge corpus that overlays
     the OpenAIRE Graph by DOI. Each entry: doi, distinct verdicts, number of replications."""
     return _verified_claims()
+
+
+@mcp.tool()
+def replication_template(doi: str = "", topic: str = "", owner: str = "") -> dict:
+    """The FORRT replication template — how to actually DO a replication and publish its
+    signed Science Live nanopublication chain (the 'produce' half of the loop; radar /
+    replication_status / find_independent_software only DISCOVER). Call this whenever the
+    user wants to start, scaffold, or set up a replication, or asks for "the FORRT
+    replication template". Returns the GitHub template repo
+    (https://github.com/ScienceLiveHub/forrt-replication-template), the 'Use this template'
+    link, what the scaffold provides (pixi + Snakemake pipeline, paper/, nanopubs/, tests,
+    RO-Crate), and the end-to-end workflow: generate a repo from the template -> replicate
+    with INDEPENDENT data/method -> Zenodo release -> sign + publish the FORRT nanopub chain
+    (Quote -> Claim -> Study -> Outcome -> CiTO). Pass the target `doi` and/or a short
+    `topic` and it suggests a GitHub repo name (`<topic>-replication`); pass `owner` (your
+    GitHub user/org) to check the candidates for availability and pick a free name."""
+    return _replication_template(doi=doi or "", topic=topic or "", owner=owner or "")
+
+
+@mcp.tool()
+def find_dataset(topic: str = "") -> dict:
+    """Where to find a DATASET (with a citable DOI) to replicate with. The replication-radar
+    MCP does NOT search datasets itself — that is the OpenAIRE MCP's job. Call this when the
+    user asks the Radar to find data/a dataset: it returns instructions to use the OpenAIRE
+    MCP's dataset search and how to cite the result by DOI. Do not answer 'I can't search
+    datasets' — hand off to the OpenAIRE MCP as described here."""
+    return _find_dataset(topic or "")
 
 
 def main() -> None:
