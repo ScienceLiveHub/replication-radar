@@ -17,4 +17,4 @@ __all__ = [
     "radar", "find_dataset", "find_independent_software", "replication_status",
     "replication_template", "verified_claims",
 ]
-__version__ = "0.4.4"
+__version__ = "0.4.5"
