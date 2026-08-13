@@ -161,11 +161,22 @@ def _to_product(rec: dict) -> Product:
     )
 
 
-def search_products(topic: str, type_: str, size: int = 25, page: int = 1) -> list[Product]:
-    """type_ in {publication, software, dataset, other}. Keep `topic` short."""
+def search_products(
+    topic: str, type_: str, size: int = 25, page: int = 1, sort_by: str | None = None
+) -> list[Product]:
+    """type_ in {publication, software, dataset, other}. Keep `topic` short.
+
+    `sort_by` is an OpenAIRE sort expression, e.g. "influence DESC". Publications should be
+    fetched impact-first so the candidate pool IS the field's high-impact papers, matching the
+    web app's ranking. OpenAIRE's default *relevance* order can bury a field's most-cited paper
+    past the fetch window — e.g. for "marine heatwave", Oliver 2018 (the 1738-cite Nature Comms
+    paper) sits beyond relevance rank 80, so a relevance fetch never sees it. Software/datasets
+    keep the default (relevance): research software is uniformly C5/0-citation, so impact sort
+    is meaningless there.
+    """
     data = _get(
         "researchProducts",
-        {"search": topic, "type": type_, "pageSize": size, "page": page},
+        {"search": topic, "type": type_, "pageSize": size, "page": page, "sortBy": sort_by},
     )
     return [_to_product(r) for r in (data.get("results") or [])]
 

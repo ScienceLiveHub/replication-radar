@@ -166,7 +166,12 @@ const priorityOf = (t) => {
 };
 
 async function search(topic, type, size) {
-  const u = `${API}/researchProducts?search=${encodeURIComponent(topic)}&type=${type}&pageSize=${size}`;
+  // Publications: fetch impact-first, not by OpenAIRE relevance. Relevance order buries a
+  // field's most-cited paper past the fetch window (e.g. "marine heatwave" hides Oliver 2018
+  // beyond rank 80), so the pool would miss the very papers worth replicating. Software/
+  // datasets keep relevance (research software is uniformly C5/0-citation — impact sort is moot).
+  const sort = type === "publication" ? `&sortBy=${encodeURIComponent("influence DESC")}` : "";
+  const u = `${API}/researchProducts?search=${encodeURIComponent(topic)}&type=${type}&pageSize=${size}${sort}`;
   const r = await fetch(u);
   if (!r.ok) throw new Error(`OpenAIRE ${r.status}`);
   return (await r.json()).results || [];
