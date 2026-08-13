@@ -19,6 +19,7 @@ import json
 import math
 import os
 import re
+import urllib.error
 import urllib.request
 
 _TIMEOUT = float(os.environ.get("RADAR_HTTP_TIMEOUT", "30"))
@@ -87,6 +88,33 @@ def stars(repo_url: str | None) -> int | None:
     d = _get_json(f"https://api.github.com/repos/{g[0]}/{g[1]}", headers)
     val = int(d["stargazers_count"]) if d and "stargazers_count" in d else None
     _stars_cache[key] = val
+    return val
+
+
+_exists_cache: dict[str, bool | None] = {}
+
+
+def repo_exists(owner: str, name: str) -> bool | None:
+    """True if github.com/owner/name exists, False if it 404s, None if unknown
+    (no owner, rate-limited, or network error). Cached. GITHUB_TOKEN-aware."""
+    if not owner or not name:
+        return None
+    key = f"{owner}/{name}".lower()
+    if key in _exists_cache:
+        return _exists_cache[key]
+    headers = {"Accept": "application/vnd.github+json", "User-Agent": "replication-radar"}
+    if _TOKEN:
+        headers["Authorization"] = f"Bearer {_TOKEN}"
+    val: bool | None
+    try:
+        req = urllib.request.Request(f"https://api.github.com/repos/{owner}/{name}", headers=headers)
+        with urllib.request.urlopen(req, timeout=_TIMEOUT):
+            val = True
+    except urllib.error.HTTPError as e:
+        val = False if e.code == 404 else None
+    except Exception:
+        val = None
+    _exists_cache[key] = val
     return val
 
 

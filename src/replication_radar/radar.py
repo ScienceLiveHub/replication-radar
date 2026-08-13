@@ -11,7 +11,44 @@ Three capabilities (exposed as MCP tools in server.py):
 """
 from __future__ import annotations
 
+import re
+
 from . import github, openaire, verdicts
+
+# The scaffold that turns a discovered target into a real, cited, signed replication —
+# the "produce" half of the loop the discovery tools only surface.
+FORRT_TEMPLATE = "https://github.com/ScienceLiveHub/forrt-replication-template"
+
+# words dropped when slugging a title/topic into a repo name (kept: the content terms)
+_SLUG_STOP = {"the", "a", "an", "and", "or", "of", "in", "on", "for", "to", "with", "from",
+              "by", "at", "is", "are", "how", "over", "past", "more", "less", "longer",
+              "shorter", "using", "study", "evidence", "global", "new", "century", "widespread"}
+
+
+def _slug(text: str, max_words: int = 4) -> str:
+    words = [w for w in re.sub(r"[^a-z0-9\s-]", " ", (text or "").lower()).split()
+             if w and w not in _SLUG_STOP]
+    return "-".join(words[:max_words]).strip("-")
+
+
+def _suggest_repo_names(topic: str, paper) -> list[str]:
+    """Repo-name candidates following the `<topic>-replication` kebab-case convention —
+    several, so there's an alternative if the first is taken."""
+    base = _slug(topic) or (_slug(paper.title) if paper else "")
+    cands: list[str] = []
+    if base:
+        cands.append(f"{base}-replication")
+    if paper and paper.authors and paper.year:
+        cands.append(f"{re.sub(r'[^a-z0-9]', '', paper.authors[0].lower())}{paper.year}-replication")
+    if base and paper and paper.year:
+        cands.append(f"{base}-{paper.year}-replication")
+    if base:
+        cands += [f"{base}-replication-{i}" for i in (2, 3)]
+    seen, out = set(), []
+    for n in cands:
+        if n and n not in seen:
+            seen.add(n); out.append(n)
+    return out or ["replication-study"]
 
 # impact class -> 0..1 (C1 best). Used in the readiness score.
 _CLASS_SCORE = {"C1": 1.0, "C2": 0.8, "C3": 0.6, "C4": 0.4, "C5": 0.2, None: 0.2}
@@ -250,6 +287,14 @@ def radar(topic: str, limit: int = 8, pool: int = 30) -> dict:
         "topic": topic,
         "targets": targets,
         "verified_in_field": verified_in_field,
+        # how to ACT on an OPEN target — scaffold the replication + publish its signed chain
+        "replicate_with": {
+            "template_repo": FORRT_TEMPLATE,
+            "tool": "replication_template",
+            "note": "To replicate an OPEN target: create a repo from this FORRT template, replicate "
+                    "with independent data/method, then sign + publish its Science Live nanopub chain "
+                    "(call replication_template for the full workflow).",
+        },
         "open_count": sum(1 for t in targets if t["status"] == "OPEN"),
         "verified_count": sum(1 for t in targets if t["status"] == "VERIFIED") + len(verified_in_field),
         "funder_context": {
@@ -259,4 +304,90 @@ def radar(topic: str, limit: int = 8, pool: int = 30) -> dict:
                 for f in land.funders[:5]
             ],
         },
+    }
+
+
+def replication_template(doi: str = "", topic: str = "", owner: str = "") -> dict:
+    """The FORRT replication template — the scaffold to actually DO a replication and
+    publish its signed Science Live nanopublication chain (the 'produce' half of the loop
+    that radar / replication_status / find_independent_software only discover).
+
+    Pass the target `doi` and/or a short `topic` and it suggests a GitHub repo name from the
+    paper (`<topic>-replication`). Pass `owner` (a GitHub user/org) to check the candidates
+    for availability and pick a free one — so you can rename if the name already exists."""
+    paper = openaire.get_by_doi(doi) if doi else None
+    workflow = [
+        f"Create your own repo from the template — 'Use this template' at {FORRT_TEMPLATE}/generate "
+        "(it is a GitHub template repository).",
+        "Add the paper you are replicating (paper/) and set the target.",
+        "Find the data — use the OpenAIRE MCP (search_research_products, type=dataset) for a citable "
+        "dataset DOI; replication-radar does not search datasets itself. Independent data strengthens it.",
+        "Replicate: reproduce the paper's claim with INDEPENDENT data and/or method (replication, "
+        "not just re-running the original code). pixi gives the environment; the Snakefile runs the "
+        "reproducible pipeline (figure + verdict).",
+        "AI-guided: CLAUDE.md / AGENTS.md drive an agent through the scaffold, the run, and drafting "
+        "the FORRT nanopublication chain (Quote -> Claim -> Study -> Outcome -> CiTO).",
+        "Release: archive to Zenodo (RO-Crate + codemeta + CITATION.cff included) and SIGN + publish "
+        "the nanopublication chain to Science Live.",
+        "The loop closes: once published, replication_status(doi) and the Radar's verdict overlay "
+        "surface your verdict network-wide, author-agnostic.",
+    ]
+    out = {
+        "template_repo": FORRT_TEMPLATE,
+        "use_this_template": f"{FORRT_TEMPLATE}/generate",
+        "is_github_template": True,
+        "what": "Self-contained scaffold for FORRT replication studies — paper PDF in, "
+                "Zenodo-archived release + Science Live nanopublication chain out; AI-guided "
+                "via CLAUDE.md / AGENTS.md.",
+        "provides": ["pixi environment", "Snakefile pipeline", "notebooks/", "paper/",
+                     "nanopubs/ (FORRT chain templates)", "scripts/ (chain & story draft builders)",
+                     "tests", "RO-Crate + codemeta + CITATION.cff", "Dockerfile"],
+        "workflow": workflow,
+        "use_after": "radar() / replication_status() — this turns a discovered, un-replicated "
+                     "target into a real, cited, signed replication.",
+    }
+    if doi or topic:
+        candidates = _suggest_repo_names(topic, paper)
+        out["repo_naming_convention"] = "<topic>-replication (kebab-case) — you can rename freely"
+        if owner:
+            # exists: True = taken, False = available, None = unknown (rate-limited/error)
+            checked = [{"name": n, "exists": github.repo_exists(owner, n)} for n in candidates]
+            free = [c["name"] for c in checked if c["exists"] is False]
+            out["suggested_repo_name"] = free[0] if free else candidates[0]
+            out["repo_name_candidates"] = checked
+            out["checked_owner"] = owner
+            out["repo_name_note"] = (
+                "Picked the first name that is free under this owner; candidates with exists=true are "
+                "taken. Change it to any free name you like." if free else
+                "All candidates are taken or availability is unknown — choose another name "
+                "(append a suffix, or use the author-year form)."
+            )
+        else:
+            out["suggested_repo_name"] = candidates[0]
+            out["suggested_repo_name_alternatives"] = candidates[1:]
+            out["repo_name_note"] = "Pass `owner` (your GitHub user/org) to auto-check availability and skip taken names."
+    if doi:
+        out["target_doi"] = doi
+    if paper:
+        out["target_title"] = paper.title
+    return out
+
+
+def find_dataset(topic: str = "") -> dict:
+    """The replication-radar MCP does not search datasets — that is the OpenAIRE MCP's role.
+    Returns a hand-off telling the agent how to find a citable dataset there (so it should
+    NOT answer 'I can't search datasets')."""
+    q = topic or "<topic>"
+    return {
+        "handled_by": "openaire (the OpenAIRE MCP)",
+        "why": "replication-radar covers papers (radar), replication verdicts (replication_status) "
+               "and reusable software (find_independent_software). DATASETS are the OpenAIRE MCP's "
+               "job — use it directly instead of saying you can't search datasets.",
+        "how": f'Call the OpenAIRE MCP: search_research_products(query="{q}", type=["dataset"]) — it '
+               "returns datasets with citable DOIs. Prefer this over find_datasets_by_topic (sparse, "
+               "usually 0).",
+        "then": "Cite the chosen dataset by its DOI in the replication (data/ + the FORRT chain). "
+                "Independent data from the original paper strengthens the replication.",
+        "example": "topic 'ERA5' -> C3S ERA5 dataset DOI 10.24381/cds.adbb2d47 (the data our "
+                   "marine-heatwave example uses).",
     }
