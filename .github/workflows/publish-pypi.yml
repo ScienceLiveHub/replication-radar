@@ -1,10 +1,21 @@
 name: Publish to PyPI
 
-# Publishes replication-radar to PyPI on each GitHub Release, using PyPI
-# Trusted Publishing (OIDC) — no API token stored in the repo.
+# Release automation for replication-radar.
 #
-# One-time setup on PyPI (pypi.org -> your account -> Publishing -> Add a pending
-# publisher), BEFORE the first release:
+# Trigger it by pushing a version tag — one push does everything:
+#     # bump version in pyproject.toml + src/replication_radar/__init__.py, commit to main, then:
+#     git tag v0.4.2
+#     git push origin v0.4.2
+#   -> builds sdist+wheel, smoke-tests, CREATES the GitHub Release (auto notes + artefacts),
+#      and PUBLISHES to PyPI via Trusted Publishing (OIDC — no API token stored in the repo).
+#
+# Still supported: publishing on a manually-created GitHub Release (release: published) and a
+# manual workflow_dispatch. A Release created by this workflow's GITHUB_TOKEN does NOT re-trigger
+# `release: published`, so tagging never double-publishes.
+#
+# NOTE: PyPI Trusted Publishing matches the *workflow filename* — keep this file named
+# `publish-pypi.yml`. One-time setup on PyPI (pypi.org -> account -> Publishing -> Add a pending
+# publisher), done before the first release:
 #   PyPI project name : replication-radar
 #   Owner             : ScienceLiveHub
 #   Repository name   : replication-radar
@@ -12,6 +23,8 @@ name: Publish to PyPI
 #   Environment name  : pypi
 
 on:
+  push:
+    tags: ["v*"]
   release:
     types: [published]
   workflow_dispatch:
@@ -36,6 +49,25 @@ jobs:
         with:
           name: dist
           path: dist/
+
+  # Create the GitHub Release when a version tag is pushed (auto-generated notes + built artefacts).
+  # Skipped when the run was triggered by an already-published Release or a manual dispatch.
+  github-release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: dist/*
 
   publish:
     needs: build
