@@ -11,7 +11,7 @@ Three capabilities (exposed as MCP tools in server.py):
 """
 from __future__ import annotations
 
-from . import openaire, verdicts
+from . import github, openaire, verdicts
 
 # impact class -> 0..1 (C1 best). Used in the readiness score.
 _CLASS_SCORE = {"C1": 1.0, "C2": 0.8, "C3": 0.6, "C4": 0.4, "C5": 0.2, None: 0.2}
@@ -89,6 +89,21 @@ def verified_claims() -> dict:
     return {"count": len(claims), "claims": claims}
 
 
+_SW_POOL = 100        # software candidates to fetch (established tools are often relevance-buried)
+_RESOLVE_CAP = 40     # max GitHub/Zenodo lookups per call (cached; set GITHUB_TOKEN for headroom)
+
+
+def _sw_rank_score(p, repo: str | None, stars: int | None) -> float:
+    """Reuse score used to RANK software: the OpenAIRE signal plus a bounded GitHub-star bonus.
+    Uses the resolved `repo` (so a Zenodo-linked tool OpenAIRE omitted still gets repo credit)."""
+    s = 0.0
+    if repo:                 s += 2   # a real, resolvable code repository
+    if p.swh_archived:       s += 2   # Software Heritage archived
+    if p.downloads > 0:      s += 1
+    if p.citation_count > 0: s += 1
+    return s + github.star_bonus(stars)   # stars separate established tools from one-off study repos
+
+
 def find_independent_software(
     doi: str | None = None,
     topic: str | None = None,
@@ -109,7 +124,9 @@ def find_independent_software(
         # derive a short topic from the title's leading words
         topic = " ".join((paper.title if paper else "").split()[:3]) or "software"
 
-    pool = openaire.search_products(topic, "software", size=25)
+    # Wide pool: established tools are often relevance-buried in OpenAIRE's software index
+    # (e.g. XMHW ranks ~60th for "marine heatwave"), so a small pool never sees them.
+    pool = openaire.search_products(topic, "software", size=_SW_POOL)
     rows = []
     for p in pool:
         rows.append(
@@ -118,14 +135,32 @@ def find_independent_software(
                 "doi": p.doi,
                 "authors": p.authors,
                 "independent": _independence(original_authors, p.authors),
-                "reuse_score": p.reuse_score,
+                "reuse_score": p.reuse_score,      # OpenAIRE-only signal (kept for transparency)
                 "code_repo": p.code_repo,
                 "swh_archived": p.swh_archived,
                 "downloads": p.downloads,
+                "stars": None,
+                "_p": p,
             }
         )
-    # independent first, then most-reusable
-    rows.sort(key=lambda r: (not r["independent"], -r["reuse_score"]))
+    # Resolve GitHub stars for the independent candidates (bounded + cached, best-effort).
+    # Stars are the missing reuse signal: without them a 0-star one-off study repo ranks like
+    # an established, widely-used tool. Resolve highest OpenAIRE-signal first so the budget is
+    # spent well; the Zenodo fallback recovers repos OpenAIRE omits (that is how XMHW resolves).
+    resolvable = [
+        r for r in rows
+        if r["independent"] and (r["code_repo"] or "zenodo" in (r["doi"] or "").lower())
+    ]
+    resolvable.sort(key=lambda r: (-r["reuse_score"], -r["downloads"]))
+    for r in resolvable[:_RESOLVE_CAP]:
+        repo = github.resolve_repo(r["code_repo"], r["doi"])
+        if repo:
+            r["code_repo"] = repo
+            r["stars"] = github.stars(repo)
+    for r in rows:
+        r["rank_score"] = round(_sw_rank_score(r.pop("_p"), r["code_repo"], r["stars"]), 2)
+    # independent first, then real (stars-augmented) reuse, then downloads
+    rows.sort(key=lambda r: (not r["independent"], -r["rank_score"], -r["downloads"]))
     return {
         "query_topic": topic,
         "original_authors": original_authors,

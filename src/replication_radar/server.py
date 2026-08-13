@@ -40,9 +40,12 @@ def radar(topic: str, limit: int = 8) -> dict:
 @mcp.tool()
 def find_independent_software(doi: str = "", topic: str = "", limit: int = 8) -> dict:
     """Reusable method software for *replicating* a claim — engines NOT authored by
-    the original paper's team (author-disjoint), ranked by reuse signal (code repo +
-    Software Heritage archival + usage), not citations. Pass the original paper's DOI
-    (authors are looked up) and a short topic."""
+    the original paper's team (author-disjoint), ranked by reuse signal — a resolvable
+    code repository + Software Heritage archival + downloads + GitHub stars (the signal
+    that separates an established tool from a one-off study repo) — not citations. Each
+    result carries its `stars` and `rank_score`. Pass the original paper's DOI (authors
+    are looked up) and a short topic; keep the topic broad (a narrow one can miss an
+    established tool whose OpenAIRE record doesn't contain the extra words)."""
     return _find_software(doi=doi or None, topic=topic or None, limit=limit)
 
 
