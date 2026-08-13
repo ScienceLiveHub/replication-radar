@@ -91,7 +91,10 @@ def replication_template(doi: str = "", topic: str = "", owner: str = "") -> dic
     with INDEPENDENT data/method -> Zenodo release -> sign + publish the FORRT nanopub chain
     (Quote -> Claim -> Study -> Outcome -> CiTO). Pass the target `doi` and/or a short
     `topic` and it suggests a GitHub repo name (`<topic>-replication`); pass `owner` (your
-    GitHub user/org) to check the candidates for availability and pick a free name."""
+    GitHub user/org) to check the candidates for availability and pick a free name. It also
+    returns a `quickstart.create_repo` command (`gh repo create … --template … --clone`) the
+    agent can run to create+clone the repo straight from the discovery session — then the user
+    opens a fresh agent session inside the repo to run the replication."""
     return _replication_template(doi=doi or "", topic=topic or "", owner=owner or "")
 
 

@@ -18,6 +18,7 @@ from . import github, openaire, verdicts
 # The scaffold that turns a discovered target into a real, cited, signed replication —
 # the "produce" half of the loop the discovery tools only surface.
 FORRT_TEMPLATE = "https://github.com/ScienceLiveHub/forrt-replication-template"
+FORRT_TEMPLATE_SLUG = "ScienceLiveHub/forrt-replication-template"  # owner/repo, for `gh repo create --template`
 
 # words dropped when slugging a title/topic into a repo name (kept: the content terms)
 _SLUG_STOP = {"the", "a", "an", "and", "or", "of", "in", "on", "for", "to", "with", "from",
@@ -366,6 +367,18 @@ def replication_template(doi: str = "", topic: str = "", owner: str = "") -> dic
             out["suggested_repo_name"] = candidates[0]
             out["suggested_repo_name_alternatives"] = candidates[1:]
             out["repo_name_note"] = "Pass `owner` (your GitHub user/org) to auto-check availability and skip taken names."
+        name = out["suggested_repo_name"]
+        out["quickstart"] = {
+            "create_repo": f"gh repo create {name} --template {FORRT_TEMPLATE_SLUG} --public --clone && cd {name}",
+            "private_variant": f"gh repo create {name} --template {FORRT_TEMPLATE_SLUG} --private --clone && cd {name}",
+            "then": (
+                "The agent can run `create_repo` from the discovery session to create + clone the repo. THEN "
+                f"open a FRESH agent session INSIDE it (`cd {name} && claude`) to run the replication: Claude "
+                "Code loads a project's CLAUDE.md/AGENTS.md, slash commands and .mcp.json only at session START, "
+                "not on a mid-session cd — so discovery ends at repo creation, and the replication runs in a "
+                "session rooted in the new repo (where the template's manual + /init-template are available)."
+            ),
+        }
     if doi:
         out["target_doi"] = doi
     if paper:
