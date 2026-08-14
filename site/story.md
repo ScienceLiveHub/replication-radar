@@ -43,19 +43,21 @@ That reframes everything. Proving a claim needs reusable software, and reusable 
 This isn't a mock-up. Here is a published, signed replication — the end state of the loop, the thing you'd actually cite:
 
 <div class="proofrow">
-  <a class="proofcard" href="https://annefou.github.io/sado-estuary-replication-2026/blog/">
-    <span class="pc-kicker">Read the proof</span>
+  <a class="proofcard" href="https://platform-dev.sciencelive4all.org/np/story?uri=https%3A%2F%2Fw3id.org%2Fnp%2FRA-5NH-xz4WEtYg6xIAda54W6oQ-I-0uOLQUFinPbMrt8">
+    <span class="pc-kicker">Read the proof · on Science Live</span>
     <span class="pc-title">The Sado&nbsp;/&nbsp;Westerschelde replication</span>
     <span class="pc-desc">Open-source Sentinel-2 re-tests a 2021 water-quality claim in the Westerschelde estuary — two independent limbs, one <b>Confirms</b>, one <b>Qualifies</b>. A bottom-line verdict, the replication limbs, and a “Cite this synthesis” box.</span>
     <span class="pc-go">Open the story →</span>
   </a>
-  <a class="proofcard alt" href="https://w3id.org/np/RAAc0B0wTJXoLQNHo12JWYMR9-tD6eVXcAPzzInssvx-M">
+  <a class="proofcard alt" href="https://w3id.org/np/RA-5NH-xz4WEtYg6xIAda54W6oQ-I-0uOLQUFinPbMrt8">
     <span class="pc-kicker">The signed record</span>
     <span class="pc-title">The story nanopublication</span>
     <span class="pc-desc">The cryptographically-signed constellation behind the story — resolvable and citable on the nanopublication network. This is what enters the Radar so the next search finds the claim proven.</span>
     <span class="pc-go">Open the nanopub →</span>
   </a>
 </div>
+
+<p class="mirror-note">Hosted on the Science Live platform — also available as a <a href="https://annefou.github.io/sado-estuary-replication-2026/blog/">static blog mirror</a>.</p>
 
 ## We closed the loop, end to end
 
