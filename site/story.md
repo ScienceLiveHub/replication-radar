@@ -38,6 +38,8 @@ The signals the Radar checks aren't machine-invented metrics. They are what a **
 
 That reframes everything. Proving a claim needs reusable software, and reusable software is **engineering** — the invisible half of reproducible science, done by people whose work earns the same *"0 citations, class C5"* as an abandoned script. Surfacing and **crediting** that work is part of making proof possible: someone has to build the tool a replication runs on. And the Radar is built to be read by **humans as much as by agents** — a person sees the software behind a claim and whether it's been checked; an agent gets the same signals, grounded, so it can *cite instead of guess*. Machine-actionable, but human-first.
 
+A proof needn't stay expert-only, either. Because a constellation is structured and signed, it can be **retold for different audiences** — a plain-language version *for citizens*, another *for schools* — each a signed summary in its own right (attributed as such, never passed off as the record). Verified knowledge that reaches people, not only machines.
+
 ## See a real proof
 
 This isn't a mock-up. Here is a published, signed replication — the end state of the loop, the thing you'd actually cite:
@@ -46,7 +48,7 @@ This isn't a mock-up. Here is a published, signed replication — the end state 
   <a class="proofcard" href="https://platform-dev.sciencelive4all.org/np/story?uri=https%3A%2F%2Fw3id.org%2Fnp%2FRA-5NH-xz4WEtYg6xIAda54W6oQ-I-0uOLQUFinPbMrt8">
     <span class="pc-kicker">Read the proof · on Science Live</span>
     <span class="pc-title">The Sado&nbsp;/&nbsp;Westerschelde replication</span>
-    <span class="pc-desc">Open-source Sentinel-2 re-tests a 2021 water-quality claim in the Westerschelde estuary — two independent limbs, one <b>Confirms</b>, one <b>Qualifies</b>. A bottom-line verdict, the replication limbs, and a “Cite this synthesis” box.</span>
+    <span class="pc-desc">Open-source Sentinel-2 re-tests a 2021 water-quality claim in the Westerschelde estuary — two independent limbs, one <b>Confirms</b>, one <b>Qualifies</b>. A bottom-line verdict, the replication limbs, a “Cite this synthesis” box — and the same proof retold <b>for citizens</b> and <b>for schools</b>.</span>
     <span class="pc-go">Open the story →</span>
   </a>
   <a class="proofcard alt" href="https://w3id.org/np/RA-5NH-xz4WEtYg6xIAda54W6oQ-I-0uOLQUFinPbMrt8">
