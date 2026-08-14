@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1090" width="1680" height="1090">
+<rect x="0" y="0" width="1680" height="1090" rx="0" fill="#ffffff" stroke="none" stroke-width="0"/>
+<text x="60" y="66" font-size="41" fill="#0c2c59" font-weight="700" text-anchor="start" font-family="Georgia, 'Times New Roman', serif" letter-spacing="0">Before you cite a claim, prove it.</text>
+<text x="60" y="103" font-size="21" fill="#5d6470" font-weight="400" text-anchor="start" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">Truth lives at the claim — not the paper. Replication Radar closes the loop from a claim to a citable proof.</text>
+<text x="840.0" y="144" font-size="15" fill="#5d6470" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="3">HOW RESEARCH TRAVELS</text>
+<rect x="100.0" y="168" width="196" height="60" rx="12" fill="#ffffff" stroke="#0c2c59" stroke-width="2.3"/>
+<text x="198.0" y="206" font-size="24" fill="#0c2c59" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">Question</text>
+<line x1="298.0" y1="198.0" x2="312.0" y2="198.0" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<line x1="312.0" y1="198.0" x2="300.52168129283393" y2="191.89686968378342" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<line x1="312.0" y1="198.0" x2="300.52168129283393" y2="204.10313031621658" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<rect x="314.0" y="168" width="196" height="60" rx="12" fill="#f7e6ef" stroke="#be2e78" stroke-width="3.4"/>
+<text x="412.0" y="206" font-size="24" fill="#be2e78" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">Claim</text>
+<text x="412.0" y="253" font-size="14.5" fill="#5d6470" font-weight="600" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">verified_claims</text>
+<line x1="512.0" y1="198.0" x2="526.0" y2="198.0" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<line x1="526.0" y1="198.0" x2="514.5216812928339" y2="191.89686968378342" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<line x1="526.0" y1="198.0" x2="514.5216812928339" y2="204.10313031621658" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<rect x="528.0" y="168" width="196" height="60" rx="12" fill="#ffffff" stroke="#0c2c59" stroke-width="2.3"/>
+<text x="626.0" y="206" font-size="24" fill="#0c2c59" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">Method</text>
+<line x1="726.0" y1="198.0" x2="740.0" y2="198.0" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<line x1="740.0" y1="198.0" x2="728.5216812928339" y2="191.89686968378342" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<line x1="740.0" y1="198.0" x2="728.5216812928339" y2="204.10313031621658" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<rect x="742.0" y="168" width="196" height="60" rx="12" fill="#ffffff" stroke="#0c2c59" stroke-width="2.3"/>
+<text x="840.0" y="206" font-size="24" fill="#0c2c59" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">Data</text>
+<text x="840.0" y="253" font-size="14.5" fill="#5d6470" font-weight="600" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">find_dataset</text>
+<line x1="940.0" y1="198.0" x2="954.0" y2="198.0" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<line x1="954.0" y1="198.0" x2="942.5216812928339" y2="191.89686968378342" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<line x1="954.0" y1="198.0" x2="942.5216812928339" y2="204.10313031621658" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<rect x="956.0" y="168" width="196" height="60" rx="12" fill="#ffffff" stroke="#0c2c59" stroke-width="2.3"/>
+<text x="1054.0" y="206" font-size="24" fill="#0c2c59" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">Software</text>
+<text x="1054.0" y="253" font-size="14.5" fill="#5d6470" font-weight="600" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">find_independent_software</text>
+<line x1="1154.0" y1="198.0" x2="1168.0" y2="198.0" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<line x1="1168.0" y1="198.0" x2="1156.521681292834" y2="191.89686968378342" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<line x1="1168.0" y1="198.0" x2="1156.521681292834" y2="204.10313031621658" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<rect x="1170.0" y="168" width="196" height="60" rx="12" fill="#ffffff" stroke="#0c2c59" stroke-width="2.3"/>
+<text x="1268.0" y="206" font-size="24" fill="#0c2c59" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">Result</text>
+<text x="1268.0" y="253" font-size="14.5" fill="#5d6470" font-weight="600" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">replication_status</text>
+<line x1="1368.0" y1="198.0" x2="1382.0" y2="198.0" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<line x1="1382.0" y1="198.0" x2="1370.521681292834" y2="191.89686968378342" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<line x1="1382.0" y1="198.0" x2="1370.521681292834" y2="204.10313031621658" stroke="#0c2c59" stroke-width="2.3" stroke-linecap="round"/>
+<rect x="1384.0" y="168" width="196" height="60" rx="12" fill="#eaf0f9" stroke="#0c2c59" stroke-width="2.3"/>
+<text x="1482.0" y="206" font-size="24" fill="#0c2c59" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">Paper</text>
+<text x="412.0" y="144" font-size="15.5" fill="#be2e78" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">the unit you cite</text>
+<line x1="412.0" y1="152" x2="412.0" y2="166" stroke="#be2e78" stroke-width="2" stroke-linecap="round"/>
+<text x="840.0" y="300" font-size="21" fill="#15294a" font-weight="600" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">When you rely on a published claim, there are two ways to trust it —</text>
+<line x1="840.0" y1="340" x2="840.0" y2="908" stroke="#e2e5ea" stroke-width="2" stroke-linecap="round"/>
+<text x="430" y="366" font-size="16" fill="#5d6470" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="1.5">TODAY · TRUST BY REPUTATION</text>
+<rect x="346.0" y="406.0" width="168" height="52" rx="26.0" fill="#f2f4f7" stroke="#9aa4b0" stroke-width="2"/>
+<text x="430" y="439.6666666666667" font-size="23" fill="#5d6470" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">Paper</text>
+<line x1="430" y1="460" x2="430" y2="506" stroke="#9aa4b0" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="2 8"/>
+<line x1="430" y1="506" x2="436.10313031621655" y2="494.52168129283393" stroke="#9aa4b0" stroke-width="2.4" stroke-linecap="round"/>
+<line x1="430" y1="506" x2="423.8968696837834" y2="494.52168129283393" stroke="#9aa4b0" stroke-width="2.4" stroke-linecap="round"/>
+<rect x="200" y="534" width="460" height="58" rx="14" fill="#f2f4f7" stroke="#9aa4b0" stroke-width="2" stroke-dasharray="2 8"/>
+<text x="400" y="562" font-size="23" fill="#5d6470" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">cited 1,738×</text>
+<text x="400" y="585" font-size="15" fill="#5d6470" font-weight="400" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">so… trusted?</text>
+<circle cx="605" cy="563" r="21" fill="#be2727"/>
+<text x="605" y="571" font-size="26" fill="#ffffff" font-weight="800" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">?</text>
+<text x="430" y="662" font-size="23" fill="#be2727" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">A plausible paper — and its citations —</text>
+<text x="430" y="692" font-size="23" fill="#be2727" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">can be manufactured.</text>
+<text x="430" y="738" font-size="19" fill="#5d6470" font-weight="400" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">Counting citations tells you what's popular,</text>
+<text x="430" y="764" font-size="19" fill="#5d6470" font-weight="400" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">not what's true.</text>
+<text x="1258" y="362" font-size="16.5" fill="#be2e78" font-weight="800" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0.5">REPLICATION RADAR · TRUST BY PROOF</text>
+<text x="1258" y="386" font-size="14" fill="#5d6470" font-weight="400" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">the replication-radar MCP, beside the OpenAIRE MCP</text>
+<rect x="1174.0" y="399.0" width="168" height="50" rx="25.0" fill="#f7e6ef" stroke="#be2e78" stroke-width="3"/>
+<text x="1258" y="431.6666666666667" font-size="23" fill="#be2e78" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">Claim</text>
+<line x1="1258" y1="450" x2="1258" y2="482" stroke="#be2e78" stroke-width="2.6" stroke-linecap="round"/>
+<line x1="1258" y1="482" x2="1264.1031303162165" y2="470.52168129283393" stroke="#be2e78" stroke-width="2.6" stroke-linecap="round"/>
+<line x1="1258" y1="482" x2="1251.8968696837835" y2="470.52168129283393" stroke="#be2e78" stroke-width="2.6" stroke-linecap="round"/>
+<rect x="1140.0" y="483.0" width="236" height="58" rx="12" fill="#0c2c59" stroke="none" stroke-width="0"/>
+<text x="1258" y="509" font-size="22" fill="#ffffff" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">Re-run the claim</text>
+<text x="1258" y="532" font-size="14" fill="#c6d3e8" font-weight="400" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">independent of the original</text>
+<rect x="858.0" y="485.0" width="262" height="54" rx="12" fill="#ffffff" stroke="#0c2c59" stroke-width="2.4"/>
+<text x="989" y="509" font-size="18" fill="#0c2c59" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">independent DATA</text>
+<text x="989" y="532" font-size="14.5" fill="#5d6470" font-weight="400" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">ESA CCI satellite SST</text>
+<rect x="1396.0" y="485.0" width="262" height="54" rx="12" fill="#ffffff" stroke="#0c2c59" stroke-width="2.4"/>
+<text x="1527" y="509" font-size="17.5" fill="#0c2c59" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">independent SOFTWARE</text>
+<text x="1527" y="532" font-size="14.5" fill="#5d6470" font-weight="400" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">XMHW · FAIR + RSE</text>
+<line x1="1124" y1="512" x2="1136.0" y2="512" stroke="#0c2c59" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="1136.0" y1="512" x2="1124.521681292834" y2="505.8968696837834" stroke="#0c2c59" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="1136.0" y1="512" x2="1124.521681292834" y2="518.1031303162166" stroke="#0c2c59" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="1392" y1="512" x2="1380.0" y2="512" stroke="#0c2c59" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="1380.0" y1="512" x2="1391.478318707166" y2="518.1031303162166" stroke="#0c2c59" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="1380.0" y1="512" x2="1391.478318707166" y2="505.8968696837834" stroke="#0c2c59" stroke-width="2.2" stroke-linecap="round"/>
+<line x1="1258" y1="543.0" x2="1258" y2="592" stroke="#0c2c59" stroke-width="2.5" stroke-linecap="round"/>
+<line x1="1258" y1="592" x2="1264.1031303162165" y2="580.5216812928339" stroke="#0c2c59" stroke-width="2.5" stroke-linecap="round"/>
+<line x1="1258" y1="592" x2="1251.8968696837835" y2="580.5216812928339" stroke="#0c2c59" stroke-width="2.5" stroke-linecap="round"/>
+<rect x="1078.0" y="596.0" width="360" height="56" rx="12" fill="#eaf0f9" stroke="#0c2c59" stroke-width="2.5"/>
+<text x="1234" y="632" font-size="23" fill="#0c2c59" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">Outcome</text>
+<circle cx="1378" cy="624" r="18" fill="#0c2c59"/>
+<path d="M 1370 624 l 5 6 l 11 -13" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1258" y="678.0" font-size="16.5" fill="#5d6470" font-weight="600" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">a signed verdict:  Validated · Qualifies · Refuted</text>
+<line x1="1030" y1="744" x2="1096" y2="714" stroke="#0c2c59" stroke-width="2" stroke-linecap="round"/>
+<line x1="1096" y1="714" x2="1154" y2="752" stroke="#0c2c59" stroke-width="2" stroke-linecap="round"/>
+<line x1="1096" y1="714" x2="1094" y2="788" stroke="#0c2c59" stroke-width="2" stroke-linecap="round"/>
+<line x1="1154" y1="752" x2="1094" y2="788" stroke="#0c2c59" stroke-width="2" stroke-linecap="round"/>
+<circle cx="1030" cy="744" r="10" fill="#be2e78" stroke="#0c2c59" stroke-width="2.2"/>
+<circle cx="1096" cy="714" r="10" fill="#ffffff" stroke="#0c2c59" stroke-width="2.2"/>
+<circle cx="1154" cy="752" r="10" fill="#ffffff" stroke="#0c2c59" stroke-width="2.2"/>
+<circle cx="1094" cy="788" r="10" fill="#ffffff" stroke="#0c2c59" stroke-width="2.2"/>
+<text x="1092" y="824" font-size="16" fill="#0c2c59" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">signed constellation</text>
+<text x="1092" y="846" font-size="13.5" fill="#5d6470" font-weight="400" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">claim → study → outcome → evidence</text>
+<line x1="1184" y1="750" x2="1406" y2="746" stroke="#be2e78" stroke-width="2.6" stroke-linecap="round"/>
+<line x1="1406" y1="746" x2="1394.4135955853571" y2="740.1046431201884" stroke="#be2e78" stroke-width="2.6" stroke-linecap="round"/>
+<line x1="1406" y1="746" x2="1394.6334925176047" y2="752.3089228599384" stroke="#be2e78" stroke-width="2.6" stroke-linecap="round"/>
+<rect x="1408" y="718" width="236" height="52" rx="26" fill="#be2e78" stroke="none" stroke-width="0"/>
+<text x="1526" y="752" font-size="23" fill="#ffffff" font-weight="800" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">cite the proof</text>
+<text x="1526" y="794" font-size="20" fill="#be2e78" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">Citation follows proof.</text>
+<text x="840.0" y="944" font-size="18" fill="#15294a" font-weight="600" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">Discovery and verdicts alike run live on —</text>
+<rect x="60" y="964" width="1560" height="118" rx="16" fill="#f4f8fd" stroke="#d3ddec" stroke-width="1.5"/>
+<rect x="120" y="986" width="700" height="46" rx="10" fill="#ffffff" stroke="#0c2c59" stroke-width="2.2"/>
+<text x="140" y="1015" font-size="23" fill="#0c2c59" font-weight="800" text-anchor="start" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">OpenAIRE Graph</text>
+<text x="410" y="1015" font-size="15" fill="#5d6470" font-weight="400" text-anchor="start" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">impact-ranked papers · software · datasets · relations</text>
+<text x="858" y="1017" font-size="30" fill="#5d6470" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">+</text>
+<rect x="896" y="986" width="664" height="46" rx="10" fill="#ffffff" stroke="#0c2c59" stroke-width="2.2"/>
+<text x="916" y="1015" font-size="23" fill="#0c2c59" font-weight="800" text-anchor="start" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">Science Live nanopubs</text>
+<text x="1246" y="1015" font-size="15" fill="#5d6470" font-weight="400" text-anchor="start" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">signed replication verdicts</text>
+<line x1="1436" y1="824" x2="1258" y2="980" stroke="#be2e78" stroke-width="2.6" stroke-linecap="round"/>
+<line x1="1258" y1="980" x2="1270.6548933157237" y2="977.0244874109404" stroke="#be2e78" stroke-width="2.6" stroke-linecap="round"/>
+<line x1="1258" y1="980" x2="1262.6097148023912" y2="967.8447324405994" stroke="#be2e78" stroke-width="2.6" stroke-linecap="round"/>
+<text x="1566" y="874" font-size="15" fill="#be2e78" font-weight="700" text-anchor="end" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">published as</text>
+<text x="1566" y="896" font-size="15" fill="#be2e78" font-weight="700" text-anchor="end" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0">a signed nanopub</text>
+<text x="840.0" y="1064" font-size="15" fill="#be2e78" font-weight="700" text-anchor="middle" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" letter-spacing="0.2">read live by the REPLICATION-RADAR MCP (beside the OpenAIRE MCP) — so the next search finds this claim already proven</text>
+</svg>
