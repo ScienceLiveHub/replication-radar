@@ -1,78 +1,73 @@
 1
-00:00:02,000 --> 00:00:10,000
-Which high-impact papers are worth replicating —
-and has anyone actually checked them?
+00:00:01,000 --> 00:00:06,000
+What's worth replicating — and has anyone checked it?
 
 2
-00:00:10,000 --> 00:00:16,000
-The OpenAIRE Graph can't tell you.
-Replication Radar can.
+00:00:07,000 --> 00:00:18,000
+Ranked off the OpenAIRE Graph: impact, momentum,
+and whether the materials to re-run it exist.
 
 3
-00:00:18,000 --> 00:00:27,000
-Search a field, and it ranks
-what's worth re-testing…
+00:00:19,000 --> 00:00:24,000
+It overlays what the Graph can't:
+which claims were independently checked.
 
 4
-00:00:27,000 --> 00:00:36,000
-…then overlays, live, which claims were
-independently checked — and how they held.
+00:00:25,000 --> 00:00:34,000
+Open one — the signed Science Live nanopublication:
+the outcome and its evidence.
 
 5
-00:00:40,000 --> 00:00:48,000
-This one was checked: validated,
-traceable to a signed nanopublication.
+00:00:35,000 --> 00:00:44,000
+High-impact, but no linked materials —
+so it can't be re-run.
 
 6
-00:00:48,000 --> 00:00:57,000
-That verification layer is what
-a citation graph can't hold.
+00:00:45,000 --> 00:00:54,000
+This one's reproducible: code and data linked,
+archived in Software Heritage.
 
 7
-00:01:05,000 --> 00:01:13,000
-That's the human view. Now the same engine
-as an MCP — driven by an AI agent.
+00:00:54,000 --> 00:01:00,000
+A live FAIR-software read, plus RSE practices —
+documented, tested, CI.
 
 8
-00:01:18,000 --> 00:01:28,000
-The agent asks the Radar what's un-replicated.
-Top hit: a Nature marine-heatwave paper.
+00:01:00,000 --> 00:01:05,000
+Hit Replicate: the FORRT template —
+step one is the replication-radar MCP.
 
 9
-00:01:28,000 --> 00:01:36,000
-Highly cited — never independently checked.
+00:01:06,000 --> 00:01:14,000
+So we switch to the agent —
+the same engine, now an MCP.
 
 10
-00:01:40,000 --> 00:01:50,000
-Which software to reuse? It ranks real tools
-by reuse signal and picks XMHW — independent.
+00:01:18,000 --> 00:01:32,000
+The agent asks the Radar what's un-replicated:
+Oliver 2018 — 1,700 citations, never checked.
 
 11
-00:01:50,000 --> 00:01:58,000
-It even flags one that looks independent
-but is the author's own code.
+00:01:38,000 --> 00:01:52,000
+It finds independent software — XMHW —
+and catches one that only looks independent.
 
 12
-00:02:08,000 --> 00:02:18,000
-For data, it hands off to the OpenAIRE MCP —
-an independent satellite dataset.
+00:02:00,000 --> 00:02:14,000
+It hands off to the OpenAIRE MCP for independent
+data — a true replication, not a re-run.
 
 13
-00:02:18,000 --> 00:02:24,000
-A different producer from the original.
-A true replication, not a re-run.
+00:02:20,000 --> 00:02:32,000
+Honest scope: the satellite era only;
+the century-long trend stays open.
 
 14
-00:02:24,000 --> 00:02:35,000
-And it's honest: satellite data only reaches the
-1980s — the century-long trend stays an open question.
+00:02:34,000 --> 00:02:44,000
+It creates the repo and records
+the paper, data, and software.
 
 15
-00:02:38,000 --> 00:02:46,000
-It scaffolds the repo from the FORRT template
-and records the paper, data, and software.
-
-16
-00:02:46,000 --> 00:02:49,500
+00:02:45,000 --> 00:02:49,500
 Two MCPs on one Graph — discover, then check.
-That's Replication Radar.
+Replication Radar.
