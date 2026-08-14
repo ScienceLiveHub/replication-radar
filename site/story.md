@@ -1,46 +1,92 @@
-# Replication Radar — surfacing the work of research software engineers
+# Before you cite a claim, prove it.
 
-*OpenAIRE AI Hackathon · Theme B (Build) · a Science Live contribution · CC-BY 4.0*
-**Live app: [openaire-hackathon.netlify.app](https://openaire-hackathon.netlify.app) · [how it works](methodology.html) · [how to replicate](replicate.html) · `pip install replication-radar`**
+Truth lives at the **claim** — not the paper. Replication Radar makes proof *findable* on the OpenAIRE Graph, and turns a proof into something the next person can **cite**.
 
-## The question
+<figure class="hero-fig">
+  <img src="research-lifecycle.svg" alt="The research lifecycle — Question, Claim, Method, Data, Software, Result, Paper — and the two ways to trust a published claim: today, by reputation (citation counts, which can be manufactured); or with Replication Radar, by proof (re-run the claim with independent data and software, sign the outcome as a constellation, and it becomes part of the Radar so the next search finds it proven). Everything runs live on the OpenAIRE Graph and the Science Live nanopublication network." />
+  <figcaption>Cite the claim, not the paper — and before you cite it, prove it. <b>Citation follows proof.</b></figcaption>
+</figure>
 
-Research software is first-class scholarly work — it is what makes results reproducible and reusable. But neither the citation graph nor academic credit treats it that way. The OpenAIRE Graph makes software **findable** but not **assessable**: a widely-used research tool carries the same *"0 citations, class C5"* as an abandoned script. The engineering work research software engineers do — documenting, testing, adding continuous integration, archiving, packaging for reuse — is **invisible** in the Graph.
+## The problem: "cited" no longer means "checked"
 
-So we asked a concrete build question: **can we surface that work — the software behind published science and the practices that make it reusable — live, on top of the OpenAIRE Graph, without changing it?**
+A citation was always shorthand for *someone checked this*. That shorthand is breaking. When anyone can generate a plausible paper — and pad it with citations to work it has nothing to do with — counting citations, or walking the citation graph, tells you what is **popular**, not what is **true**.
 
-## The journey
+And a paper is not one thing you can trust: it buries many claims, and what you actually rely on is **one**. When you cite a paper, you're really citing a single claim inside it. So the unit that matters is the claim — and the only honest question is: *has this claim been proven?*
 
-We started paper-first: rank the papers in a field worth replicating. It worked, but it mostly re-served the Graph's one signal (citation impact) — and when we actually *used* it, we hit a wall: on a live topic search, **essentially none of the papers carry a linked code or data artefact** (OpenAIRE almost never links materials to a paper). The thing that was both *actionable* and *undervalued* wasn't the paper — it was the **software**.
+## The shift: soundness is the whole chain, verified
 
-The turn came from a research software engineer. **Saranjeet Kaur Bhogal**, an RSE at Imperial College London, tried the tool and told us what an RSE actually looks for: not a single high-level "FAIR" badge, but whether code is **documented**, has **tests**, runs **CI**, **invites contribution**. That feedback reshaped the project. We stopped grading papers and started **surfacing the software behind them** — computing, live from the GitHub, Software Heritage and Zenodo APIs, both the recognised **fair-software.eu** recommendations *and* a set of **RSE good-practice** signals: **documented · tests · CI · contributing · code of conduct**, with the repository's own **CI status** as a grounded reproducibility signal, each check linking straight to the real artefact. RSE work, made visible and creditable.
+Soundness isn't a property of a paper on its own. It lives in one **verifiable chain** — the claim, the study that tests it, the data behind it, the software that produced it, the evidence that backs it — each link checkable and cryptographically signed. Break any link and the citation means nothing.
 
-We kept the other signal the Graph structurally can't hold, too: whether a claim has been independently **replicated**, read live from the Science Live **nanopublication** network (author-agnostic, retraction-aware). So a field's *reusable software* and its *checked results* surface together.
+So the principle is simple:
 
-**We put it to the test.** We took a paper the Radar flags as high-impact but never replicated — Oliver et al. 2018, *"Longer and more frequent marine heatwaves"* — and actually replicated it: ERA5 pulled straight from the cloud, marine heatwaves detected with **XMHW** (an independent RSE tool), and cross-checked against the paper author's own **marineHeatWaves** — both software the Radar surfaces. The two agree to the digit, and the finding half-holds: marine-heatwave *days* have risen steeply, *frequency* only borderline — an honest **PartiallySupported** verdict. A code-independent replication, built entirely from software the Graph already holds. The loop, closed.
+> **Before you cite a claim, prove it. Never cite what you haven't verified.**
 
-Two disciplines run through all of it. **Everything is grounded** — every signal comes from a named, verifiable source, documented signal-by-signal in a machine- and human-readable methodology page (`methodology.json` + `/methodology.html`). And everything runs **client-side** against public, CORS-enabled APIs — no backend, no keys — so the artifact is a static site anyone can fork. We even deleted the one feature we had built on a guess (keyword-matched "relevant tooling"): surfacing RSE work has to be grounded, or it is just noise.
+## What Replication Radar does — the loop
 
-## The insight
+Replication Radar makes that principle operable on the **OpenAIRE Graph**, and closes the loop:
 
-- **OpenAIRE lists research software — largely Zenodo deposits — but tells you nothing about whether it is reproducible or whether it has been checked.** That is exactly the gap the Radar fills: it takes those software records and adds, live, a **reproducibility read** (documented / tests / CI, with the repository's own CI status) and a **replication read** (has a claim the software supports been independently verified?). Making OpenAIRE's software **assessable — not just findable** — is the original move, and it uses only the OpenAIRE Graph plus grounded public APIs.
-- **Research software is the invisible half of reproducible science, and the Graph can't see it — but GitHub, Software Heritage and Zenodo can, live.** Surfacing that changes what the Graph is *for an RSE*: from "here is a document" to "here is the software behind it, and here is how reusable it is."
-- **The signals RSEs care about are *practices*, not a score.** Documented, tested, CI, contributing — each grounded in the repository's own files, each a link to the actual artefact. A green CI run is an honest reproducibility signal (the code builds and its tests pass) — explicitly *not* a claim of independent reproduction, which the replication verdict covers separately.
-- **Reliability and reusability are *different categories* of signal**, not better metrics. You cannot repair the citation axis into a truth axis or a reuse axis — you *add* them, live, on top of the Graph.
-- **Packaged as an MCP server, it runs next to the OpenAIRE MCP** — one gives the structural graph, the other the RSE + verification layer. Together they are a first brick of a graph of *verified, engineered* knowledge for agentic science.
+<ol class="loop">
+  <li><b>Find what's proven.</b> Search a field and, for each high-impact claim, see whether anyone has independently <em>proven</em> it — a signed Science Live replication verdict (validated · qualifies · refuted), read live from the nanopublication network, author-agnostic. Where the Graph knows only <em>cited / not-cited</em>, the Radar adds <em>checked / not-checked</em>.</li>
+  <li><b>If it isn't proven, prove it.</b> The Radar hands you what you need: the <b>independent, reusable software</b> OpenAIRE holds for that field — ranked by signals a one-off deposit can't fake (a resolvable repository · GitHub stars · Software Heritage archival · fair-software.eu + RSE practices: documented · tested · CI · contributing) — and, via the OpenAIRE MCP, <b>independent data</b>. You re-run the claim independent of the original.</li>
+  <li><b>Publish the proof.</b> The result is a signed <b>constellation</b> — claim → study → outcome → evidence — not a claim taken on trust.</li>
+  <li><b>The loop closes.</b> That constellation becomes part of the Radar: published to the same nanopublication network the Radar reads, so the <b>next</b> person's search finds the claim already proven. <b>Citation follows proof.</b></li>
+</ol>
+
+## Research software engineers point to what matters
+
+The signals the Radar checks aren't machine-invented metrics. They are what a **research software engineer — Saranjeet Kaur Bhogal (Imperial College London)** — told us she actually looks for: not a single "FAIR" badge, but whether code is **documented, tested, runs CI, invites contribution**. A human pointed us to what matters; the tool just makes it visible, live, and grounded. We started grading papers; an RSE turned the project around to surfacing the *software* and the engineering behind them.
+
+That reframes everything. Proving a claim needs reusable software, and reusable software is **engineering** — the invisible half of reproducible science, done by people whose work earns the same *"0 citations, class C5"* as an abandoned script. Surfacing and **crediting** that work is part of making proof possible: someone has to build the tool a replication runs on. And the Radar is built to be read by **humans as much as by agents** — a person sees the software behind a claim and whether it's been checked; an agent gets the same signals, grounded, so it can *cite instead of guess*. Machine-actionable, but human-first.
+
+And "human" here is not one kind of person. Every link in the chain is someone's work — the **researcher** who framed the claim, the people who **gathered the data** in the field, the **modeller**, and the **research software engineer** who turned code into a tool others can reuse. Making the chain checkable makes *all of them* visible and creditable. AI **assists** — it finds, connects, drafts, checks — but it doesn't replace any of them. Research isn't human *or* machine, and it isn't one discipline over another: it's all of them **together**, and no one is left out.
+
+A proof needn't stay expert-only, either. Because a constellation is structured and signed, it can be **retold for different audiences** — a plain-language version *for citizens*, another *for schools* — each a signed summary in its own right (attributed as such, never passed off as the record). Verified knowledge that reaches people, not only machines.
+
+## See a real proof
+
+This isn't a mock-up. Here is a published, signed replication — the end state of the loop, the thing you'd actually cite:
+
+<div class="proofrow">
+  <a class="proofcard" href="https://platform-dev.sciencelive4all.org/np/story?uri=https%3A%2F%2Fw3id.org%2Fnp%2FRA-5NH-xz4WEtYg6xIAda54W6oQ-I-0uOLQUFinPbMrt8">
+    <span class="pc-kicker">Read the proof · on Science Live</span>
+    <span class="pc-title">The Sado&nbsp;/&nbsp;Westerschelde replication</span>
+    <span class="pc-desc">Open-source Sentinel-2 re-tests a 2021 water-quality claim in the Westerschelde estuary — two independent limbs, one <b>Confirms</b>, one <b>Qualifies</b>. A bottom-line verdict, the replication limbs, a “Cite this synthesis” box — and the same proof retold <b>for citizens</b> and <b>for schools</b>.</span>
+    <span class="pc-go">Open the story →</span>
+  </a>
+  <a class="proofcard alt" href="https://w3id.org/np/RA-5NH-xz4WEtYg6xIAda54W6oQ-I-0uOLQUFinPbMrt8">
+    <span class="pc-kicker">The signed record</span>
+    <span class="pc-title">The story nanopublication</span>
+    <span class="pc-desc">The cryptographically-signed constellation behind the story — resolvable and citable on the nanopublication network. This is what enters the Radar so the next search finds the claim proven.</span>
+    <span class="pc-go">Open the nanopub →</span>
+  </a>
+</div>
+
+<p class="mirror-note">Hosted on the Science Live platform — also available as a <a href="https://annefou.github.io/sado-estuary-replication-2026/blog/">static blog mirror</a>.</p>
+
+## We closed the loop, end to end
+
+As a dry run, an agent running the Radar *next to the OpenAIRE MCP* took a claim the Radar flags as high-impact but **never replicated** — Oliver et al. 2018, marine heatwaves (~1,740 citations; the atomic claim: 1925–2016 global marine-heatwave frequency +34%, duration +17%, days +54%).
+
+The agent **pushed back on our first data choice** — ERA5's sea-surface temperature shares the original paper's HadISST lineage, so it isn't independent — and switched to **independent ESA CCI satellite SST**, detecting events with the independent **XMHW** cross-checked against the author's own tool. They agree to the digit. We keep the scope **honest**: satellite data only reaches back to ~1982, so this proves the **satellite-era** trend (1982–2016) — directionally consistent with the paper — while the full century-scale global magnitudes stay untested for want of an independent long record. A proof independent in *both* data and code, built from what the Graph already holds.
+
+## Grounded, and built on the OpenAIRE Graph
+
+Every signal comes from a **named, verifiable source** — the OpenAIRE Graph, the Science Live nanopublication network, GitHub, Software Heritage, Zenodo — documented signal-by-signal in a machine- and human-readable [methodology page](methodology.html). And everything runs **client-side** against public, CORS-enabled APIs — no backend, no keys — so the artifact is a static site anyone can fork, plus a `pip install`-able **MCP server** for any MCP-capable agent, run beside the OpenAIRE MCP — not tied to any one model or vendor. We even deleted a feature we'd built on a guess — it tried to pick the software *relevant* to a topic by matching keywords, and surfaced off-topic repos. Surfacing work has to be **grounded** — from a named source, not a keyword match — or it is just noise. (In its place: rank OpenAIRE's own software index by signals a deposit can't fake, and follow the Graph's own paper→software relations.)
 
 ## What others can reuse
 
-- **The live web app** — pure static, queries OpenAIRE + GitHub/Software Heritage/Zenodo + the nanopub network from the browser. Fork it, point it elsewhere.
+- **The live web app** — pure static, queries OpenAIRE + GitHub / Software Heritage / Zenodo + the nanopub network from the browser. Fork it, point it elsewhere.
 - **An MCP server** (`pip install replication-radar`) exposing the same engine to any agent, to run alongside the OpenAIRE MCP.
-- **A grounded software assessment** — the fair-software.eu recommendations *plus* the RSE good-practice signals (documented / tests / CI / contributing / code of conduct + CI status), computed from GitHub + Software Heritage + Zenodo, each explained with links to go deeper (The Turing Way, goodpractice, NumFOCUS, Imperial's Essential Software Engineering course).
-- **A reproducible, author-agnostic, retraction-aware verdict-index method** — FORRT Outcome/CiTO nanopubs joined on the trusty hash, with an admin-graph validity guard.
+- **A grounded software assessment** — fair-software.eu recommendations *plus* RSE good-practice signals (documented / tested / CI / contributing / code of conduct), computed live from GitHub + Software Heritage + Zenodo.
+- **A reproducible, author-agnostic, retraction-aware verdict-index method** — FORRT Outcome / CiTO nanopubs joined on the trusty hash.
 - **A machine-readable methodology & provenance spec** (`methodology.json`, CC-BY) — every signal's source and formula.
 - **A feasibility map** of which open-science APIs are reachable and CORS-friendly, so the next builder doesn't re-discover it.
 
+*A complementary facet by Jean Iaquinta uses the OpenAIRE MCP's citation-graph tools to show the citation graph holds everything except the verification edge — the gap the Radar fills.*
+
 ## Honest limits
 
-OpenAIRE rarely links materials to a paper, so the *paper* lens surfaces reusable software only where it is separately resolved; the OpenAIRE *software* index is broad but dominated by one-off study deposits, so surfacing the best-engineered tools well is ongoing work (better sources, and the relation graph via the OpenAIRE MCP, are the next step). Discovery recall is keyword-bound; the verdict overlay covers whatever the nanopub network holds; the software assessment runs only where a real repository resolves, and GitHub's unauthenticated rate limit caps how many it scores per hour (results are cached). None of this is hidden in the output.
+Discovery recall is keyword-bound (OpenAIRE free-text terms are AND-ed); the verdict overlay covers whatever the nanopublication network holds, reachable by DOI; the software assessment runs only where a real repository resolves, and GitHub's unauthenticated rate limit caps how many it scores per hour (results are cached). A green CI run is an honest reproducibility *signal* — the code builds and its own tests pass — **not** a claim of independent reproduction, which the replication verdict covers separately. We add two of the missing layers; the full graph of verified knowledge is the direction, not something we finished.
 
 ---
 
