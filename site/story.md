@@ -71,7 +71,7 @@ The agent **pushed back on our first data choice** — ERA5's sea-surface temper
 
 ## Grounded, and built on the OpenAIRE Graph
 
-Every signal comes from a **named, verifiable source** — the OpenAIRE Graph, the Science Live nanopublication network, GitHub, Software Heritage, Zenodo — documented signal-by-signal in a machine- and human-readable [methodology page](methodology.html). And everything runs **client-side** against public, CORS-enabled APIs — no backend, no keys — so the artifact is a static site anyone can fork, plus a `pip install`-able **MCP server** that runs beside the OpenAIRE MCP. We even deleted the one feature we'd built on a guess: surfacing work has to be grounded, or it is just noise.
+Every signal comes from a **named, verifiable source** — the OpenAIRE Graph, the Science Live nanopublication network, GitHub, Software Heritage, Zenodo — documented signal-by-signal in a machine- and human-readable [methodology page](methodology.html). And everything runs **client-side** against public, CORS-enabled APIs — no backend, no keys — so the artifact is a static site anyone can fork, plus a `pip install`-able **MCP server** for any MCP-capable agent, run beside the OpenAIRE MCP — not tied to any one model or vendor. We even deleted the one feature we'd built on a guess: surfacing work has to be grounded, or it is just noise.
 
 ## What others can reuse
 
