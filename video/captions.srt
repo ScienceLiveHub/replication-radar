@@ -1,83 +1,78 @@
 1
-00:00:01,000 --> 00:00:08,000
+00:00:02,000 --> 00:00:10,000
 Which high-impact papers are worth replicating —
 and has anyone actually checked them?
 
 2
-00:00:08,000 --> 00:00:14,000
+00:00:10,000 --> 00:00:16,000
 The OpenAIRE Graph can't tell you.
 Replication Radar can.
 
 3
-00:00:16,000 --> 00:00:24,000
+00:00:18,000 --> 00:00:27,000
 Search a field, and it ranks
 what's worth re-testing…
 
 4
-00:00:24,000 --> 00:00:33,000
+00:00:27,000 --> 00:00:36,000
 …then overlays, live, which claims were
 independently checked — and how they held.
 
 5
-00:00:38,000 --> 00:00:46,000
+00:00:40,000 --> 00:00:48,000
 This one was checked: validated,
 traceable to a signed nanopublication.
 
 6
-00:00:46,000 --> 00:00:54,000
+00:00:48,000 --> 00:00:57,000
 That verification layer is what
 a citation graph can't hold.
 
 7
 00:01:05,000 --> 00:01:13,000
-Impact-ranked targets, and the reusable
-software behind them — all off the OpenAIRE Graph.
-
-8
-00:01:48,000 --> 00:01:56,000
 That's the human view. Now the same engine
 as an MCP — driven by an AI agent.
 
-9
-00:01:58,000 --> 00:02:07,000
+8
+00:01:18,000 --> 00:01:28,000
 The agent asks the Radar what's un-replicated.
 Top hit: a Nature marine-heatwave paper.
 
-10
-00:02:07,000 --> 00:02:13,000
+9
+00:01:28,000 --> 00:01:36,000
 Highly cited — never independently checked.
 
-11
-00:02:20,000 --> 00:02:30,000
+10
+00:01:40,000 --> 00:01:50,000
 Which software to reuse? It ranks real tools
 by reuse signal and picks XMHW — independent.
 
-12
-00:02:30,000 --> 00:02:38,000
+11
+00:01:50,000 --> 00:01:58,000
 It even flags one that looks independent
 but is the author's own code.
 
-13
-00:02:48,000 --> 00:02:57,000
+12
+00:02:08,000 --> 00:02:18,000
 For data, it hands off to the OpenAIRE MCP —
 an independent satellite dataset.
 
-14
-00:02:57,000 --> 00:03:04,000
+13
+00:02:18,000 --> 00:02:24,000
 A different producer from the original.
 A true replication, not a re-run.
 
-15
-00:03:06,000 --> 00:03:16,000
+14
+00:02:24,000 --> 00:02:35,000
 And it's honest: satellite data only reaches the
 1980s — the century-long trend stays an open question.
 
-16
-00:03:22,000 --> 00:03:30,000
+15
+00:02:38,000 --> 00:02:46,000
 It scaffolds the repo from the FORRT template
 and records the paper, data, and software.
 
-17
-00:03:30,000 --> 00:03:34,000
-Two MCPs on one Graph — discover,
-then go check. That's Replication Radar.
+16
+00:02:46,000 --> 00:02:49,500
+Two MCPs on one Graph — discover, then check.
+That's Replication Radar.
