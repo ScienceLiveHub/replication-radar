@@ -38,6 +38,8 @@ The signals the Radar checks aren't machine-invented metrics. They are what a **
 
 That reframes everything. Proving a claim needs reusable software, and reusable software is **engineering** — the invisible half of reproducible science, done by people whose work earns the same *"0 citations, class C5"* as an abandoned script. Surfacing and **crediting** that work is part of making proof possible: someone has to build the tool a replication runs on. And the Radar is built to be read by **humans as much as by agents** — a person sees the software behind a claim and whether it's been checked; an agent gets the same signals, grounded, so it can *cite instead of guess*. Machine-actionable, but human-first.
 
+And "human" here is not one kind of person. Every link in the chain is someone's work — the **researcher** who framed the claim, the people who **gathered the data** in the field, the **modeller**, and the **research software engineer** who turned code into a tool others can reuse. Making the chain checkable makes *all of them* visible and creditable. AI **assists** — it finds, connects, drafts, checks — but it doesn't replace any of them. Research isn't human *or* machine, and it isn't one discipline over another: it's all of them **together**, and no one is left out.
+
 A proof needn't stay expert-only, either. Because a constellation is structured and signed, it can be **retold for different audiences** — a plain-language version *for citizens*, another *for schools* — each a signed summary in its own right (attributed as such, never passed off as the record). Verified knowledge that reaches people, not only machines.
 
 ## See a real proof
