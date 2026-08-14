@@ -12,7 +12,7 @@ Approx. timings shown — nudge ±2–3 s in the editor if a line drifts.
 | 0:35 | hover a 0.55 target, no materials | **High-impact, but no linked materials — so it can't be re-run.** |
 | 0:45 | Reproducible tab, has materials | **This one's reproducible: code and data linked, archived in Software Heritage.** |
 | 0:54 | FAIR-software + RSE practices | **A live FAIR-software read, plus RSE practices — documented, tested, CI.** |
-| 1:00 | "Replicate this" → how-to page | **Hit Replicate: the FORRT template — step one is the replication-radar MCP.** |
+| 1:01 | "Replicate this" → how-to page + `/mcp` connected | **Hit Replicate — the FORRT template runs on the replication-radar MCP.** |
 | 1:06 | switch to Claude Code | **So we switch to the agent — the same engine, now an MCP.** |
 | 1:18 | radar → Oliver 2018 | **The agent asks the Radar what's un-replicated: Oliver 2018 — 1,700 citations, never checked.** |
 | 1:38 | find_independent_software → XMHW | **It finds independent software — XMHW — and catches one that only looks independent.** |

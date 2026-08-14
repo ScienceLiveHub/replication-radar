@@ -1,73 +1,73 @@
 1
-00:00:01,000 --> 00:00:06,000
+00:00:01,500 --> 00:00:06,500
 What's worth replicating — and has anyone checked it?
 
 2
-00:00:07,000 --> 00:00:18,000
+00:00:07,000 --> 00:00:14,500
 Ranked off the OpenAIRE Graph: impact, momentum,
 and whether the materials to re-run it exist.
 
 3
-00:00:19,000 --> 00:00:24,000
+00:00:15,000 --> 00:00:19,000
 It overlays what the Graph can't:
 which claims were independently checked.
 
 4
-00:00:25,000 --> 00:00:34,000
+00:00:20,000 --> 00:00:32,000
 Open one — the signed Science Live nanopublication:
 the outcome and its evidence.
 
 5
-00:00:35,000 --> 00:00:44,000
+00:00:33,000 --> 00:00:43,000
 High-impact, but no linked materials —
 so it can't be re-run.
 
 6
-00:00:45,000 --> 00:00:54,000
+00:00:44,000 --> 00:00:53,000
 This one's reproducible: code and data linked,
 archived in Software Heritage.
 
 7
-00:00:54,000 --> 00:01:00,000
+00:00:53,500 --> 00:01:00,000
 A live FAIR-software read, plus RSE practices —
 documented, tested, CI.
 
 8
-00:01:00,000 --> 00:01:05,000
-Hit Replicate: the FORRT template —
-step one is the replication-radar MCP.
+00:01:01,000 --> 00:01:07,500
+Hit Replicate — the FORRT template
+runs on the replication-radar MCP.
 
 9
-00:01:06,000 --> 00:01:14,000
+00:01:08,000 --> 00:01:14,000
 So we switch to the agent —
-the same engine, now an MCP.
+same engine, now an MCP.
 
 10
-00:01:18,000 --> 00:01:32,000
+00:01:17,000 --> 00:01:33,000
 The agent asks the Radar what's un-replicated:
 Oliver 2018 — 1,700 citations, never checked.
 
 11
-00:01:38,000 --> 00:01:52,000
+00:01:40,000 --> 00:02:03,000
 It finds independent software — XMHW —
 and catches one that only looks independent.
 
 12
-00:02:00,000 --> 00:02:14,000
+00:02:08,000 --> 00:02:24,000
 It hands off to the OpenAIRE MCP for independent
 data — a true replication, not a re-run.
 
 13
-00:02:20,000 --> 00:02:32,000
+00:02:26,000 --> 00:02:38,000
 Honest scope: the satellite era only;
 the century-long trend stays open.
 
 14
-00:02:34,000 --> 00:02:44,000
+00:02:38,500 --> 00:02:45,000
 It creates the repo and records
 the paper, data, and software.
 
 15
-00:02:45,000 --> 00:02:49,500
+00:02:45,500 --> 00:02:49,500
 Two MCPs on one Graph — discover, then check.
 Replication Radar.
