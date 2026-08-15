@@ -1,11 +1,12 @@
-%% Replication Radar — architecture (render at https://mermaid.live for §2.1's visual)
+%% Replication Radar — architecture (§2.1). Render at https://mermaid.live or https://kroki.io
 flowchart LR
   U[Researcher / RSE] --> APP[Replication Radar<br/>static web app]
   AG[AI agent] --> MCP[replication-radar MCP]
   APP & MCP --> OA[(OpenAIRE Graph API<br/>impact-ranked products)]
-  APP & MCP --> NP[(Science Live nanopub network<br/>SPARQL: FORRT Outcome + CiTO)]
+  APP & MCP --> NP[(Science Live nanopubs<br/>FORRT Outcome + CiTO)]
   APP --> GH[(GitHub / Software Heritage / Zenodo<br/>FAIR + RSE practices)]
-  AG -. also .-> OAMCP[OpenAIRE MCP<br/>citation graph]
+  AG -. beside .-> OAMCP[OpenAIRE MCP<br/>citation graph + data]
   OA --> V[Ranked queue + verdict overlay + software signals]
   NP --> V
   GH --> V
+  V -. prove .-> C[Signed constellation<br/>claim to evidence] --> NP
