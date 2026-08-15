@@ -7,6 +7,8 @@ Truth lives at the **claim** — not the paper. Replication Radar makes proof *f
   <figcaption>Cite the claim, not the paper — and before you cite it, prove it. <b>Citation follows proof.</b></figcaption>
 </figure>
 
+**▶ [Watch the 3-minute demo](https://youtu.be/hVyLafY3Y3E)** — the Radar and the agent, end to end.
+
 ## The problem: "cited" no longer means "checked"
 
 A citation was always shorthand for *someone checked this*. That shorthand is breaking. When anyone can generate a plausible paper — and pad it with citations to work it has nothing to do with — counting citations, or walking the citation graph, tells you what is **popular**, not what is **true**.
