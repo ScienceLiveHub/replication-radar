@@ -44,30 +44,30 @@ A proof needn't stay expert-only, either. Because a constellation is structured 
 
 ## See a real proof
 
-This isn't a mock-up. Here is a published, signed replication — the end state of the loop, the thing you'd actually cite:
+This isn't a mock-up — and it's on the very topic the demo walks through. Here is Oliver et al. 2018, marine heatwaves, **replicated, signed, and Validated** — the thing you'd actually cite:
 
 <div class="proofrow">
-  <a class="proofcard" href="https://platform-dev.sciencelive4all.org/np/story?uri=https%3A%2F%2Fw3id.org%2Fnp%2FRA-5NH-xz4WEtYg6xIAda54W6oQ-I-0uOLQUFinPbMrt8">
+  <a class="proofcard" href="https://platform-dev.sciencelive4all.org/np/story?uri=https%3A%2F%2Fw3id.org%2Fsciencelive%2Fnp%2FRAQfGMNmJiFt4KDDJE8dsiT3az4CRYehRuDFoa-tXGc8w">
     <span class="pc-kicker">Read the proof · on Science Live</span>
-    <span class="pc-title">The Sado&nbsp;/&nbsp;Westerschelde replication</span>
-    <span class="pc-desc">Open-source Sentinel-2 re-tests a 2021 water-quality claim in the Westerschelde estuary — two independent limbs, one <b>Confirms</b>, one <b>Qualifies</b>. A bottom-line verdict, the replication limbs, a “Cite this synthesis” box — and the same proof retold <b>for citizens</b> and <b>for schools</b>.</span>
+    <span class="pc-title">Marine heatwaves — independently confirmed</span>
+    <span class="pc-desc">A signed replication of Oliver et&nbsp;al. (2018): independent satellite SST (ESA&nbsp;CCI) and the independent detector XMHW reproduce the rise in marine-heatwave days <b>to the digit</b> — <b>Validated</b>, and robust to El&nbsp;Niño. The constellation, the verdict, and the same proof retold <b>for citizens</b> and <b>for schools</b>.</span>
     <span class="pc-go">Open the story →</span>
   </a>
-  <a class="proofcard alt" href="https://w3id.org/np/RA-5NH-xz4WEtYg6xIAda54W6oQ-I-0uOLQUFinPbMrt8">
+  <a class="proofcard alt" href="https://w3id.org/sciencelive/np/RAQfGMNmJiFt4KDDJE8dsiT3az4CRYehRuDFoa-tXGc8w">
     <span class="pc-kicker">The signed record</span>
     <span class="pc-title">The story nanopublication</span>
-    <span class="pc-desc">The cryptographically-signed constellation behind the story — resolvable and citable on the nanopublication network. This is what enters the Radar so the next search finds the claim proven.</span>
+    <span class="pc-desc">The cryptographically-signed constellation behind the story — claim → study → outcome → evidence, carrying the <b>Validated</b> verdict — resolvable and citable on the nanopublication network. This is what enters the Radar so the next search finds the claim proven.</span>
     <span class="pc-go">Open the nanopub →</span>
   </a>
 </div>
 
-<p class="mirror-note">Hosted on the Science Live platform — also available as a <a href="https://annefou.github.io/sado-estuary-replication-2026/blog/">static blog mirror</a>.</p>
+<p class="mirror-note">Also a reproducible <a href="https://annefou.github.io/marine-heatwave-replication/blog/">study blog</a> and open <a href="https://github.com/annefou/marine-heatwave-replication">code + data</a> (Zenodo-archived). And a second proof, in a different field — the <a href="https://platform-dev.sciencelive4all.org/np/story?uri=https%3A%2F%2Fw3id.org%2Fnp%2FRA-5NH-xz4WEtYg6xIAda54W6oQ-I-0uOLQUFinPbMrt8">Sado&nbsp;/&nbsp;Westerschelde estuary replication</a>.</p>
 
 ## We closed the loop, end to end
 
-As a dry run, an agent running the Radar *next to the OpenAIRE MCP* took a claim the Radar flags as high-impact but **never replicated** — Oliver et al. 2018, marine heatwaves (~1,740 citations; the atomic claim: 1925–2016 global marine-heatwave frequency +34%, duration +17%, days +54%).
+An agent running the Radar *next to the OpenAIRE MCP* took a claim the Radar flags as high-impact but **never replicated** — Oliver et al. 2018, marine heatwaves (~1,740 citations). It **pushed back on our first data choice** — ERA5's sea-surface temperature shares the original paper's HadISST lineage, so it isn't independent — and switched to **independent ESA CCI satellite SST**, detecting events with the independent detector **XMHW**, cross-checked against the author's own tool.
 
-The agent **pushed back on our first data choice** — ERA5's sea-surface temperature shares the original paper's HadISST lineage, so it isn't independent — and switched to **independent ESA CCI satellite SST**, detecting events with the independent **XMHW** cross-checked against the author's own tool. They agree to the digit. We keep the scope **honest**: satellite data only reaches back to ~1982, so this proves the **satellite-era** trend (1982–2016) — directionally consistent with the paper — while the full century-scale global magnitudes stay untested for want of an independent long record. A proof independent in *both* data and code, built from what the Graph already holds.
+The result is now **published as a signed constellation — and it holds. Validated.** The rise in marine-heatwave days is confirmed (**31.8 days over 1982–2016 against the paper's 30 — within 6%**; frequency and duration agree too; the trend survives ENSO removal), independent in *both* data and code. We keep the scope **honest**: satellite data only reaches back to ~1982, so this validates the **satellite-era** trend and leaves the paper's century-scale "54%" figure explicitly out of scope — no independent pre-1981 daily record exists, for anyone. This is the very replication the demo sets up — now finished, signed, citable, and [retold for citizens and for schools](https://annefou.github.io/marine-heatwave-replication/blog/). Not described: **done.**
 
 ## Grounded, and built on the OpenAIRE Graph
 
