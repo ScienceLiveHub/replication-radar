@@ -1,5 +1,7 @@
 The Radar tells you **what** is worth replicating. This page is the **how**: the end-to-end loop that turns a target into an independent, signed, citable replication — and how a research software engineer can run it with an AI agent using the open **replication-radar** MCP together with the FORRT replication template.
 
+> **Want to reproduce exactly what the [demo video](https://youtu.be/hVyLafY3Y3E) shows?** Follow the [step-by-step demo walkthrough](demo.html) — the precise searches, prompts, and expected results. This page is the general guide behind it.
+
 ## The replication loop
 
 Five steps. Each replication you publish becomes a public, author-attributed nanopublication — and shows back up here as an independently-checked result, so the next person sees it.

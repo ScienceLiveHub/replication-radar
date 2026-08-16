@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Replication Radar — reproduce the demo, step by step</title>
+  <meta name="description" content="Reproduce the 3-minute demo video step by step: the exact searches, agent prompts, and expected results — from a species-distribution search to an end-to-end marine-heatwave discovery with the replication-radar MCP beside the OpenAIRE MCP. Grounded and deterministic." />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .mwrap{max-width:880px}
+    .backbar{margin:6px 0 18px;font-size:13.5px}
+    .watchbar{display:flex;align-items:center;gap:10px;background:var(--magenta-soft);color:#a32a6a;border-radius:10px;padding:11px 15px;font-size:13.5px;margin:0 0 18px}
+    .watchbar b{color:#7d1f52}
+    .watchbar a{color:#a32a6a;font-weight:700;text-decoration:underline}
+    /* rendered-Markdown styling — content is authored in demo.md (same renderer as replicate.html) */
+    .md-content > p:first-of-type{font-size:16px;color:var(--ink);line-height:1.6}
+    .md-content h2{font-size:20px;color:var(--navy);margin:34px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+    .md-content h3{font-size:15.5px;color:var(--navy);margin:22px 0 6px}
+    .md-content p{font-size:14.5px;line-height:1.65;color:var(--ink);margin:10px 0}
+    .md-content a{color:var(--magenta);font-weight:600;text-decoration:none}
+    .md-content a:hover{text-decoration:underline}
+    .md-content em{color:var(--navy2);font-style:normal}
+    .md-content strong{color:var(--navy)}
+    .md-content hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+    /* ordered lists render as numbered step cards */
+    .md-content ol{list-style:none;counter-reset:step;padding:0;margin:16px 0;display:flex;flex-direction:column;gap:10px}
+    .md-content ol > li{counter-increment:step;position:relative;border:1px solid var(--line);border-radius:12px;padding:14px 16px 14px 54px;background:var(--card);line-height:1.55;font-size:14px;color:var(--ink)}
+    .md-content ol > li::before{content:counter(step);position:absolute;left:12px;top:13px;width:28px;height:28px;border-radius:8px;background:var(--navy);color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+    .md-content ul{font-size:14px;line-height:1.7;color:var(--ink);padding-left:20px;margin:10px 0}
+    /* blockquotes = asides */
+    .md-content blockquote{margin:12px 0;padding:11px 16px;border-left:4px solid var(--magenta);background:var(--magenta-soft);border-radius:0 8px 8px 0;font-size:13.5px;color:var(--navy2)}
+    .md-content blockquote p{margin:4px 0;font-size:13.5px}
+    /* code */
+    .md-content pre{position:relative;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:#f3f5f9;border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:var(--ink);line-height:1.55;overflow-x:auto;margin:12px 0}
+    .md-content :not(pre) > code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:#eef2f9;border-radius:5px;padding:1px 5px;color:var(--navy)}
+    .md-content pre code{background:none;padding:0;color:inherit}
+    .copybtn{position:absolute;top:7px;right:7px;font:600 11px/1 ui-sans-serif,system-ui,sans-serif;background:#fff;border:1px solid var(--line);color:var(--navy2);border-radius:6px;padding:4px 8px;cursor:pointer;opacity:0;transition:opacity .12s,background .12s,color .12s}
+    .md-content pre:hover .copybtn,.md-content pre:focus-within .copybtn,.copybtn:focus-visible{opacity:1}
+    .copybtn:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .copybtn.ok{background:#1f7a3d;color:#fff;border-color:#1f7a3d;opacity:1}
+    @media (hover:none){.copybtn{opacity:.7}}
+    .md-err{font-size:14px;color:var(--mut)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Reproduce the demo</h1>
+      <p class="tag">The 3-minute video, step by step — exact searches, prompts, and results.</p>
+      <p class="sub">Replication Radar · <a href="index.html" style="color:#fff;text-decoration:underline">back to the Radar</a> · <a href="replicate.html" style="color:#fff;text-decoration:underline">how to replicate</a> · <a href="methodology.html" style="color:#fff;text-decoration:underline">how it works</a></p>
+    </div>
+  </header>
+  <main class="wrap mwrap">
+    <p class="backbar">← <a href="index.html">Back to the Radar</a></p>
+    <div class="watchbar">▶ <b>Watch first, then reproduce:</b> <a href="https://youtu.be/hVyLafY3Y3E" target="_blank" rel="noopener">the 3-minute demo on YouTube ↗</a></div>
+    <article id="content" class="md-content"><p class="md-err">Loading…</p></article>
+  </main>
+  <footer>
+    <div class="wrap">
+      <span class="svc">Want a claim replicated but can't run it yourself? <a href="https://vitenhub.no/replication-services" target="_blank" rel="noopener">Science Live offers replication as a service →</a></span>
+      <div class="foot-links">
+        <span>Live against <a href="https://graph.openaire.eu/">OpenAIRE Graph</a> · verdicts from <a href="https://sciencelive4all.org">Science Live</a> nanopublications</span>
+        <span><a href="index.html">Replication Radar</a> · <a href="replicate.html">how to replicate</a> · <a href="methodology.html">methodology</a> · <a href="team.html">team</a> · <a href="https://github.com/ScienceLiveHub/replication-radar">code (MIT)</a> · <a href="https://pypi.org/project/replication-radar/">PyPI</a></span>
+      </div>
+    </div>
+  </footer>
+  <!-- content authored in demo.md, rendered client-side (same approach as replicate.html — no build step) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    function addCopyButtons() {
+      document.querySelectorAll("#content pre").forEach((pre) => {
+        const code = pre.querySelector("code") || pre;
+        const text = code.innerText.replace(/\n+$/, "");
+        const btn = document.createElement("button");
+        btn.type = "button"; btn.className = "copybtn"; btn.textContent = "Copy";
+        btn.setAttribute("aria-label", "Copy code to clipboard");
+        btn.addEventListener("click", async () => {
+          let ok = false;
+          try { await navigator.clipboard.writeText(text); ok = true; }
+          catch (_) {
+            const r = document.createRange(); r.selectNodeContents(code);
+            const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+            try { ok = document.execCommand("copy"); } catch (e2) { /* blocked */ }
+            sel.removeAllRanges();
+          }
+          btn.textContent = ok ? "Copied ✓" : "Press ⌘/Ctrl-C";
+          if (ok) btn.classList.add("ok");
+          setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("ok"); }, 1600);
+        });
+        pre.appendChild(btn);
+      });
+    }
+    fetch("demo.md")
+      .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
+      .then((md) => {
+        document.getElementById("content").innerHTML =
+          window.marked ? marked.parse(md) : `<pre>${esc(md)}</pre>`;
+        addCopyButtons();
+      })
+      .catch((e) => {
+        document.getElementById("content").innerHTML =
+          `<p class="md-err">Could not load the tutorial (${esc(e.message)}). Read it on <a href="https://github.com/ScienceLiveHub/replication-radar/blob/main/site/demo.md">GitHub</a>.</p>`;
+      });
+  </script>
+</body>
+</html>
