@@ -4,6 +4,8 @@
 
 ### 🔗 Live demo → **https://openaire-hackathon.netlify.app**
 
+### ▶ Watch the 3-min demo → **https://youtu.be/hVyLafY3Y3E** · reproduce it step by step → **https://openaire-hackathon.netlify.app/demo.html**
+
 A tool that **makes the OpenAIRE Graph more useful for replication.** Search a research
 field and it answers the question the Graph structurally cannot: *what high-impact work
 is worth replicating, has it already been independently checked — with what verdict — and
