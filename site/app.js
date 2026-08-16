@@ -1138,6 +1138,13 @@ el("lens-software").addEventListener("click", () => setLens("software"));
 el("status").textContent = "Loading the Science Live verdict layer live from the nanopub network …";
 VERDICTS_READY = Promise.all([loadVerdicts(), loadCurated()]);
 VERDICTS_READY.then(() => {
+  // Deep-link: ?topic=… runs that search on load, so a shareable link opens on populated results.
+  const urlTopic = (new URLSearchParams(location.search).get("topic") || "").trim();
+  if (urlTopic && el("results").hidden && !el("topic").value.trim()) {
+    el("topic").value = urlTopic;
+    run(urlTopic);
+    return;
+  }
   // Default landing state: populate the radar with a sample field so first-time visitors see the
   // value immediately, not a blank page — but never clobber a user who has already started.
   if (!el("topic").value.trim() && el("results").hidden) {
