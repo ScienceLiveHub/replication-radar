@@ -45,6 +45,12 @@
     .pracgo > span{font-weight:700;color:var(--navy2)}
     .pracgo a{display:inline-block;background:var(--magenta-soft);color:#a32a6a;border-radius:20px;padding:3px 11px;text-decoration:none;font-weight:600}
     .pracgo a:hover{background:var(--magenta);color:#fff}
+    /* architecture diagram */
+    .archfig{margin:8px 0 30px}
+    .archfig .archscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .archfig img{display:block;min-width:660px;width:100%;height:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .archfig figcaption{font-size:13.5px;color:var(--mut);margin-top:11px;line-height:1.55}
+    .archfig figcaption b{color:var(--magenta)}
   </style>
 </head>
 <body>
@@ -58,6 +64,10 @@
   <main class="wrap mwrap">
     <p class="backbar">← <a href="index.html">Back to the Radar</a></p>
     <p id="lead" class="lead"></p>
+    <figure class="archfig">
+      <div class="archscroll"><img src="architecture.png" alt="Replication Radar architecture: a researcher (on the static web app) and an AI agent (on the replication-radar MCP, run beside the OpenAIRE MCP) both read the OpenAIRE Graph, the Science Live nanopublication network, and GitHub / Software Heritage / Zenodo into a ranked queue with verdict overlays and software-reuse signals. Proving a claim publishes a signed constellation back to the nanopublication network, closing the loop." /></div>
+      <figcaption>How it fits together. Two entry points — a researcher on the web app, an AI agent on the <b>replication-radar MCP</b> run beside the OpenAIRE MCP — read the same grounded sources: the <b>OpenAIRE Graph</b>, the <b>Science Live</b> nanopublications, and GitHub / Software Heritage / Zenodo. Proving a claim publishes a <b>signed constellation</b> back to the network, so the next search finds it already proven.</figcaption>
+    </figure>
     <div id="content"></div>
   </main>
   <footer>

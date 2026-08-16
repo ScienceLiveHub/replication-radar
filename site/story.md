@@ -7,7 +7,7 @@ Truth lives at the **claim** — not the paper. Replication Radar makes proof *f
   <figcaption>Cite the claim, not the paper — and before you cite it, prove it. <b>Citation follows proof.</b></figcaption>
 </figure>
 
-**▶ [Watch the 3-minute demo](https://youtu.be/hVyLafY3Y3E)** — the Radar and the agent, end to end.
+**▶ [Watch the 3-minute demo](https://youtu.be/hVyLafY3Y3E)** — the Radar and the agent, end to end · **[reproduce it step by step](demo.html)**.
 
 ## The problem: "cited" no longer means "checked"
 
