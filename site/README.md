@@ -3,8 +3,9 @@
 A **live, client-side** Replication Radar: type a research field and it queries the
 OpenAIRE Graph API directly from the browser (CORS-enabled), ranks replication
 targets by readiness, finds independent reusable tooling, and overlays whether each
-claim has already been checked by a Science Live replication. **No backend** — pure
-static files calling OpenAIRE + a bundled `verdicts.json`.
+claim has already been checked by a Science Live replication. **No keys in the browser** —
+pure static files calling public APIs + a bundled `verdicts.json`; one small Netlify function
+proxies the GitHub API with a server-side token for rate-limit headroom (with a keyless fallback).
 
 Same engine as the `replication-radar` Python package / MCP server; this is the
 browser port so the verdicts and logic agree.
