@@ -1,5 +1,7 @@
 # Replication Radar
 
+<!-- mcp-name: org.sciencelive4all/replication-radar -->
+
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21850976.svg)](https://doi.org/10.5281/zenodo.21850976) [![PyPI](https://img.shields.io/pypi/v/replication-radar)](https://pypi.org/project/replication-radar/)
 
 ### 🔗 Live demo → **https://openaire-hackathon.netlify.app**
