@@ -1,0 +1,48 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "org.sciencelive4all/replication-radar",
+  "title": "Replication Radar",
+  "description": "Turn the OpenAIRE Graph into a ranked replication queue with a Science Live verification overlay.",
+  "version": "0.4.7",
+  "websiteUrl": "https://openaire-hackathon.netlify.app",
+  "repository": {
+    "url": "https://github.com/ScienceLiveHub/replication-radar",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "replication-radar",
+      "version": "0.4.7",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "GITHUB_TOKEN",
+          "description": "Optional GitHub token for higher API rate limits (RADAR_GITHUB_TOKEN also accepted)",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "RADAR_OPENAIRE_BASE",
+          "description": "OpenAIRE Graph API base (default: https://api.openaire.eu/graph/v1)",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "RADAR_NANOPUB_SPARQL",
+          "description": "Nanopub SPARQL endpoint (default: https://query.knowledgepixels.com/repo/full)",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "RADAR_HTTP_TIMEOUT",
+          "description": "Per-request timeout in seconds (default: 30)",
+          "isRequired": false,
+          "isSecret": false
+        }
+      ]
+    }
+  ]
+}
