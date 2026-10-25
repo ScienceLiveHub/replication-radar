@@ -154,6 +154,8 @@ header .sub{margin:0;color:#aebfdc;font-size:14px}
 .badge.st-needs{background:#eef2f9;color:var(--mut)}
 .badge.st-dorm{background:#f0f1f4;color:#5d6470}
 .badge.st-ref{background:#ffe4e3;color:#be2727}
+.badge.st-part{background:#eef3fb;color:#3a5f97}
+.badge.st-inc{background:#eef0f3;color:#4b5563}
 .ic{display:inline-block;vertical-align:-2px}
 .badge .ic{margin-right:3px}
 .tfair .ic,.fairline .ic,.fairrecs .ic{margin-right:2px}
