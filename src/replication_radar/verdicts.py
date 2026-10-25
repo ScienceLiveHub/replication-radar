@@ -47,7 +47,10 @@ def _agreement(hits: list[dict]) -> dict:
       refuted             — every verdict contradicts
       contested           — contradicted AND (confirmed or partial) — the interesting case
       robustly_validated  — >=2 confirmations, none contradicted, none partial
-      validated           — at least one confirm/partial, none contradicted
+      validated           — at least one confirmation, none contradicted
+      qualified           — partial support only: no confirmation, none contradicted
+      inconclusive        — no confirm, partial or contradict (e.g. only Inconclusive verdicts)
+    A claim is never called validated without at least one confirming verdict.
     """
     seen: dict[str, str] = {}
     for v in hits:
@@ -64,13 +67,19 @@ def _agreement(hits: list[dict]) -> dict:
         pattern = "refuted"
     elif confirm >= 2 and not partial:
         pattern = "robustly_validated"
-    else:
+    elif confirm:
         pattern = "validated"
+    elif partial:
+        pattern = "qualified"
+    else:
+        pattern = "inconclusive"
     label = {
         "contested": "Contested — independent verdicts disagree",
         "refuted": "Refuted by independent replication",
         "robustly_validated": "Robustly validated — multiple confirmations, no disagreement",
         "validated": "Validated by independent replication",
+        "qualified": "Qualified — independent replication partially supports it",
+        "inconclusive": "Inconclusive — independently checked, no verdict either way",
     }[pattern]
     return {
         "pattern": pattern,

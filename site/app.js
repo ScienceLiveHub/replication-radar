@@ -75,6 +75,8 @@ const ICON = {
   validated: svg('<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>'),
   contested: svg('<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>'),
   refuted: svg('<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>'),
+  qualified: svg('<circle cx="12" cy="12" r="10"/><path d="M8 12h8"/>'),
+  inconclusive: svg('<circle cx="12" cy="12" r="10"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/>'),
   reproducible: svg('<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'),
   needs: svg('<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>'),
   dormant: svg('<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>'),
@@ -90,6 +92,8 @@ const STATUS = {
   validated:    { label: "Validated",          icon: ICON.validated,    cls: "st-val",   tip: "independently replicated and it held up" },
   contested:    { label: "Contested",          icon: ICON.contested,    cls: "st-con",   tip: "independent replications DISAGREE (some confirm, some contradict/partial) — worth re-checking" },
   refuted:      { label: "Refuted",            icon: ICON.refuted,      cls: "st-ref",   tip: "independent replication(s) contradicted it, none confirmed" },
+  qualified:    { label: "Qualified",          icon: ICON.qualified,    cls: "st-part",  tip: "independent replication(s) only PARTIALLY supported it, none confirmed or contradicted — it holds under some conditions, not all" },
+  inconclusive: { label: "Inconclusive",       icon: ICON.inconclusive, cls: "st-inc",   tip: "independently checked, but no verdict either way (e.g. too little data to decide)" },
   reproducible: { label: "Reproducible",       icon: ICON.reproducible, cls: "st-ready", tip: "original code/data are available, so it can be RE-RUN (reproduced). Note: replication ≠ reproduction — replication tests the same claim with DIFFERENT data/methods (FORRT)." },
   needs:        { label: "Needs check",        icon: ICON.needs,        cls: "st-needs", tip: "not yet replicated and OpenAIRE links no materials — unknown (not absent); resolve from the paper" },
   dormant:      { label: "Dormant",            icon: ICON.dormant,      cls: "st-dorm",  tip: "no verdict, older, low momentum, no materials surfaced — likely dormant" },
@@ -141,11 +145,12 @@ const agreementOf = (doi) => {
   if (contra)                         return { key: "refuted",   why: `contradicted by ${contra} replication${contra > 1 ? "s" : ""}` };
   if (confirm >= 2 && !partial)       return { key: "robust",    why: `${confirm} independent replications, all confirmed` };
   if (confirm)                        return { key: "validated", why: partial ? `confirmed (${n} replications, ${partial} partial)` : (n > 1 ? `confirmed (${n} replications)` : "confirmed once") };
-  if (partial)                        return { key: "validated", why: `partially supported (${partial} of ${n})` };
-  return { key: "validated", why: "independently checked" };
+  // Never "validated" without a confirming verdict: partial-only and inconclusive-only get their own patterns.
+  if (partial)                        return { key: "qualified", why: `partially supported (${partial} of ${n}), none confirmed` };
+  return { key: "inconclusive", why: n > 1 ? `checked ${n} times, no verdict either way` : "checked once, no verdict either way" };
 };
 const statusOf = (t) => {
-  if (t.status === "VERIFIED") return agreementOf(t.doi).key;        // robust / validated / contested / refuted
+  if (t.status === "VERIFIED") return agreementOf(t.doi).key;        // robust / validated / qualified / inconclusive / contested / refuted
   if (t.mat && t.mat.score != null) return "reproducible";          // original materials present → can re-run
   const old = t.year && (new Date().getFullYear() - t.year) >= 8;   // had time to be replicated
   const hot = t.impl === "C1" || t.impl === "C2";                   // still gaining momentum
@@ -154,7 +159,7 @@ const statusOf = (t) => {
 // Replication PRIORITY (0..1) — how much this would benefit from (further) replication, so the
 // number and the order agree. OPEN = worth × feasible (the readiness already computed). VERIFIED =
 // impact modulated by the agreement: contested/unsettled rises, robustly-validated sinks (it's done).
-const VERDICT_WEIGHT = { robust: 0.2, validated: 0.4, contested: 0.95, refuted: 0.55 };
+const VERDICT_WEIGHT = { robust: 0.2, validated: 0.4, qualified: 0.7, inconclusive: 0.8, contested: 0.95, refuted: 0.55 };
 const priorityOf = (t) => {
   if (t.status !== "VERIFIED") {
     // dormant = old, cold, no materials → low ACTIONABILITY, so it sinks below live targets
@@ -854,7 +859,7 @@ function targetRow(t) {
   </div>`;
 }
 
-const FILTER_ORDER = ["reproducible", "robust", "validated", "contested", "refuted", "needs", "dormant"];
+const FILTER_ORDER = ["reproducible", "robust", "validated", "qualified", "inconclusive", "contested", "refuted", "needs", "dormant"];
 // "Has code" is a SEPARATE filter axis (the RSE view Saranjeet asked for): can we point to a
 // repository for this item — resolved to the paper, or a replication's own repo?
 const hasCode = (t) => !!((t.mat && t.mat.code) || t.fair || (t.mat && (t.mat.state === "code" || t.mat.state === "rocrate")));
@@ -963,7 +968,7 @@ function renderVerified(inField) {
 
 // The replication-gap map: a status-composition bar over the ranked list (not a per-paper
 // citation chart — the insight is how MUCH of the field has been checked, not who's most cited).
-const GAP_ORDER = ["reproducible", "robust", "validated", "contested", "refuted", "needs", "dormant"];
+const GAP_ORDER = ["reproducible", "robust", "validated", "qualified", "inconclusive", "contested", "refuted", "needs", "dormant"];
 // Distinguishable by hue AND lightness — the two "unchecked" states (needs/dormant) were
 // previously near-identical light blue-greys; now a clear medium slate vs a light warm grey.
 // Platform chart colormap: chart-1 pink, chart-3 green, chart-4 orange, destructive red,
@@ -971,8 +976,8 @@ const GAP_ORDER = ["reproducible", "robust", "validated", "contested", "refuted"
 // reproducible = brand pink · robust/validated (confirmed) = navy + brighter blue · contested =
 // amber · refuted = red · the two unchecked states = DESATURATED neutral greys (no blue tint) so
 // the navy/blue "checked" segments read clearly apart from them.
-const GAP_COLOR = { reproducible: "#be2e78", robust: "#1f4d8f", validated: "#4a7bc0", contested: "#f59e09", refuted: "#ff6b6b", needs: "#9aa0a8", dormant: "#d7d9dc" };
-const CHECKED = new Set(["robust", "validated", "contested", "refuted"]);
+const GAP_COLOR = { reproducible: "#be2e78", robust: "#1f4d8f", validated: "#4a7bc0", qualified: "#8fb0de", inconclusive: "#6b7280", contested: "#f59e09", refuted: "#ff6b6b", needs: "#9aa0a8", dormant: "#d7d9dc" };
+const CHECKED = new Set(["robust", "validated", "qualified", "inconclusive", "contested", "refuted"]);
 function renderChart() {
   const counts = {};
   for (const t of _targets) counts[t.statusKey] = (counts[t.statusKey] || 0) + 1;

@@ -61,8 +61,9 @@ def replication_status(doi: str) -> dict:
 
     Also returns:
       - `agreement`: how the independent verdicts agree — pattern is one of
-        robustly_validated / validated / contested / refuted, with confirm/partial/
-        contradicted counts (so you can say *how robustly* it held, not just that it did).
+        robustly_validated / validated / qualified (partial support only) / inconclusive /
+        contested / refuted, with confirm/partial/contradicted counts (so you can say *how
+        robustly* it held, not just that it did). Never "validated" without a confirmation.
       - `claims`: the exact FORRT claim(s) that were replicated — each an atomic AIDA
         statement plus its claim type (descriptive pattern, statistical significance, …).
       - the paper's `title` and `abstract` (from OpenAIRE, markup stripped), so you can
