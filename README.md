@@ -94,4 +94,11 @@ PYTHONPATH=src python3 demo_sdm.py     # live vertical-slice demo on SDM
   not reachable); budgets are frequently reported as 0 in records.
 - The verdict index ships 6 source works / 12 chains (Science Live). Extend
   `data/verdicts.json` to grow coverage.
-```
+
+## Who is behind it
+
+Replication Radar is part of [Science Live](https://sciencelive4all.org).
+
+- **[LifeWatch ERIC](https://www.lifewatch.eu)**: development. Anne Fouilloux, CTO of LifeWatch ERIC, develops the Science Live platform and its open tools: FORRT Research MCP, Replication Radar and fip-mcp.
+- **[VitenHub AS](https://vitenhub.no/)**: infrastructure and operations. Jean Iaquinta, CEO of VitenHub AS, manages the infrastructure behind the platform. VitenHub AS operates Science Live and delivers the paid replication services.
+- **[Knowledge Pixels](https://knowledgepixels.com)**: the nanopublication infrastructure that Science Live publishes to.
