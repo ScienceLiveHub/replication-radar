@@ -37,6 +37,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Versions agree (pyproject.toml is the single source; tag, CITATION.cff, server.json must match)
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            python scripts/set_version.py --check --tag "$GITHUB_REF_NAME"
+          else
+            python scripts/set_version.py --check
+          fi
       - name: Build sdist + wheel
         run: |
           python -m pip install --upgrade build

@@ -17,4 +17,10 @@ __all__ = [
     "radar", "find_dataset", "find_independent_software", "replication_status",
     "replication_template", "verified_claims",
 ]
-__version__ = "0.4.9"
+# The version lives in pyproject.toml only; read it from the installed package.
+try:
+    from importlib.metadata import PackageNotFoundError, version as _pkg_version
+
+    __version__ = _pkg_version("replication-radar")
+except PackageNotFoundError:  # running from a source tree that was never installed
+    __version__ = "0+unknown"
