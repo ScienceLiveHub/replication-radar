@@ -656,7 +656,10 @@ const FAIR_REC = { repository: "public repository", license: "open licence", reg
 // button that POSTs to the SWH Save-Code-Now API (anonymous, CORS-open, no account needed).
 const swhHtml = (repo, archived) => {
   if (archived) {
-    const b = repo ? `https://archive.softwareheritage.org/browse/origin/directory/?origin_url=${encodeURIComponent(repo)}` : null;
+    // Software Heritage knows the repository origin, not a release page: strip /tree/<tag> etc.
+    const g = repo ? parseGitHub(repo) : null;
+    const origin = g ? `https://github.com/${g.owner}/${g.repo}` : repo;
+    const b = origin ? `https://archive.softwareheritage.org/browse/origin/directory/?origin_url=${encodeURIComponent(origin)}` : null;
     return b ? `<a class="swhok" href="${b}" target="_blank" rel="noopener" title="Browse the archived snapshot in Software Heritage">in Software Heritage</a>` : `<span class="swhok">in Software Heritage</span>`;
   }
   if (!repo) return `<a class="swhno" href="https://archive.softwareheritage.org/save/" target="_blank" rel="noopener">not yet archived</a>`;
