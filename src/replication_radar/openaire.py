@@ -1,4 +1,4 @@
-"""Thin client over the OpenAIRE Graph API (graph/v1).
+"""Thin client over the OpenAIRE Graph API (graph/v2).
 
 Hits api.openaire.eu directly (anonymous, no token needed for these queries).
 Endpoint-agnostic: set RADAR_OPENAIRE_BASE to point at the Alien gateway or any
@@ -21,7 +21,9 @@ import urllib.request
 from dataclasses import dataclass, field
 from typing import Any
 
-BASE = os.environ.get("RADAR_OPENAIRE_BASE", "https://api.openaire.eu/graph/v1")
+# OpenAIRE retired Graph API v1 (Nov 2026): research products moved to v2, projects to v3.
+BASE = os.environ.get("RADAR_OPENAIRE_BASE", "https://api.openaire.eu/graph/v2")
+PROJECTS_BASE = os.environ.get("RADAR_OPENAIRE_PROJECTS_BASE", "https://api.openaire.eu/graph/v3")
 _TIMEOUT = float(os.environ.get("RADAR_HTTP_TIMEOUT", "30"))
 
 
@@ -45,9 +47,9 @@ def _abstract(rec: dict, limit: int = 2500) -> str:
 _CLASS_RANK = {"C1": 1, "C2": 2, "C3": 3, "C4": 4, "C5": 5, None: 9}
 
 
-def _get(path: str, params: dict[str, Any]) -> dict:
+def _get(path: str, params: dict[str, Any], base: str | None = None) -> dict:
     qs = urllib.parse.urlencode({k: v for k, v in params.items() if v is not None})
-    url = f"{BASE}/{path}?{qs}"
+    url = f"{base or BASE}/{path}?{qs}"
     req = urllib.request.Request(url, headers={"Accept": "application/json"})
     with urllib.request.urlopen(req, timeout=_TIMEOUT) as resp:
         return json.load(resp)
@@ -220,7 +222,11 @@ class ProjectLandscape:
 def funder_landscape(topic: str, size: int = 20) -> ProjectLandscape:
     """Aggregate funder context for a field via /projects (per-paper funding is NOT
     reachable on this connector; this is topic-level CoARA context only)."""
-    data = _get("projects", {"search": topic, "pageSize": size})
+    try:
+        data = _get("projects", {"search": topic, "pageSize": size}, base=PROJECTS_BASE)
+    except Exception:
+        # Funder context is a side panel: never let it take the whole radar down.
+        return ProjectLandscape(total=0)
     total = (data.get("header") or {}).get("numFound") or len(data.get("results") or [])
     agg: dict[str, Funder] = {}
     for proj in data.get("results") or []:

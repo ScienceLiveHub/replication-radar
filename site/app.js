@@ -2,7 +2,7 @@
 // Mirrors the Python package (replication_radar) so the web app and MCP agree.
 // OpenAIRE allows CORS (*), so everything runs in the browser; no backend.
 
-const API = "https://api.openaire.eu/graph/v1";
+const API = "https://api.openaire.eu/graph/v2";
 const CLASS_SCORE = { C1: 1, C2: 0.8, C3: 0.6, C4: 0.4, C5: 0.2 };
 // Per-class tooltip text so EVERY class (not just C1/C5) explains itself on hover.
 const CLS_PCT = { C1: "top 0.01%", C2: "top 0.1%", C3: "top 1%", C4: "top 10%", C5: "the rest (outside the top 10%)" };

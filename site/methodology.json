@@ -5,7 +5,7 @@
   "updated": "2026-08-13",
   "license": "CC-BY-4.0",
   "sources": [
-    { "id": "openaire", "name": "OpenAIRE Graph", "url": "https://graph.openaire.eu/", "api": "https://api.openaire.eu/graph/v1", "role": "Research products (papers, software, datasets), citation-impact indicators, open-access status, subject classification (FOS, SDG), and code/data links. Queried live from the browser; no key required." },
+    { "id": "openaire", "name": "OpenAIRE Graph", "url": "https://graph.openaire.eu/", "api": "https://api.openaire.eu/graph/v2", "role": "Research products (papers, software, datasets), citation-impact indicators, open-access status, subject classification (FOS, SDG), and code/data links. Queried live from the browser; no key required." },
     { "id": "bip", "name": "BIP! citation indicators (via OpenAIRE)", "url": "https://bip.imsi.athenarc.gr/", "role": "The C1–C5 impact and impulse classes are BIP! indicators carried in the OpenAIRE record." },
     { "id": "sciencelive", "name": "Science Live nanopublication network", "url": "https://sciencelive4all.org", "api": "https://query.knowledgepixels.com/repo/full", "role": "FORRT replication chains as signed nanopublications: the Outcome (verdict), the Study (method), the Claim (what was tested) and CiTO citations to the original paper. Queried live via SPARQL; author-agnostic (any signer)." },
     { "id": "fairsoftware", "name": "fair-software.eu recommendations", "url": "https://fair-software.eu/", "role": "The five FAIR-for-research-software recommendations we score a replication's code against." },
