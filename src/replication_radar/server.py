@@ -5,7 +5,7 @@ Add to an MCP client (.mcp.json):
     { "mcpServers": { "replication-radar": {
         "command": "python", "args": ["-m", "replication_radar.server"] } } }
 
-Hits api.openaire.eu/graph/v1 directly (anonymous). Point elsewhere with
+Hits api.openaire.eu/graph/v2 directly (anonymous). Point elsewhere with
 RADAR_OPENAIRE_BASE (e.g. the Alien AI-Gateway endpoint).
 """
 from __future__ import annotations

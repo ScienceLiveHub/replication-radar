@@ -21,7 +21,7 @@ OpenAIRE's only value signal is citation-popularity (BIP! influence / popularity
 impulse, classes C1–C5) — paper-bound, and orthogonal to whether a claim is *true*.
 The Radar joins three sources to add a **replication layer** on top:
 
-- **OpenAIRE Graph** — impact-ranks candidate papers (`api.openaire.eu/graph/v1`).
+- **OpenAIRE Graph** — impact-ranks candidate papers (`api.openaire.eu/graph/v2`; funder context from `graph/v3/projects`).
 - **Software Heritage + repo signals** — surfaces *reusable* method software.
 - **Science Live nanopub verdicts** — the "already checked → did it hold" overlay.
 
@@ -80,7 +80,8 @@ PYTHONPATH=src python3 demo_sdm.py     # live vertical-slice demo on SDM
 
 | Env var | Default | Purpose |
 |---|---|---|
-| `RADAR_OPENAIRE_BASE` | `https://api.openaire.eu/graph/v1` | Swap to the Alien AI-Gateway or a mirror — the Radar is endpoint-agnostic |
+| `RADAR_OPENAIRE_BASE` | `https://api.openaire.eu/graph/v2` | Swap to the Alien AI-Gateway or a mirror — the Radar is endpoint-agnostic |
+| `RADAR_OPENAIRE_PROJECTS_BASE` | `https://api.openaire.eu/graph/v3` | Base for `/projects` (funder context); OpenAIRE serves projects only on v3 |
 | `RADAR_HTTP_TIMEOUT` | `30` | Per-request timeout (s) |
 
 ## Known limits (v1, honest)

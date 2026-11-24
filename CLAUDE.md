@@ -20,7 +20,7 @@ independently checked (with the verdict) + a FAIR-software score for the replica
 - `STORY.md` — the 1–2pp CC-BY hackathon story. **STALE — needs rewriting** to match the current app (see Next).
 
 ## How the app works — all GROUNDED, all CORS-enabled, NO auth/keys
-1. **Impact ranking** — public OpenAIRE Graph API `https://api.openaire.eu/graph/v1/researchProducts`
+1. **Impact ranking** — public OpenAIRE Graph API `https://api.openaire.eu/graph/v2/researchProducts` (v1 was retired by OpenAIRE in Nov 2026; `/projects` is only on v3)
    (`type=publication|software|dataset`), `indicators.citationImpact` (BIP! classes C1=top 0.01% … C5).
    Dedup id = `doi_dedup___::md5(lowercased-doi)`. Free-text is AND-ed; keep queries short.
 2. **Verdict overlay (author-agnostic, LIVE)** — SPARQL on `https://query.knowledgepixels.com/repo/full`.
